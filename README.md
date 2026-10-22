@@ -30,6 +30,12 @@ Open the board once after setup and allow the database and Claude permissions.
 4. **The scheduled rundown** keeps rows current between check-ins and leaves a short note at the top of the board.
 5. **`/rundown:update`** after a new release pulls the latest board code into your same link; your projects and notes stay.
 
+### Hearing about new versions
+
+- **Email:** on this repo, choose **Watch → Custom → Releases**. GitHub emails you when a new version ships.
+- **On the board:** each `/rundown:checkin` records your installed plugin version. When it is newer than your board, the board shows a notice with a button that copies `/rundown:update`.
+- **Plugin itself:** `/plugin marketplace update rundown-studio` pulls the newest release. To get it automatically, turn on **Enable auto-update** for `rundown-studio` under `/plugin` → Marketplaces.
+
 The walkthrough uses demo data and shows the board as of v1.3.3. Re-record it with `npm run walkthrough` (needs `ffmpeg`) after any visible UI change.
 
 ## Commands

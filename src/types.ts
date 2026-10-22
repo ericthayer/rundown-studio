@@ -75,6 +75,8 @@ export interface BoardConfig {
   feedbackEmail?: string;
   /** Where Report an issue opens (an https URL). Defaults to the Rundown repo's new-issue page. */
   issuesUrl?: string;
+  /** Installed Rundown plugin version (x.y.z), written by /rundown:checkin. Newer than the board's build → update notice. */
+  pluginVersion?: string;
 }
 
 export type RailFilter = 'all' | 'needs' | 'decisions' | 'waiting' | 'blocked' | 'stale' | 'parked' | Area;
