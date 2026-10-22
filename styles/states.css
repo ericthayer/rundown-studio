@@ -43,3 +43,4 @@
 .fhelp { margin-top: 7px; padding-top: 6px; box-shadow: 0 -1px 0 var(--line); }
 .fhelp a.fopt { color: inherit; text-decoration: none; }
 .fhelp a.fopt:focus-visible { outline-offset: -2px; }
+.fhelp button.fopt { width: 100%; border: 0; background: none; color: inherit; font: inherit; text-align: left; }
