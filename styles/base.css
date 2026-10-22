@@ -1,0 +1,23 @@
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(12px, 0.35vw + 8.5px, 17px); }
+html, body { min-height: 100%; }
+body { margin: 0; background: linear-gradient(180deg, var(--field-top) 0%, var(--field-mid) 62%, var(--field-bot) 100%); background-color: var(--field-top); color: var(--ink); font-family: var(--font); font-size: 1rem; line-height: 1.45; -webkit-font-smoothing: antialiased; --pad: clamp(0px, 1.2vw, 20px); padding-block: var(--pad); padding-left: max(var(--pad), env(safe-area-inset-left, 0px)); padding-right: max(var(--pad), env(safe-area-inset-right, 0px)); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--peach); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.num { font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Wrapper elements that only add behavior keep the existing layout. */
+rd-sidebar, rd-assistant, rd-priorities, rd-composer, rd-project-list { display: contents; }
+
+/* One tooltip system: [data-tip] in the slim sidebar (opens right) and the assistant icon rail (opens left). */
+[data-tip] { position: relative; }
+:is(.slim .rail, .arail) [data-tip]:is(:hover, :focus-visible)::after {
+  content: attr(data-tip); position: absolute; top: 50%; left: calc(100% + 12px); transform: translateY(-50%);
+  background: var(--btn); color: var(--btn-ink); font-size: 0.8462rem; font-weight: 500; line-height: 1.2;
+  padding: 6px 9px; border-radius: 7px; white-space: nowrap; pointer-events: none; z-index: 20;
+  box-shadow: 0 6px 18px -6px rgba(0,0,0,.35);
+}
+.agent .arail [data-tip]:is(:hover, :focus-visible)::after { left: auto; right: calc(100% + 10px); }

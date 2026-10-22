@@ -1,0 +1,45 @@
+/* Design tokens. Light-mode text/status colors meet WCAG 2.2 AA:
+   --muted ≥ 4.5:1 on surface, shell and rail; status dots ≥ 3:1 on surface. */
+:root {
+  --field-top: #c8cbcf;
+  --field-mid: #d9d2cc;
+  --field-bot: #f68c64;
+  --shell: rgba(244, 245, 245, 0.92);
+  --surface: #ffffff;
+  --rail: #eceeee;
+  --ink: #111214;
+  --muted: #656a72;
+  --line: #e4e6e8;
+  --chip: #f1f2f3;
+  --btn: #15171a;
+  --btn-ink: #ffffff;
+  --pink: #e9a3b8;
+  --violet: #b9a5e8;
+  --peach: #f7a07c;
+  --rose: #e5487e;
+  --dot-block: #e5484d;
+  --dot-stale: #b7791f;
+  --dot-ok: #2f8f57;
+  --dot-park: #868b93;
+  --area-work: #f3c7a6;
+  --area-client: #c9d7f0;
+  --area-personal: #dccdf3;
+  --area-other: #e6e8ea;
+  --badge-ink: #111214;
+  --shadow: 0 30px 80px -30px rgba(40, 30, 25, 0.35);
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --field-top: #17181b; --field-mid: #221d1c; --field-bot: #6b3424; --shell: rgba(28, 29, 33, 0.94);
+    --surface: #24262b; --rail: #1f2125; --ink: #f2f3f5; --muted: #9a9ea6; --line: #33363c; --chip: #2c2f35;
+    --btn: #f2f3f5; --btn-ink: #15171a; --shadow: 0 30px 80px -30px rgba(0,0,0,.7); color-scheme: dark;
+    --dot-stale: #e8a33d; --dot-ok: #3fa66b; --dot-park: #a0a4aa;
+  }
+}
+:root[data-theme="dark"] {
+  --field-top: #17181b; --field-mid: #221d1c; --field-bot: #6b3424; --shell: rgba(28, 29, 33, 0.94);
+  --surface: #24262b; --rail: #1f2125; --ink: #f2f3f5; --muted: #9a9ea6; --line: #33363c; --chip: #2c2f35;
+  --btn: #f2f3f5; --btn-ink: #15171a; --shadow: 0 30px 80px -30px rgba(0,0,0,.7); color-scheme: dark;
+  --dot-stale: #e8a33d; --dot-ok: #3fa66b; --dot-park: #a0a4aa;
+}

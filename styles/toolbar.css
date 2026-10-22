@@ -1,0 +1,62 @@
+/* List panel + toolbar: search | filter chips (popovers) … clear, sort; folds into a sheet on narrow containers. */
+.ptable { flex: 1; min-height: 0; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.ptools { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--chip) 50%, var(--surface)); }
+.psearch { flex: 0 100 clamp(150px, 22cqi, 280px); min-width: 120px; height: var(--ctl-h); display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 0 10px; }
+.psearch:focus-within { border-color: var(--muted); }
+.psearch svg { width: 14px; height: 14px; stroke: var(--muted); fill: none; stroke-width: 2; flex: none; }
+.psearch input { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 0.9231rem; }
+.psearch input::placeholder { color: var(--muted); }
+.tsep { width: 1px; height: 20px; background: var(--line); flex: none; }
+.tright { display: flex; align-items: center; gap: 8px; margin-left: auto; flex: none; }
+.pfilters { display: flex; align-items: center; gap: 6px; flex: 0 1 auto; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 4px; margin: -4px; }
+.pfilters::-webkit-scrollbar { display: none; }
+.pfilters > * { flex: none; }
+.fchip, .fbtn { height: var(--ctl-h); border: 1px dashed var(--ctl-dash); background: transparent; border-radius: 8px; padding: 0 7px 0 10px; font-size: 0.8462rem; display: inline-flex; align-items: center; gap: 5px; color: var(--ink); white-space: nowrap; }
+.fchip:hover, .fbtn:hover { background: var(--surface); border-color: var(--muted); }
+.fchip[data-active] { border-style: solid; border-color: var(--ink); background: var(--surface); }
+.fchip .fv { font-weight: 600; max-width: 12em; overflow: hidden; text-overflow: ellipsis; }
+.fchip .fv::before { content: ""; display: inline-block; width: 1px; height: 12px; background: var(--line); margin: 0 7px 0 1px; vertical-align: -1px; }
+.fchip svg, .fbtn svg { width: 13px; height: 13px; fill: none; stroke: var(--muted); stroke-width: 2; flex: none; }
+.fbtn { display: none; border-style: solid; border-color: var(--line); background: var(--surface); padding: 0 10px; }
+.fbtn .badge { min-width: 17px; height: 17px; border-radius: 9px; background: var(--btn); color: var(--btn-ink); font-size: 0.6923rem; display: grid; place-items: center; padding: 0 4px; }
+.fsort { position: relative; height: var(--ctl-h); display: inline-flex; align-items: center; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding-left: 10px; color: var(--muted); }
+.fsort:hover { border-color: var(--muted); }
+.fsort:has(select:focus-visible) { outline: 2px solid var(--peach); outline-offset: 2px; }
+.fsort svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; flex: none; }
+.fsort .chev { position: absolute; right: 9px; width: 13px; height: 13px; pointer-events: none; }
+.fsort select { appearance: none; -webkit-appearance: none; border: 0; background: transparent; color: var(--ink); font-size: 0.8462rem; height: 100%; padding: 0 28px 0 7px; cursor: pointer; outline: none; }
+.fclear { border: 0; background: none; color: var(--muted); font-size: 0.8462rem; text-decoration: underline; text-underline-offset: 2px; padding: 6px 4px; }
+.fclear:hover { color: var(--ink); }
+.fpop { position: fixed; inset: auto; margin: 0; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 12px; padding: 6px; min-width: 210px; box-shadow: 0 16px 40px -12px rgba(0,0,0,.28); }
+.fset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.fset legend { font-size: 0.7692rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 4px 8px 6px; }
+.fopt { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 0.9231rem; cursor: pointer; }
+.fopt:hover, .fopt:has(:focus-visible) { background: var(--chip); }
+.fopt input { margin: 0; accent-color: var(--btn); }
+.fopt input:focus-visible { outline-offset: 1px; }
+.fopt .dot { margin-top: 0; }
+.fopt .n { margin-left: auto; color: var(--muted); font-size: 0.8462rem; }
+.fsheet { width: min(100%, 520px); max-width: 100%; max-height: 86dvh; margin: auto auto 0; border: 0; border-radius: 18px 18px 0 0; padding: 0; background: var(--surface); color: var(--ink); flex-direction: column; }
+.fsheet[open] { display: flex; }
+.fsheet::backdrop { background: rgba(10, 10, 12, .4); }
+.fsh, .fsf { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px; }
+.fsh { border-bottom: 1px solid var(--line); }
+.fsh h2 { margin: 0; font-size: 1.1538rem; font-weight: 600; }
+.fsf { border-top: 1px solid var(--line); padding-bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
+.fgroups { overflow-y: auto; padding: 10px 8px; display: grid; gap: 14px; }
+@container (max-width: 780px) {
+  .pfilters, .tsep, .fsort, .tright .fclear { display: none; }
+  .fbtn { display: inline-flex; }
+  .psearch { flex: 1 1 auto; }
+}
+
+/* Rundown note: flush info band under the toolbar. */
+.note { --info: var(--violet); display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px 10px 16px; border-bottom: 1px solid color-mix(in srgb, var(--info) 16%, var(--line)); background: color-mix(in srgb, var(--info) 8%, var(--surface)); color: var(--ink); font-size: 0.8846rem; line-height: 1.45; }
+.note > svg { width: 16px; height: 16px; flex: none; margin-top: 1px; fill: none; stroke: color-mix(in srgb, var(--info) 70%, var(--ink)); stroke-width: 1.8; }
+.note p { margin: 0; flex: 1; min-width: 0; text-wrap: pretty; }
+.note strong { font-weight: 600; margin-right: 2px; }
+.note span { color: color-mix(in srgb, var(--ink) 78%, var(--muted)); }
+.note-x { width: 22px; height: 22px; flex: none; border: 0; border-radius: 6px; background: none; color: var(--muted); display: grid; place-items: center; margin: -2px -2px 0 0; }
+.note-x:hover { background: color-mix(in srgb, var(--info) 18%, transparent); color: var(--ink); }
+.note-x svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 2; }
+@media (max-width: 1060px) { .ptable { overflow: visible; } }

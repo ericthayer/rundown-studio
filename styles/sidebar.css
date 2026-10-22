@@ -1,0 +1,50 @@
+/* Left rail: sections split by full-bleed hairlines — brand | views | areas | account footer. */
+.rail { background: var(--rail); border-right: 1px solid var(--line); padding: 22px 12px 12px; display: flex; flex-direction: column; gap: 4px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1.1538rem; letter-spacing: -0.01em; margin: -22px -12px 10px; padding: 18px 20px 16px; border-bottom: 1px solid var(--line); }
+.brand svg { width: 20px; height: 20px; }
+.brand-name { flex: 1; }
+.rtoggle { width: 26px; height: 26px; border: 0; border-radius: 8px; background: none; color: var(--muted); display: grid; place-items: center; flex: none; }
+.rtoggle:hover { background: var(--surface); color: var(--ink); }
+.rtoggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.navb { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; border-radius: 10px; padding: 8px 10px; color: var(--muted); font-size: 1rem; text-align: left; }
+.navb svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; flex: none; }
+.navb[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+.navb .badge { margin-left: auto; min-width: 18px; height: 18px; border-radius: 9px; background: var(--btn); color: var(--btn-ink); font-size: 0.8462rem; display: grid; place-items: center; padding: 0 5px; }
+.sec { margin: 12px -12px 4px; width: auto; display: flex; justify-content: space-between; align-items: center; background: none; border: 0; border-top: 1px solid var(--line); padding: 16px 22px 6px; font-weight: 600; font-size: 0.8462rem; color: var(--muted); }
+.sec:hover { color: var(--ink); }
+.sec svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; transition: transform .15s; }
+.sec[aria-expanded="false"] svg { transform: rotate(180deg); }
+.hide-areas .area-nav { display: none; }
+.me { margin: auto -12px -12px; padding: 14px 16px 16px; border-top: 1px solid var(--line); color: var(--ink); display: flex; flex-direction: column; gap: 12px; }
+.me-row { display: flex; gap: 10px; align-items: center; }
+.av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8462rem; font-weight: 600; background: linear-gradient(135deg, var(--peach), var(--pink)); color: var(--badge-ink); flex: none; position: relative; }
+.me .av::after { content: ""; position: absolute; right: -1px; bottom: -1px; width: 8px; height: 8px; border-radius: 50%; background: var(--dot-ok); border: 2px solid var(--rail); }
+.me b { display: block; font-size: 0.9231rem; font-weight: 600; }
+.me small { font-size: 0.8462rem; color: var(--muted); }
+.me button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 32px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 0 10px; font-size: 0.8846rem; font-weight: 500; color: var(--ink); }
+.me button:hover { border-color: var(--muted); }
+.me button .spark { display: grid; place-items: center; }
+.me button .spark svg { width: 13px; height: 13px; fill: var(--peach); }
+
+/* Slim: icons only; labels stay in the DOM for assistive tech; tooltips from base.css. */
+@media (min-width: 721px) {
+  .slim .rail { padding-inline: 10px; align-items: center; }
+  .slim .brand { flex-direction: column; gap: 14px; align-self: stretch; margin-inline: -10px; padding: 18px 0 16px; }
+  .slim .brand-name, .slim .navb .lbl, .slim .me-row > span:not(.av), .slim .me-copy-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .slim .navs { width: 100%; }
+  .slim .navb { justify-content: center; padding: 10px 0; }
+  .slim .navb svg { width: 17px; height: 17px; }
+  .slim .navb .badge { position: absolute; top: 3px; right: 6px; min-width: 15px; height: 15px; font-size: 0.6154rem; padding: 0 3px; margin: 0; }
+  .slim .sec { display: none; }
+  .slim .area-nav { display: block; width: auto; align-self: stretch; margin: 12px -10px 0; padding: 14px 10px 0; border-top: 1px solid var(--line); }
+  .slim .me { align-self: stretch; margin-inline: -10px; padding: 12px 0 14px; align-items: center; gap: 10px; }
+  .slim .me button { width: 36px; height: 36px; padding: 0; }
+}
+@media (max-width: 720px) {
+  .rtoggle { display: none; }
+  .rail { border-right: 0; border-bottom: 1px solid var(--line); padding: 14px 10px 10px; }
+  .navs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; }
+  .navs .navb { width: auto; white-space: nowrap; }
+  .sec, .area-nav, .me { display: none; }
+  .brand { margin: 0 0 4px; padding: 0 8px 10px; border-bottom: 0; }
+}
