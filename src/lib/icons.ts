@@ -3,6 +3,8 @@
 export const ICON = {
   all: '<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>',
   needs: '<circle cx="12" cy="12" r="8"/><path d="M12 8v5M12 16h.01"/>',
+  decisions: '<path d="M12 21v-8M12 13 6.5 7.5M12 13l5.5-5.5M6 11V7h4M18 11V7h-4"/>',
+  waiting: '<path d="M7 3h10M7 21h10M8 3v2.5a4 4 0 0 0 1.6 3.2L12 10.5l2.4-1.8A4 4 0 0 0 16 5.5V3M8 21v-2.5a4 4 0 0 1 1.6-3.2l2.4-1.8 2.4 1.8a4 4 0 0 1 1.6 3.2V21"/>',
   blocked: '<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
   stale: '<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>',
   parked: '<path d="M6 4h12v16l-6-4-6 4z"/>',

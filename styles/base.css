@@ -10,7 +10,7 @@ button { cursor: pointer; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Wrapper elements that only add behavior keep the existing layout. */
-rd-sidebar, rd-assistant, rd-priorities, rd-composer, rd-project-list { display: contents; }
+rd-sidebar, rd-assistant, rd-priorities, rd-composer, rd-project-list, rd-decisions { display: contents; }
 
 /* One tooltip system: [data-tip] in the slim sidebar (opens right) and the assistant icon rail (opens left). */
 [data-tip] { position: relative; }

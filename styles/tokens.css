@@ -1,5 +1,5 @@
 /* Design tokens. Light-mode text/status colors meet WCAG 2.2 AA:
-   --muted ≥ 4.5:1 on surface, shell and rail; status dots ≥ 3:1 on surface. */
+   --muted ≥ 4.5:1 on surface, shell and rail; status + signal dots ≥ 3:1 on surface. */
 :root {
   --field-top: #c8cbcf;
   --field-mid: #d9d2cc;
@@ -21,6 +21,8 @@
   --dot-stale: #b7791f;
   --dot-ok: #2f8f57;
   --dot-park: #868b93;
+  --dot-wait: #3a6fd0;
+  --dot-decide: #7a57c9;
   --area-work: #f3c7a6;
   --area-client: #c9d7f0;
   --area-personal: #dccdf3;
@@ -34,12 +36,12 @@
     --field-top: #17181b; --field-mid: #221d1c; --field-bot: #6b3424; --shell: rgba(28, 29, 33, 0.94);
     --surface: #24262b; --rail: #1f2125; --ink: #f2f3f5; --muted: #9a9ea6; --line: #33363c; --chip: #2c2f35;
     --btn: #f2f3f5; --btn-ink: #15171a; --shadow: 0 30px 80px -30px rgba(0,0,0,.7); color-scheme: dark;
-    --dot-stale: #e8a33d; --dot-ok: #3fa66b; --dot-park: #a0a4aa;
+    --dot-stale: #e8a33d; --dot-ok: #3fa66b; --dot-park: #a0a4aa; --dot-wait: #6f9cf0; --dot-decide: #a98be8;
   }
 }
 :root[data-theme="dark"] {
   --field-top: #17181b; --field-mid: #221d1c; --field-bot: #6b3424; --shell: rgba(28, 29, 33, 0.94);
   --surface: #24262b; --rail: #1f2125; --ink: #f2f3f5; --muted: #9a9ea6; --line: #33363c; --chip: #2c2f35;
   --btn: #f2f3f5; --btn-ink: #15171a; --shadow: 0 30px 80px -30px rgba(0,0,0,.7); color-scheme: dark;
-  --dot-stale: #e8a33d; --dot-ok: #3fa66b; --dot-park: #a0a4aa;
+  --dot-stale: #e8a33d; --dot-ok: #3fa66b; --dot-park: #a0a4aa; --dot-wait: #6f9cf0; --dot-decide: #a98be8;
 }

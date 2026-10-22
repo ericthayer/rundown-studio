@@ -4,7 +4,7 @@ import { getSampler, revokeSampler } from '../runtime.js';
 import { h } from '../lib/dom.js';
 
 /** Fields sent to the model: status data only. */
-const FIELDS = ['id', 'name', 'area', 'state', 'priority', 'lastActivity', 'due', 'leftOff', 'decided', 'openDecisions', 'blockers', 'nextStep'] as const;
+const FIELDS = ['id', 'name', 'area', 'state', 'priority', 'lastActivity', 'due', 'leftOff', 'decided', 'openDecisions', 'waitingOn', 'blockers', 'nextStep'] as const;
 
 /**
  * Ask box + answer area. With the `sample` capability it asks Claude about the projects; without it,

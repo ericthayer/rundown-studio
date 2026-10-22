@@ -21,10 +21,11 @@ src/
   runtime.ts            artifact db/sample bridge, midnight tick
   types.ts              domain + state types, runtime capability typings
   domain/               projects (needs-you, streak, labels) · filters (groups, sort, visible list)
+                        · signals (open decisions with age, waiting on)
   lib/                  dom helpers (h, preserveFocus, copyCommand) · prefs · dates · icons
   components/           rd-sidebar · rd-count · rd-stat-strip · rd-streak · rd-toolbar · rd-note
-                        rd-project-list · rd-priorities · rd-composer · rd-assistant
-tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration
+                        rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant
+tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals
 ```
 
 ## Rules this codebase keeps
@@ -36,7 +37,9 @@ tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer,
 
 ## Data contract (artifact database)
 
-`projects/{id}` — `name` (required), `area` (`work|client|personal`), `kind` (`project|chat|repo`), `state` (`active|blocked|stale|parked`), `priority` (number, 1 = top), `lastActivity` / `due` (ISO dates), `leftOff`, `nextStep` (strings), `openDecisions` / `blockers` / `decided` (string arrays).
+`projects/{id}` — `name` (required), `area` (`work|client|personal`), `kind` (`project|chat|repo`), `state` (`active|blocked|stale|parked`), `priority` (number, 1 = top), `lastActivity` / `due` (ISO dates), `leftOff`, `nextStep` (strings), `blockers` / `decided` (string arrays), `openDecisions` (strings or `{ text, since }`), `waitingOn` (`{ who, what?, since? }` or strings).
+
+Signals: `since` (ISO date) drives the age shown in the **Decisions** rollup (oldest first, parked projects excluded) and on cards. A `blocked` project with `waitingOn` and no `blockers` is waiting on others: it gets a blue dot and leaves **Needs you** until a wait passes 14 days.
 
 `meta/run` — `nextRun` (string), `critique` (rundown note), `streak` (number) **or** `sessionDays` (ISO date array). Without either, the streak falls back to consecutive check-in days.
 

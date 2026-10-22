@@ -1,6 +1,7 @@
 import type { AppState, DueWindow, Flag, Kind, Project, ProjectState, RailFilter, SortKey, ToolbarFilters, UpdatedWindow } from '../types.js';
 import { daysSince, daysUntil } from '../lib/dates.js';
 import { byPriority, isArea, needsYou, strings } from './projects.js';
+import { decisions, waits } from './signals.js';
 
 export const defaultFilters = (): ToolbarFilters => ({ status: [], updated: 'any', due: 'any', kind: [], flags: [], sort: 'needs' });
 
@@ -18,7 +19,8 @@ const DUE: Record<Exclude<DueWindow, 'any'>, (n: number | null) => boolean> = {
 };
 const FLAG: Record<Flag, (p: Project) => boolean> = {
   blockers: (p) => strings(p.blockers).length > 0,
-  decisions: (p) => strings(p.openDecisions).length > 0,
+  decisions: (p) => decisions(p).length > 0,
+  waiting: (p) => waits(p).length > 0,
   nonext: (p) => !p.nextStep,
 };
 
@@ -43,7 +45,7 @@ export const GROUPS: readonly FilterGroup[] = [
   { key: 'updated', title: 'Updated', multi: false, opts: [['any', 'Any time'], ['today', 'Today'], ['week', 'Last 7 days'], ['month', 'Last 30 days'], ['old', '30+ days or never']], test: (p, v) => UPDATED[v](daysSince(p.lastActivity)) },
   { key: 'due', title: 'Due', multi: false, opts: [['any', 'Any'], ['overdue', 'Overdue'], ['week', 'Next 7 days'], ['has', 'Has a due date'], ['none', 'No due date']], test: (p, v) => DUE[v](daysUntil(p.due)) },
   { key: 'kind', title: 'Type', multi: true, opts: [['project', 'Project'], ['chat', 'Chat'], ['repo', 'Repo']], test: (p, v) => p.kind === v },
-  { key: 'flags', title: 'Has', multi: true, all: true, opts: [['blockers', 'Blockers'], ['decisions', 'Open decisions'], ['nonext', 'No next step']], test: (p, v) => FLAG[v](p) },
+  { key: 'flags', title: 'Has', multi: true, all: true, opts: [['blockers', 'Blockers'], ['decisions', 'Open decisions'], ['waiting', 'Waiting on'], ['nonext', 'No next step']], test: (p, v) => FLAG[v](p) },
 ];
 
 export const SORT_OPTIONS: readonly [SortKey, string][] = [['needs', 'Needs you'], ['priority', 'Priority'], ['recent', 'Last updated'], ['due', 'Due date'], ['name', 'Name']];
@@ -89,6 +91,8 @@ function passToolbar(p: Project, f: ToolbarFilters): boolean {
 
 function passRail(p: Project, filter: RailFilter): boolean {
   if (filter === 'needs') return needsYou(p);
+  if (filter === 'decisions') return p.state !== 'parked' && decisions(p).length > 0;
+  if (filter === 'waiting') return waits(p).length > 0;
   if (filter === 'blocked' || filter === 'stale' || filter === 'parked') return p.state === filter;
   if (isArea(filter)) return p.area === filter;
   return true;
@@ -96,7 +100,8 @@ function passRail(p: Project, filter: RailFilter): boolean {
 
 function passQuery(p: Project, q: string): boolean {
   if (!q) return true;
-  return [p.name, p.leftOff, p.nextStep, ...strings(p.openDecisions), ...strings(p.blockers), ...strings(p.decided)].join(' ').toLowerCase().includes(q);
+  const signals = [...decisions(p).map((d) => d.text), ...waits(p).flatMap((w) => [w.who, w.what])];
+  return [p.name, p.leftOff, p.nextStep, ...signals, ...strings(p.blockers), ...strings(p.decided)].join(' ').toLowerCase().includes(q);
 }
 
 let memo: { key: unknown[]; result: Project[] } | null = null;

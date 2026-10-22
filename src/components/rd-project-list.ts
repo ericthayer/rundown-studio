@@ -2,9 +2,10 @@ import type { Project } from '../types.js';
 import { StoreElement } from './base.js';
 import { store } from '../store.js';
 import { ICON, KIND, UI } from '../lib/icons.js';
-import { h, icon, preserveFocus, setAttr, setText } from '../lib/dom.js';
+import { h, icon, preserveFocus, setAttr, setText, type Kid } from '../lib/dom.js';
 import { visibleProjects, activeCount, defaultFilters } from '../domain/filters.js';
 import { AREA_LABEL, isArea, strings, whenLabel } from '../domain/projects.js';
+import { ageLabel, decisions, waitLabel, waitingOnOthers, waits } from '../domain/signals.js';
 
 interface Row {
   li: HTMLLIElement;
@@ -39,6 +40,9 @@ export class RdProjectList extends StoreElement {
 
   #render(): void {
     const s = store.state;
+    // The decisions view renders as a rollup in <rd-decisions> instead.
+    this.hidden = s.filter === 'decisions';
+    if (this.hidden) return;
     const shown = visibleProjects(s);
     const seen = new Set<string>();
 
@@ -83,8 +87,9 @@ export class RdProjectList extends StoreElement {
 
   #patch(row: Row, p: Project, open: boolean): void {
     const state = p.state ?? 'active';
-    setAttr(row.dot, 'class', `dot ${state}`);
-    setAttr(row.dot, 'title', state);
+    const waiting = waitingOnOthers(p);
+    setAttr(row.dot, 'class', `dot ${waiting ? 'waiting' : state}`);
+    setAttr(row.dot, 'title', waiting ? `waiting on ${waits(p).map((w) => w.who).join(', ')}` : state);
     setText(row.name, p.name);
     setText(row.pv, p.leftOff || 'No check-in yet.');
     setText(row.time, whenLabel(p));
@@ -105,7 +110,7 @@ export class RdProjectList extends StoreElement {
       row.detailSig = '';
       return;
     }
-    const sig = JSON.stringify([p.nextStep, p.leftOff, p.openDecisions, p.blockers, p.decided, p.area, whenLabel(p)]);
+    const sig = JSON.stringify([p.nextStep, p.leftOff, p.openDecisions, p.waitingOn, p.blockers, p.decided, p.area, whenLabel(p)]);
     if (row.detail && sig === row.detailSig) return;
     const card = this.#card(p);
     const detail = h('div', { class: 'pitem', style: 'padding-top:0' }, h('span'), card);
@@ -116,9 +121,15 @@ export class RdProjectList extends StoreElement {
 
   /** Next-step card (Primer-style): icon tile, heading, description, detail groups, meta footer. */
   #card(p: Project): HTMLElement {
-    const groups = ([['Open decisions', p.openDecisions], ['Blocked by', p.blockers], ['Decided', p.decided]] as const)
-      .filter(([, v]) => strings(v).length)
-      .map(([t, v]) => h('section', {}, h('h4', {}, t), h('ul', {}, strings(v).map((x) => h('li', {}, x)))));
+    const aged = (label: string, age: number | null): Kid[] => [label, age === null ? null : h('span', { class: 'ns-age' }, ` · ${ageLabel(age)}`)];
+    const groups = ([
+      ['Open decisions', decisions(p).map((d) => aged(d.text, d.age))],
+      ['Waiting on', waits(p).map((w) => aged(waitLabel(w), w.age))],
+      ['Blocked by', strings(p.blockers)],
+      ['Decided', strings(p.decided)],
+    ] as const)
+      .filter(([, items]) => items.length)
+      .map(([t, items]) => h('section', {}, h('h4', {}, t), h('ul', {}, items.map((x) => h('li', {}, x)))));
     const when = whenLabel(p);
     const area = isArea(p.area) ? p.area : null;
     return h('article', { class: 'nscard', 'aria-label': `Next step for ${p.name}` },

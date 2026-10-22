@@ -4,13 +4,17 @@ import { store } from '../store.js';
 import { h, icon, placeUnder, preserveFocus, setAttr, setText } from '../lib/dom.js';
 import { UI } from '../lib/icons.js';
 import { needsYou } from '../domain/projects.js';
+import { decisionCount, waits } from '../domain/signals.js';
 
-type StatKey = Extract<RailFilter, 'needs' | 'blocked' | 'stale' | 'parked'>;
-const STATS: readonly [StatKey, string, (p: Project) => boolean][] = [
-  ['needs', 'Need you', needsYou],
-  ['blocked', 'Blocked', (p) => p.state === 'blocked'],
-  ['stale', 'Stale', (p) => p.state === 'stale'],
-  ['parked', 'Parked', (p) => p.state === 'parked'],
+type StatKey = Extract<RailFilter, 'needs' | 'decisions' | 'waiting' | 'blocked' | 'stale' | 'parked'>;
+const where = (test: (p: Project) => boolean) => (ps: readonly Project[]): number => ps.filter(test).length;
+const STATS: readonly [StatKey, string, (ps: readonly Project[]) => number][] = [
+  ['needs', 'Need you', where(needsYou)],
+  ['blocked', 'Blocked', where((p) => p.state === 'blocked')],
+  ['waiting', 'Waiting', where((p) => waits(p).length > 0)],
+  ['decisions', 'Decisions', decisionCount],
+  ['stale', 'Stale', where((p) => p.state === 'stale')],
+  ['parked', 'Parked', where((p) => p.state === 'parked')],
 ];
 
 const MESSAGE: Record<LoadStatus, string> = {
@@ -77,7 +81,7 @@ export class RdStatStrip extends StoreElement {
     setText(this.#msg, MESSAGE[status]);
     for (const st of this.#stats) {
       const n = STATS.find(([k]) => k === st.key)?.[2];
-      const count = n ? projects.filter(n).length : 0;
+      const count = n ? n(projects) : 0;
       const on = filter === st.key;
       st.btn.hidden = empty;
       if (st.sep) st.sep.hidden = empty;
