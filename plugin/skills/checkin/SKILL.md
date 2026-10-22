@@ -45,6 +45,7 @@ Write every confirmed row to this board only, with `ArtifactData`. Collection `p
 | waitingOn | {who, what, since}[] | Things blocked on someone else: `who` = person or org, `what` = what you need from them, `since` = YYYY-MM-DD the wait started. Empty if none |
 | blockers | string[] | Blockers on the user's side only. Empty if none |
 | nextStep | string | Exactly one, imperative |
+| sourceError | {source, detail, since} | Only when a source this project depends on (its repo, usually `source: "GitHub"`) could not be reached during this check-in. `detail` = one short reason, `since` = YYYY-MM-DD it first failed (keep the old `since` if it was already failing). Remove the field (write `null`) once the source answers again |
 | updatedAt | ISO timestamp | Now |
 | updatedBy | "checkin" | Constant for this skill |
 

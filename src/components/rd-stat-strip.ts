@@ -5,7 +5,6 @@ import { h, icon, placeUnder, preserveFocus, setAttr, setText } from '../lib/dom
 import { UI } from '../lib/icons.js';
 import { needsYou } from '../domain/projects.js';
 import { decisionCount, waits } from '../domain/signals.js';
-import { checkinCommand } from '../lib/config.js';
 
 type StatKey = Extract<RailFilter, 'needs' | 'decisions' | 'waiting' | 'blocked' | 'stale' | 'parked'>;
 const where = (test: (p: Project) => boolean) => (ps: readonly Project[]): number => ps.filter(test).length;
@@ -18,12 +17,8 @@ const STATS: readonly [StatKey, string, (ps: readonly Project[]) => number][] = 
   ['parked', 'Parked', where((p) => p.state === 'parked')],
 ];
 
-const MESSAGE: Record<LoadStatus, string> = {
-  loading: 'Loading your projects…',
-  'signed-out': "Sign in to see your projects. Rows live in this page's database.",
-  error: "Couldn't load projects. Reload to try again.",
-  ready: 'No projects yet. Run {cmd} inside any Project to add the first one.',
-};
+/** Only the first load speaks here; empty, error and signed-out boards get the list's illustrated panel. */
+const LOADING = 'Loading your projects…';
 
 interface Stat { key: StatKey; label: string; btn: HTMLButtonElement; num: HTMLElement; sep: HTMLElement | null; item: HTMLButtonElement; itemNum: HTMLElement }
 
@@ -37,6 +32,7 @@ export class RdStatStrip extends StoreElement {
   #more!: HTMLButtonElement;
   #menu!: HTMLDivElement;
   #raf = 0;
+  #empty = true;
 
   protected setup(): void {
     this.#msg = this.ref('msg');
@@ -66,7 +62,7 @@ export class RdStatStrip extends StoreElement {
     this.append(...nodes, this.#more);
     document.body.append(this.#menu);
 
-    this.watch(['projects', 'filter', 'status', 'day', 'config'], (_c, s) => preserveFocus(() => this.#render(s.projects, s.filter, s.status)));
+    this.watch(['projects', 'filter', 'status', 'day'], (_c, s) => preserveFocus(() => this.#render(s.projects, s.filter, s.status)));
     const ro = new ResizeObserver(() => { cancelAnimationFrame(this.#raf); this.#raf = requestAnimationFrame(() => this.#fit()); });
     ro.observe(this);
   }
@@ -78,8 +74,9 @@ export class RdStatStrip extends StoreElement {
 
   #render(projects: readonly Project[], filter: RailFilter, status: LoadStatus): void {
     const empty = projects.length === 0;
-    this.#msg.hidden = !empty;
-    setText(this.#msg, MESSAGE[status].replace('{cmd}', checkinCommand()));
+    this.#empty = empty;
+    this.#msg.hidden = !empty || status !== 'loading';
+    setText(this.#msg, LOADING);
     for (const st of this.#stats) {
       const n = STATS.find(([k]) => k === st.key)?.[2];
       const count = n ? n(projects) : 0;
@@ -98,7 +95,7 @@ export class RdStatStrip extends StoreElement {
 
   /** Hide trailing stats until the strip fits; mirror hidden ones into the menu. */
   #fit(): void {
-    if (!this.#stats.length || this.#msg.hidden === false) { this.#more.hidden = true; return; }
+    if (!this.#stats.length || this.#empty) { this.#more.hidden = true; return; }
     for (const st of this.#stats) { st.btn.hidden = false; if (st.sep) st.sep.hidden = false; st.item.hidden = true; }
     this.#more.hidden = true;
     const fits = (): boolean => this.scrollWidth <= this.clientWidth + 1;

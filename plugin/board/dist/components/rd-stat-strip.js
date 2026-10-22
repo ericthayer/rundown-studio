@@ -4,7 +4,6 @@ import { h, icon, placeUnder, preserveFocus, setAttr, setText } from '../lib/dom
 import { UI } from '../lib/icons.js';
 import { needsYou } from '../domain/projects.js';
 import { decisionCount, waits } from '../domain/signals.js';
-import { checkinCommand } from '../lib/config.js';
 const where = (test) => (ps) => ps.filter(test).length;
 const STATS = [
     ['needs', 'Need you', where(needsYou)],
@@ -14,12 +13,8 @@ const STATS = [
     ['stale', 'Stale', where((p) => p.state === 'stale')],
     ['parked', 'Parked', where((p) => p.state === 'parked')],
 ];
-const MESSAGE = {
-    loading: 'Loading your projects…',
-    'signed-out': "Sign in to see your projects. Rows live in this page's database.",
-    error: "Couldn't load projects. Reload to try again.",
-    ready: 'No projects yet. Run {cmd} inside any Project to add the first one.',
-};
+/** Only the first load speaks here; empty, error and signed-out boards get the list's illustrated panel. */
+const LOADING = 'Loading your projects…';
 /**
  * Stat strip: counts that double as filter shortcuts. Never wraps — stats that don't fit move,
  * last first, into a "+N" menu (priority+ pattern). Buttons are built once and updated in place.
@@ -30,6 +25,7 @@ export class RdStatStrip extends StoreElement {
     #more;
     #menu;
     #raf = 0;
+    #empty = true;
     setup() {
         this.#msg = this.ref('msg');
         this.#menu = h('div', { class: 'fpop smenu', id: 'pstats-menu', popover: 'auto', role: 'group', 'aria-label': 'More project counts' });
@@ -57,7 +53,7 @@ export class RdStatStrip extends StoreElement {
         });
         this.append(...nodes, this.#more);
         document.body.append(this.#menu);
-        this.watch(['projects', 'filter', 'status', 'day', 'config'], (_c, s) => preserveFocus(() => this.#render(s.projects, s.filter, s.status)));
+        this.watch(['projects', 'filter', 'status', 'day'], (_c, s) => preserveFocus(() => this.#render(s.projects, s.filter, s.status)));
         const ro = new ResizeObserver(() => { cancelAnimationFrame(this.#raf); this.#raf = requestAnimationFrame(() => this.#fit()); });
         ro.observe(this);
     }
@@ -67,8 +63,9 @@ export class RdStatStrip extends StoreElement {
     }
     #render(projects, filter, status) {
         const empty = projects.length === 0;
-        this.#msg.hidden = !empty;
-        setText(this.#msg, MESSAGE[status].replace('{cmd}', checkinCommand()));
+        this.#empty = empty;
+        this.#msg.hidden = !empty || status !== 'loading';
+        setText(this.#msg, LOADING);
         for (const st of this.#stats) {
             const n = STATS.find(([k]) => k === st.key)?.[2];
             const count = n ? n(projects) : 0;
@@ -87,7 +84,7 @@ export class RdStatStrip extends StoreElement {
     }
     /** Hide trailing stats until the strip fits; mirror hidden ones into the menu. */
     #fit() {
-        if (!this.#stats.length || this.#msg.hidden === false) {
+        if (!this.#stats.length || this.#empty) {
             this.#more.hidden = true;
             return;
         }

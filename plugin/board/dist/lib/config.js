@@ -1,6 +1,9 @@
 import { store } from '../store.js';
 const DEFAULT_COMMAND = '/project-checkin';
-const KEYS = ['owner', 'boardUrl', 'schedule', 'checkinCommand'];
+const KEYS = ['owner', 'boardUrl', 'schedule', 'checkinCommand', 'feedbackEmail', 'issuesUrl'];
+/** Feedback goes to Rundown's maintainer unless a board's `meta/config` points elsewhere. */
+export const FEEDBACK_EMAIL = 'ethayer.design@gmail.com';
+export const ISSUES_URL = 'https://github.com/ericthayer/rundown-studio/issues/new';
 export function toConfig(raw) {
     const out = {};
     for (const k of KEYS) {
@@ -12,9 +15,21 @@ export function toConfig(raw) {
         delete out.boardUrl;
     if (out.checkinCommand && !out.checkinCommand.startsWith('/'))
         delete out.checkinCommand;
+    if (out.feedbackEmail && !/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(out.feedbackEmail))
+        delete out.feedbackEmail;
+    if (out.issuesUrl && !out.issuesUrl.startsWith('https://'))
+        delete out.issuesUrl;
     return out;
 }
 export const checkinCommand = () => store.state.config.checkinCommand ?? DEFAULT_COMMAND;
+/** mailto: link with a subject and the page URL, so a report says which board it came from. */
+export function feedbackHref() {
+    const to = store.state.config.feedbackEmail ?? FEEDBACK_EMAIL;
+    const subject = encodeURIComponent('Rundown feedback');
+    const body = encodeURIComponent(`\n\n---\nBoard: ${store.state.config.boardUrl ?? location.href}\nBrowser: ${navigator.userAgent}`);
+    return `mailto:${to}?subject=${subject}&body=${body}`;
+}
+export const issuesHref = () => store.state.config.issuesUrl ?? ISSUES_URL;
 /** Up to two initials for the avatar, e.g. "Ada Lovelace" → "AL", "Rundown" → "R". */
 export function initials(name) {
     const parts = name.trim().split(/\s+/).filter(Boolean);

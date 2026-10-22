@@ -2,13 +2,14 @@ import type { ThemeMode } from '../types.js';
 import { StoreElement } from './base.js';
 import { prefs } from '../lib/prefs.js';
 import { applyTheme } from '../lib/theme.js';
-import { THEME } from '../lib/icons.js';
-import { h, icon, placeAbove, placeUnder } from '../lib/dom.js';
+import { THEME, UI } from '../lib/icons.js';
+import { feedbackHref, issuesHref } from '../lib/config.js';
+import { h, icon, placeAbove, placeUnder, setAttr } from '../lib/dom.js';
 import './rd-note-locker.js';
 
 const MODES: readonly [ThemeMode, string][] = [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']];
 
-/** Account settings popover next to the viewer's name. Holds per-viewer preferences (color mode) and the note locker. */
+/** Account settings popover next to the viewer's name: color mode, the note locker, and Help (feedback + issues). */
 export class RdSettings extends StoreElement {
   protected setup(): void {
     const btn = this.ref<HTMLButtonElement>('btn');
@@ -19,7 +20,7 @@ export class RdSettings extends StoreElement {
     pop.replaceChildren(h('fieldset', { class: 'fset' }, h('legend', {}, 'Color mode'),
       MODES.map(([value, label]) => h('label', { class: 'fopt' },
         h('input', { type: 'radio', name: 'theme', value, checked: value === current, 'data-fk': `theme:${value}`, onchange: () => this.#set(value) }),
-        icon(THEME[value]), label))), locker);
+        icon(THEME[value]), label))), locker, this.#help());
     pop.addEventListener('toggle', (e) => {
       const open = (e as ToggleEvent).newState === 'open';
       btn.setAttribute('aria-expanded', String(open));
@@ -27,6 +28,14 @@ export class RdSettings extends StoreElement {
       if (open) (btn.getBoundingClientRect().top < innerHeight / 2 ? placeUnder : placeAbove)(btn, pop);
     });
     this.listen(window, 'resize', () => { if (pop.matches(':popover-open')) pop.hidePopover(); });
+  }
+
+  /** Feedback links. Targets come from `meta/config` when set, so they're refreshed on config changes. */
+  #help(): HTMLElement {
+    const mail = h('a', { class: 'fopt', 'data-fk': 'help:feedback' }, icon(UI.mail), 'Send feedback');
+    const issue = h('a', { class: 'fopt', target: '_blank', rel: 'noopener noreferrer', 'data-fk': 'help:issue' }, icon(UI.bug), 'Report an issue', h('span', { class: 'sr' }, ' (opens in a new tab)'));
+    this.watch(['config'], () => { setAttr(mail, 'href', feedbackHref()); setAttr(issue, 'href', issuesHref()); });
+    return h('fieldset', { class: 'fset fhelp' }, h('legend', {}, 'Help'), mail, issue);
   }
 
   #set(mode: ThemeMode): void {

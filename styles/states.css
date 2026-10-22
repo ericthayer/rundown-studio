@@ -1,0 +1,45 @@
+/* Empty, no-match and failure states: illustrated list panel, connection band, row source badge, Ask errors. */
+.plist > li.empty { padding: 0; border: 0; color: var(--ink); }
+.estate { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 48px 16px 56px; }
+.estate-h { margin: 10px 0 0; font-family: var(--font-display); font-size: 1.1538rem; font-weight: 600; letter-spacing: -0.015em; }
+.estate-d { margin: 0; max-width: 42ch; color: var(--muted); font-size: max(var(--fs-floor), 0.9231rem); line-height: 1.5; text-wrap: pretty; }
+.estate-cta { margin-top: 10px; font-family: var(--font-display); }
+.estate-cta[aria-disabled="true"] { opacity: .6; cursor: progress; }
+
+/* Illustration: static SVG paints first; the Lottie player draws over it once it loads. */
+.art { position: relative; width: 136px; height: 136px; flex: none; }
+.art > svg, .art-anim { position: absolute; inset: 0; width: 100%; height: 100%; }
+.art-anim svg { display: block; }
+.art[data-anim="on"] > svg { visibility: hidden; }
+.art .t-surface { fill: var(--surface); }
+.art .t-chip { fill: var(--chip); }
+.art .t-line { fill: var(--line); }
+.art .t-muted { fill: var(--muted); }
+.art .t-ink { fill: var(--ink); }
+.art .t-peach { fill: var(--peach); }
+.art .t-pink { fill: var(--pink); }
+.art .t-violet { fill: var(--violet); }
+.art :is(.s-line, .s-muted, .s-ink, .s-peach) { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.art .s-line { stroke: var(--line); }
+.art .s-muted { stroke: var(--muted); }
+.art .s-ink { stroke: var(--ink); }
+.art .s-peach { stroke: var(--peach); }
+
+/* Connection band: same flush band as the rundown note, warm tone for warnings. */
+.lstat { --info: var(--dot-stale); align-items: center; }
+.lstat[data-tone="info"] { --info: var(--violet); }
+.lstat .fclear { flex: none; padding: 2px 4px; color: var(--ink); }
+
+/* Row badge: the last check-in couldn't reach the project's source. */
+.badges .b-src { background: color-mix(in srgb, var(--dot-block) 14%, var(--surface)); }
+.b-src svg { width: 12px; height: 12px; fill: none; stroke: var(--dot-block); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Ask Rundown: a failed answer reads as a note, not an answer. */
+.answer.afail .aerr { color: var(--muted); }
+.answer.afail .afoot { justify-content: flex-start; }
+.aretry { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+
+/* Help links in the settings menu. */
+.fhelp { margin-top: 7px; padding-top: 6px; box-shadow: 0 -1px 0 var(--line); }
+.fhelp a.fopt { color: inherit; text-decoration: none; }
+.fhelp a.fopt:focus-visible { outline-offset: -2px; }

@@ -9,6 +9,7 @@ import './components/rd-stat-strip.js';
 import './components/rd-streak.js';
 import './components/rd-toolbar.js';
 import './components/rd-note.js';
+import './components/rd-status.js';
 import './components/rd-project-list.js';
 import './components/rd-decisions.js';
 import './components/rd-priorities.js';

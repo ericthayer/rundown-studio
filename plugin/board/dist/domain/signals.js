@@ -42,3 +42,13 @@ export function ageLabel(age) {
 export function waitLabel(w) {
     return w.what ? `${w.who}: ${w.what}` : w.who;
 }
+/** The source the last check-in couldn't reach, or null. A bare string names the source. */
+export function sourceError(p) {
+    const v = p.sourceError;
+    const r = record(v);
+    const source = typeof v === 'string' ? v.trim() : text(r.source);
+    if (!source)
+        return null;
+    const detail = text(r.detail);
+    return { source: source.slice(0, 40), ...(detail ? { detail: detail.slice(0, 200) } : {}), age: daysSince(r.since) };
+}

@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="styles/toolbar.css">
 <link rel="stylesheet" href="styles/list.css">
 <link rel="stylesheet" href="styles/assistant.css">
+<link rel="stylesheet" href="styles/states.css">
 <link rel="stylesheet" href="styles/mobile.css">
 <link rel="modulepreload" href="dist/main.js">
 
@@ -61,6 +62,10 @@
         <p><strong id="note-h">Rundown note</strong> <span data-ref="text"></span></p>
         <button class="note-x" type="button" data-ref="dismiss" aria-label="Dismiss note"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="m3 3 6 6M9 3 3 9"/></svg></button>
       </rd-note>
+      <rd-status>
+        <div class="note lstat" data-ref="band" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20zM12 10v4M12 17h.01"/></svg><p><strong data-ref="title"></strong> <span data-ref="text"></span></p><button class="fclear" type="button" data-ref="retry" data-fk="status:retry" hidden>Try again</button></div>
+        <p class="sr" role="status" aria-live="polite" data-ref="live"></p>
+      </rd-status>
       <rd-project-list><ul class="plist" data-ref="list" aria-label="Projects"></ul></rd-project-list>
       <rd-decisions hidden><ul class="plist" data-ref="list" aria-label="Open decisions, oldest first"></ul></rd-decisions>
     </section>

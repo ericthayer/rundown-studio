@@ -23,7 +23,12 @@ export interface Project {
   blockers?: unknown;
   /** `WaitItem`s (or plain strings naming who): blocked on someone else, not on you. */
   waitingOn?: unknown;
+  /** `SourceError` written by a check-in that couldn't reach the project's repo or source; cleared on the next good one. */
+  sourceError?: unknown;
 }
+
+/** A source the last check-in couldn't reach, e.g. `{source: 'GitHub', since: '2026-10-22'}`. */
+export interface SourceError { source: string; detail?: string; since?: string }
 
 /** One open decision as /project-checkin writes it. `since` = ISO date it was first raised. */
 export interface DecisionItem { text: string; since?: string }
@@ -66,6 +71,10 @@ export interface BoardConfig {
   schedule?: string;
   /** Slash command the check-in buttons run or copy. */
   checkinCommand?: string;
+  /** Where Send feedback mails. Defaults to the Rundown maintainer. */
+  feedbackEmail?: string;
+  /** Where Report an issue opens (an https URL). Defaults to the Rundown repo's new-issue page. */
+  issuesUrl?: string;
 }
 
 export type RailFilter = 'all' | 'needs' | 'decisions' | 'waiting' | 'blocked' | 'stale' | 'parked' | Area;
@@ -87,12 +96,19 @@ export interface ToolbarFilters {
 }
 
 export type LoadStatus = 'loading' | 'ready' | 'signed-out' | 'error';
+/** Live feed health once loaded: streaming, browser offline, or the db subscription died (rows shown are the last good ones). */
+export type LinkState = 'live' | 'offline' | 'paused';
 
 export interface AppState {
   projects: Project[];
   meta: RunMeta;
   config: BoardConfig;
   status: LoadStatus;
+  link: LinkState;
+  /** Time (ms) of the last good projects snapshot; null before the first. */
+  syncedAt: number | null;
+  /** Rows in the last snapshot that couldn't be read (no name, or not an object). */
+  skipped: number;
   /** Sidebar / stat-strip filter. */
   filter: RailFilter;
   /** Search box text, lower-cased and trimmed. */
