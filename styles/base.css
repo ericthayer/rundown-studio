@@ -7,10 +7,12 @@ button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--peach); outline-offset: 2px; }
 [hidden] { display: none !important; }
 .num { font-variant-numeric: tabular-nums; }
+/* Display face for headings, titles and labeled action buttons; copy, labels, nav and rows stay on --font. */
+:is(h1, h2, .brand-name, .pitem b, .card b, .ns-h, .cta, .me button, .chip, .fchip, .fbtn, .fclear) { font-family: var(--font-display); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Wrapper elements that only add behavior keep the existing layout. */
-rd-sidebar, rd-assistant, rd-priorities, rd-composer, rd-project-list, rd-decisions { display: contents; }
+rd-sidebar, rd-assistant, rd-priorities, rd-composer, rd-project-list, rd-decisions, rd-focus, rd-settings { display: contents; }
 
 /* One tooltip system: [data-tip] in the slim sidebar (opens right) and the assistant icon rail (opens left). */
 [data-tip] { position: relative; }

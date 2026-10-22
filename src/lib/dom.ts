@@ -86,3 +86,10 @@ export function placeUnder(anchor: Element, pop: HTMLElement): void {
   pop.style.top = `${Math.round(r.bottom + 6)}px`;
   pop.style.left = `${Math.round(Math.max(8, Math.min(r.left, innerWidth - pop.offsetWidth - 8)))}px`;
 }
+
+/** Positions a fixed popover above its anchor (for controls pinned to the bottom), kept inside the viewport. */
+export function placeAbove(anchor: Element, pop: HTMLElement): void {
+  const r = anchor.getBoundingClientRect();
+  pop.style.top = `${Math.round(Math.max(8, r.top - pop.offsetHeight - 6))}px`;
+  pop.style.left = `${Math.round(Math.max(8, Math.min(r.left, innerWidth - pop.offsetWidth - 8)))}px`;
+}

@@ -2,6 +2,7 @@
  * Rundown — entry module. Defines custom elements (each module self-registers), then connects the
  * artifact runtime. Markup is server-rendered in index.html; components enhance it in place.
  */
+import './lib/theme.js';
 import './components/rd-sidebar.js';
 import './components/rd-count.js';
 import './components/rd-stat-strip.js';
@@ -13,6 +14,8 @@ import './components/rd-decisions.js';
 import './components/rd-priorities.js';
 import './components/rd-composer.js';
 import './components/rd-assistant.js';
+import './components/rd-focus.js';
+import './components/rd-settings.js';
 import { connectRuntime } from './runtime.js';
 import { byId, copyCommand } from './lib/dom.js';
 

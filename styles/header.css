@@ -11,6 +11,12 @@
 .atoggle:hover { border-color: var(--muted); }
 .atoggle svg { width: 15px; height: 15px; fill: var(--peach); }
 @media (max-width: 1060px) { .atoggle { display: inline-grid; } }
+/* Focus mode: same quiet square as the assistant toggle; icon swaps expand ↔ collapse. */
+.ftoggle { display: inline-grid; width: 32px; height: 32px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; place-items: center; flex: none; }
+.ftoggle:hover { border-color: var(--muted); }
+.ftoggle svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ftoggle .foff, .ftoggle[aria-pressed="true"] .fon { display: none; }
+.ftoggle[aria-pressed="true"] .foff { display: inline; }
 
 .pmeta { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 16px; margin: -6px 0 2px; }
 .pstats { display: flex; flex-wrap: nowrap; align-items: center; gap: 2px 0; margin-left: -8px; min-height: 30px; flex: 1 1 auto; min-width: 0; overflow: hidden; }

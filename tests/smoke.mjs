@@ -179,6 +179,44 @@ const active = (p) => p.evaluate(() => document.activeElement?.dataset?.fk ?? do
   check('no console errors (phone)', errors.length === 0, errors.join(' | '));
   await ctx.close();
 }
+// 8. Focus mode: fullscreen toggle where allowed, hidden where not.
+{
+  const { p, ctx, errors } = await page();
+  const btn = 'rd-focus button';
+  check('focus button shown when fullscreen allowed', await p.isVisible(btn));
+  await p.click(btn); await p.waitForTimeout(200);
+  check('focus mode enters fullscreen', await p.evaluate(() => document.fullscreenElement === document.documentElement));
+  check('focus button pressed + relabelled', (await p.getAttribute(btn, 'aria-pressed')) === 'true' && (await p.getAttribute(btn, 'aria-label')) === 'Exit focus mode');
+  await p.screenshot({ path: join(OUT, 'focus-mode.png') });
+  await p.click(btn); await p.waitForTimeout(200);
+  check('focus button exits fullscreen', await p.evaluate(() => !document.fullscreenElement) && (await p.getAttribute(btn, 'aria-pressed')) === 'false');
+  check('no console errors (focus)', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+  const off = await page({ init: () => Object.defineProperty(Document.prototype, 'fullscreenEnabled', { get: () => false }) });
+  check('focus button hidden when fullscreen blocked', !(await off.p.isVisible(btn)));
+  await off.ctx.close();
+}
+// 9. Settings: color mode picker next to the viewer's name.
+{
+  const { p, ctx, errors } = await page();
+  const theme = () => p.evaluate(() => document.documentElement.getAttribute('data-theme'));
+  await p.click('.mset'); await p.waitForTimeout(100);
+  check('settings popover opens', await p.isVisible('#me-settings') && (await p.getAttribute('.mset', 'aria-expanded')) === 'true');
+  check('popover stays in viewport', await p.evaluate(() => { const r = document.getElementById('me-settings').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; }));
+  await p.screenshot({ path: join(OUT, 'settings.png') });
+  await p.check('input[name="theme"][value="dark"]');
+  check('dark mode applies', (await theme()) === 'dark');
+  check('dark tokens active', await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() === '#24262b'));
+  await p.reload(); await p.waitForSelector('.pitem');
+  check('color mode persists across reload', (await theme()) === 'dark' && await p.isChecked('input[name="theme"][value="dark"]'));
+  await p.screenshot({ path: join(OUT, 'wide-dark.png') });
+  await p.click('.mset'); await p.check('input[name="theme"][value="system"]');
+  check('system mode clears override', (await theme()) === null);
+  await p.keyboard.press('Escape');
+  check('Escape closes settings', !(await p.isVisible('#me-settings')));
+  check('no console errors (settings)', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+}
 
 await browser.close();
 server.close();

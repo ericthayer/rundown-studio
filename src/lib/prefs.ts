@@ -1,4 +1,4 @@
-import type { ToolbarFilters } from '../types.js';
+import type { ThemeMode, ToolbarFilters } from '../types.js';
 
 /** Per-viewer conveniences only (layout, filters, dismissals). Never shared or durable state. */
 export interface Prefs {
@@ -12,10 +12,12 @@ export interface Prefs {
   filters: Partial<ToolbarFilters> | null;
   noteDismissed: string;
   noteSeen: string;
+  /** Color mode; 'system' follows the OS setting. */
+  theme: ThemeMode;
 }
 
 const KEY = 'rundown.prefs';
-const DEFAULTS: Prefs = { v: 1, slim: false, areasOpen: true, agentOpen: true, agentW: null, drawer: 1, filters: null, noteDismissed: '', noteSeen: '' };
+const DEFAULTS: Prefs = { v: 1, slim: false, areasOpen: true, agentOpen: true, agentW: null, drawer: 1, filters: null, noteDismissed: '', noteSeen: '', theme: 'system' };
 
 function read(key: string): string | null {
   try { return localStorage.getItem(key); } catch { return null; }
