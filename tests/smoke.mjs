@@ -221,6 +221,14 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
   await legacy.p.click('.mset'); await legacy.p.waitForTimeout(100);
   check('legacy dismissal shows in the locker', (await legacy.p.locator('.nlock-btn').count()) === 1);
   await legacy.ctx.close();
+  // Only "Show again" deletes a locker note: loading, reloading and a legacy migration never do.
+  const keep = { 'note-keep': { kind: 'note', text: META.critique, savedAt: iso(1), projectId: null, inLocker: true } };
+  const kept = await page({ init: (d) => { if (!localStorage.getItem('__notes')) localStorage.setItem('__notes', JSON.stringify(d)); localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, noteDismissed: 'Some other old note.' })); }, initArg: keep });
+  await kept.p.reload(); await kept.p.waitForSelector('.pitem'); await kept.p.waitForTimeout(100);
+  const after = await kept.p.evaluate(() => window.__notes());
+  check('load + reload + migration keep existing locker notes', !!after['note-keep'] && Object.keys(after).length === 2, Object.keys(after).join(','));
+  check('locked note stays hidden after reload', !(await kept.p.isVisible('rd-note')));
+  await kept.ctx.close();
 }
 
 process.exit((await finish()) ? 1 : 0);
