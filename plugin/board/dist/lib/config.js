@@ -1,6 +1,6 @@
 import { store } from '../store.js';
 const DEFAULT_COMMAND = '/project-checkin';
-const KEYS = ['owner', 'boardUrl', 'schedule', 'checkinCommand', 'feedbackEmail', 'issuesUrl'];
+const KEYS = ['owner', 'boardUrl', 'schedule', 'checkinCommand', 'feedbackEmail', 'issuesUrl', 'pluginVersion'];
 /** Feedback goes to Rundown's maintainer unless a board's `meta/config` points elsewhere. */
 export const FEEDBACK_EMAIL = 'ethayer.design@gmail.com';
 export const ISSUES_URL = 'https://github.com/ericthayer/rundown-studio/issues/new';
@@ -19,6 +19,8 @@ export function toConfig(raw) {
         delete out.feedbackEmail;
     if (out.issuesUrl && !out.issuesUrl.startsWith('https://'))
         delete out.issuesUrl;
+    if (out.pluginVersion && !/^\d+\.\d+\.\d+$/.test(out.pluginVersion))
+        delete out.pluginVersion;
     return out;
 }
 export const checkinCommand = () => store.state.config.checkinCommand ?? DEFAULT_COMMAND;

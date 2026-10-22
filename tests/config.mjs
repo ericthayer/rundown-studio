@@ -54,4 +54,27 @@ const text = (p, sel) => p.evaluate((s) => document.querySelector(s)?.textConten
   await ctx.close();
 }
 
+// Update notice: a newer plugin version recorded by /rundown:checkin offers /rundown:update once.
+{
+  const { p, ctx, errors } = await page({ meta: {}, config: own });
+  const board = await p.evaluate(async () => (await import('./dist/version.js')).BOARD_VERSION);
+  const [maj, min, pat] = board.split('.').map(Number);
+  const notice = () => p.locator('.toast[data-key="update"] .toast-msg').count();
+  await p.evaluate((v) => window.__pushConfig({ pluginVersion: v }), board);
+  check('no notice when the plugin matches the board', (await notice()) === 0);
+  await p.evaluate((v) => window.__pushConfig({ pluginVersion: v }), `${maj}.${min}.${pat - 1 < 0 ? 0 : pat - 1}`);
+  check('no notice for an older plugin', (await notice()) === 0);
+  await p.evaluate(() => window.__pushConfig({ pluginVersion: '9.9.9 beta' }));
+  check('ignores a malformed version', (await notice()) === 0);
+  const next = `${maj}.${min + 1}.0`;
+  await p.evaluate((v) => window.__pushConfig({ pluginVersion: v }), next);
+  check('newer plugin shows the update notice', (await p.textContent('.toast[data-key="update"] .toast-msg')) === `Rundown ${next} is installed. This board is on ${board}.`);
+  check('notice offers to copy /rundown:update', (await p.textContent('[data-fk="toast:update"]')) === 'Copy /rundown:update');
+  await p.click('.toast[data-key="update"] .toast-x');
+  await p.evaluate((v) => window.__pushConfig({ pluginVersion: v, owner: 'Grace' }), next);
+  check('the notice shows once per version per load', (await notice()) === 0);
+  check('no console errors (update notice)', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+}
+
 process.exit((await finish()) ? 1 : 0);

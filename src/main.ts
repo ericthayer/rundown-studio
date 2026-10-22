@@ -23,11 +23,13 @@ import { initCheckin } from './lib/checkin.js';
 import { initViewSwipe } from './lib/view-swipe.js';
 import { initBoardToasts } from './lib/board-toasts.js';
 import { initOnboarding } from './lib/onboarding.js';
+import { initUpdateNotice } from './lib/update-notice.js';
 
 initCheckin(byId<HTMLButtonElement>('copy-cmd-2'));
 initViewSwipe(document.querySelector<HTMLElement>('.ptable') ?? document.body);
 
 initBoardToasts();
+initUpdateNotice();
 initOnboarding();
 void connectRuntime();
 
