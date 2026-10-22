@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.2.0...rundown-studio-v1.3.0) (2026-10-22)
+
+
+### Features
+
+* **layout:** flush project table, rail-style assistant panel, flipped dark gradient ([#11](https://github.com/ericthayer/rundown-studio/issues/11)) ([2ebb96f](https://github.com/ericthayer/rundown-studio/commit/2ebb96f4d0185670283ed50a1786bc95deef4297))
+
 ## [1.2.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.1.0...rundown-studio-v1.2.0) (2026-10-22)
 
 
