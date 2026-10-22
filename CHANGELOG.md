@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.3.3...rundown-studio-v1.4.0) (2026-10-22)
+
+
+### Features
+
+* **onboarding:** first-run tour with replay from settings ([#21](https://github.com/ericthayer/rundown-studio/issues/21)) ([493c0cb](https://github.com/ericthayer/rundown-studio/commit/493c0cba5f7a663cead81d6143ef0b996bd99c24))
+* **plugin:** tell plugin users when their board is behind ([#23](https://github.com/ericthayer/rundown-studio/issues/23)) ([6f851ca](https://github.com/ericthayer/rundown-studio/commit/6f851ca8150fb43eac9f423e1215dae47d088f85))
+* **states:** empty, no-match and failure states, board-update toasts, feedback links ([#20](https://github.com/ericthayer/rundown-studio/issues/20)) ([ad51f38](https://github.com/ericthayer/rundown-studio/commit/ad51f3814ec1fe4636d308f73dc3b2952f5a277f))
+
 ## [1.3.3](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.3.2...rundown-studio-v1.3.3) (2026-10-22)
 
 
