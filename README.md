@@ -20,6 +20,18 @@ Rundown ships as a Claude Code plugin. It publishes a private copy of the board 
 
 Open the board once after setup and allow the database and Claude permissions.
 
+![Rundown walkthrough: stat filters, a project's next-step card, the Decisions rollup, filter chips, Ask Rundown, the collapsible assistant rail, and color mode](docs/walkthrough.gif)
+
+### What happens after install
+
+1. **`/rundown:setup`** asks four things at once (your display name, the GitHub repos to scan, a schedule, your timezone), then publishes your private board and gives you its link. It creates the scheduled rundown for you, or hands you the prompt to paste into a scheduled task.
+2. **Open the board** and allow the database and Claude permissions. It starts empty.
+3. **`/rundown:checkin`** inside each project you want tracked. Claude summarizes where the project stands (left off, next step, blockers, open decisions) and writes the row once you confirm.
+4. **The scheduled rundown** keeps rows current between check-ins and leaves a short note at the top of the board.
+5. **`/rundown:update`** after a new release pulls the latest board code into your same link; your projects and notes stay.
+
+The walkthrough uses demo data. Re-record it with `npm run walkthrough` (needs `ffmpeg`).
+
 ## Commands
 
 | Command | What it does |
@@ -29,6 +41,7 @@ Open the board once after setup and allow the database and Claude permissions.
 | `npm test` | Build + Playwright suites (`tests/smoke.mjs`, `mobile.mjs`, `ask.mjs`, `config.mjs`), screenshots in `tests/out/` |
 | `npm run plugin` | Clean build, then copy the board into `plugin/board/` (CI does this on main) |
 | `npm run plugin:check` | Fail if `plugin/board/` differs from the build |
+| `npm run walkthrough` | Build, then record `docs/walkthrough.gif` against demo data |
 
 ## Layout
 

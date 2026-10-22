@@ -76,7 +76,7 @@ export const browser = await chromium.launch();
 
 export async function page(opts = {}) {
   const touch = opts.touch ? { hasTouch: true, isMobile: true } : {};
-  const ctx = await browser.newContext({ viewport: opts.viewport ?? { width: 1440, height: 860 }, colorScheme: opts.scheme ?? 'light', ...touch });
+  const ctx = await browser.newContext({ viewport: opts.viewport ?? { width: 1440, height: 860 }, colorScheme: opts.scheme ?? 'light', ...touch, ...(opts.video ? { recordVideo: opts.video } : {}) });
   const p = await ctx.newPage();
   const errors = [];
   p.on('pageerror', (e) => errors.push(e.message));
