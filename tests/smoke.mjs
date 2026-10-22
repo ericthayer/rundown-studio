@@ -179,6 +179,23 @@ const active = (p) => p.evaluate(() => document.activeElement?.dataset?.fk ?? do
   check('no console errors (phone)', errors.length === 0, errors.join(' | '));
   await ctx.close();
 }
+// 8. Focus mode: fullscreen toggle where allowed, hidden where not.
+{
+  const { p, ctx, errors } = await page();
+  const btn = 'rd-focus button';
+  check('focus button shown when fullscreen allowed', await p.isVisible(btn));
+  await p.click(btn); await p.waitForTimeout(200);
+  check('focus mode enters fullscreen', await p.evaluate(() => document.fullscreenElement === document.documentElement));
+  check('focus button pressed + relabelled', (await p.getAttribute(btn, 'aria-pressed')) === 'true' && (await p.getAttribute(btn, 'aria-label')) === 'Exit focus mode');
+  await p.screenshot({ path: join(OUT, 'focus-mode.png') });
+  await p.click(btn); await p.waitForTimeout(200);
+  check('focus button exits fullscreen', await p.evaluate(() => !document.fullscreenElement) && (await p.getAttribute(btn, 'aria-pressed')) === 'false');
+  check('no console errors (focus)', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+  const off = await page({ init: () => Object.defineProperty(Document.prototype, 'fullscreenEnabled', { get: () => false }) });
+  check('focus button hidden when fullscreen blocked', !(await off.p.isVisible(btn)));
+  await off.ctx.close();
+}
 
 await browser.close();
 server.close();

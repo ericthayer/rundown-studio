@@ -13,6 +13,7 @@ import './components/rd-decisions.js';
 import './components/rd-priorities.js';
 import './components/rd-composer.js';
 import './components/rd-assistant.js';
+import './components/rd-focus.js';
 import { connectRuntime } from './runtime.js';
 import { byId, copyCommand } from './lib/dom.js';
 

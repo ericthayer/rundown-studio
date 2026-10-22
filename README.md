@@ -24,8 +24,8 @@ src/
                         · signals (open decisions with age, waiting on)
   lib/                  dom helpers (h, preserveFocus, copyCommand) · prefs · dates · icons
   components/           rd-sidebar · rd-count · rd-stat-strip · rd-streak · rd-toolbar · rd-note
-                        rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant
-tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals
+                        rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant · rd-focus
+tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals, focus mode
 ```
 
 ## Rules this codebase keeps
