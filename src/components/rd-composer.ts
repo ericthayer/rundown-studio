@@ -1,8 +1,8 @@
 import { StoreElement, emit } from './base.js';
 import { store } from '../store.js';
 import { getSampler, revokeSampler } from '../runtime.js';
-import { h, setAttr, setText } from '../lib/dom.js';
-import { tap } from '../lib/haptics.js';
+import { h, icon, setAttr, setText } from '../lib/dom.js';
+import { UI } from '../lib/icons.js';
 import { type AskTurn, loadTurns, saveTurns, recap, MAX_TURNS } from '../lib/ask-history.js';
 import { type RdSaveMenu, savedAnswer } from './rd-save-menu.js';
 import './rd-save-menu.js';
@@ -33,7 +33,7 @@ export class RdComposer extends StoreElement {
     this.ref('clear').addEventListener('click', () => this.clear());
     this.#menu = document.createElement('rd-save-menu') as RdSaveMenu;
     this.append(this.#menu);
-    this.#log.replaceChildren(...this.#turns.map((t) => { const [el] = this.#turnEl(t.q, t.a); this.#addSave(el, t.q, t.a); return el; }));
+    this.#log.replaceChildren(...this.#turns.map((t) => { const [el] = this.#turnEl(t, t.a); this.#addSave(el, t.q, t.a); return el; }));
     this.#sync();
     this.watch(['notes'], () => this.#labelSaves());
     const form = this.ref<HTMLFormElement>('form');
@@ -66,9 +66,13 @@ export class RdComposer extends StoreElement {
     this.focusInput();
   }
 
-  #turnEl(q: string, a: string): [HTMLElement, HTMLElement] {
-    const out = h('div', {}, a);
-    return [h('article', { class: 'answer' }, h('div', { class: 'q' }, q), out), out];
+  /** One exchange as a disclosure: the question is the summary, so a long answer folds away. Folding is kept per tab. */
+  #turnEl(turn: AskTurn, text: string): [HTMLElement, HTMLElement] {
+    const out = h('div', { class: 'atext' }, text);
+    const el = h('details', { class: 'answer', open: !turn.folded },
+      h('summary', { class: 'q' }, h('span', {}, turn.q), icon(UI.chevron)), out);
+    el.addEventListener('toggle', () => { turn.folded = !el.open; saveTurns(this.#turns); });
+    return [el, out];
   }
 
   #sync(): void {
@@ -97,7 +101,6 @@ export class RdComposer extends StoreElement {
 
   async ask(question: string): Promise<void> {
     if (!question) return;
-    tap();
     this.#input.value = question;
     const sample = getSampler();
     if (!sample) {
@@ -111,7 +114,7 @@ export class RdComposer extends StoreElement {
     const turn: AskTurn = { q: question, a: '', at: new Date().toISOString() };
     const context = recap(this.#turns);
     this.#turns = [...this.#turns, turn].slice(-MAX_TURNS);
-    const [el, out] = this.#turnEl(question, 'Thinking…');
+    const [el, out] = this.#turnEl(turn, 'Thinking…');
     this.#log.append(el);
     this.#sync();
     requestAnimationFrame(() => { this.#scroll.scrollTop = this.#scroll.scrollHeight; });

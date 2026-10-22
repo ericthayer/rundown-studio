@@ -54,18 +54,27 @@ await p.uncheck('#asave-pop [data-fk="save:locker"]'); await p.waitForTimeout(50
 check('unticking both deletes the doc', !(await doc()) && (await p.locator('.asave').last().textContent()) === 'Save');
 await p.keyboard.press('Escape');
 
+// Collapsible answers: the question toggles its answer, and folding survives a reload in the tab.
+await p.locator('.alog .answer .q').first().click();
+check('clicking a question folds its answer', await p.evaluate(() => !document.querySelector('.alog .answer').open && document.querySelectorAll('.alog .answer[open]').length === 1));
+await p.reload(); await p.waitForSelector('.pitem');
+check('folded answers stay folded after a reload', await p.evaluate(() => !document.querySelector('.alog .answer').open && document.querySelector('.alog .answer:last-child').open));
+await p.locator('.alog .answer .q').first().focus(); await p.keyboard.press('Enter');
+check('keyboard Enter unfolds it', await p.evaluate(() => document.querySelector('.alog .answer').open));
+
 await p.click('.aclear');
 check('Clear empties the transcript and storage', (await p.locator('.alog .answer').count()) === 0 && await p.locator('.ahead').isHidden() && (await p.evaluate(() => sessionStorage.getItem('rundown.askLog'))) === null);
 check('focus returns to the ask box after Clear', await p.evaluate(() => document.activeElement?.tagName === 'TEXTAREA'));
 
-// Touch: a haptic tap on submit (Vibration API where it exists), focus stays in the box.
-const touch = await page({ init: () => { window.__buzz = []; navigator.vibrate = (ms) => { window.__buzz.push(ms); return true; }; }, viewport: { width: 390, height: 844 }, touch: true });
-await touch.p.click('#agent-toggle'); await touch.p.waitForTimeout(400);
-await touch.p.fill('rd-composer textarea', 'Token'); await touch.p.press('rd-composer textarea', 'Enter');
-check('submit gives a haptic tap on touch', (await touch.p.evaluate(() => window.__buzz)).length === 1);
+// Phone: the transcript never scrolls sideways.
+const phone = await page({ init: withSampler, viewport: { width: 390, height: 844 }, touch: true });
+await phone.p.click('#agent-toggle'); await phone.p.waitForTimeout(400);
+await phone.p.fill('rd-composer textarea', 'Which projects overlap or should be merged or dropped?'); await phone.p.press('rd-composer textarea', 'Enter'); await phone.p.waitForTimeout(100);
+check('no sideways scroll in the transcript on a phone', await phone.p.evaluate(() => { const s = document.querySelector('.ascroll'); return s.scrollWidth <= s.clientWidth; }));
+await phone.ctx.close();
 
 const fresh = await page({ init: withSampler });
 check('a new tab starts with no history', (await fresh.p.locator('.alog .answer').count()) === 0);
-check('no page errors', errors.length === 0 && fresh.errors.length === 0 && touch.errors.length === 0, [...errors, ...fresh.errors, ...touch.errors].join('; '));
+check('no page errors', errors.length === 0 && fresh.errors.length === 0, [...errors, ...fresh.errors].join('; '));
 
 process.exit(await finish());

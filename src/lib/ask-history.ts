@@ -1,5 +1,5 @@
 /** One Ask Rundown exchange. `a` is empty while the answer streams or after a failed ask. */
-export interface AskTurn { q: string; a: string; at: string }
+export interface AskTurn { q: string; a: string; at: string; /** Collapsed in the transcript. */ folded?: boolean }
 
 /** Session-only: the transcript lives in this tab and is gone when the tab closes. */
 const KEY = 'rundown.askLog';
