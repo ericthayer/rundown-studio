@@ -54,4 +54,5 @@ export const store = new Store({
   filters: { ...defaultFilters(), ...(prefs.get('filters') ?? {}) },
   canAsk: false,
   day: dayKey(),
+  notes: null,
 });

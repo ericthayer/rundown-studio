@@ -44,12 +44,25 @@ export const ROWS = [
 export const META = { critique: 'Three overlapping config-distribution efforts; pick tharness.', sessionDays: [day(0), day(-1), day(-2), day(-3), day(-4)] };
 
 const stub = ({ rows, meta }) => {
-  const subs = { rows: [], meta: [] };
+  const subs = { rows: [], meta: [], notes: [] };
   const snap = (r) => ({ docs: r.map((x) => ({ id: x.id, data: () => x })) });
   window.__push = (r) => subs.rows.forEach((f) => f(snap(r)));
   window.__pushMeta = (m) => subs.meta.forEach((f) => f({ id: 'run', data: () => m }));
+  // `notes` persists in localStorage under its own key so it survives reloads, like the board db.
+  const load = () => JSON.parse(localStorage.getItem('__notes') ?? '{}');
+  const notesSnap = () => ({ docs: Object.entries(load()).map(([id, x]) => ({ id, data: () => x })) });
+  const save = (all) => { localStorage.setItem('__notes', JSON.stringify(all)); subs.notes.forEach((f) => f(notesSnap())); };
+  window.__notes = load;
+  const notes = {
+    where: () => notes,
+    onSnapshot: (f) => { subs.notes.push(f); f(notesSnap()); return () => {}; },
+    doc: (id) => ({
+      set: async (d) => save({ ...load(), [id]: d }),
+      delete: async () => { const all = load(); delete all[id]; save(all); },
+    }),
+  };
   window.claude = { use: async (n) => (n === 'db' ? {
-    collection: () => ({ onSnapshot: (f) => { subs.rows.push(f); f(snap(rows)); return () => {}; } }),
+    collection: (name) => (name === 'notes' ? notes : { onSnapshot: (f) => { subs.rows.push(f); f(snap(rows)); return () => {}; } }),
     doc: () => ({ onSnapshot: (f) => { subs.meta.push(f); f({ id: 'run', data: () => meta }); return () => {}; } }),
   } : null) };
 };

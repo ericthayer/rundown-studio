@@ -44,7 +44,7 @@ Signals: `since` (ISO date) drives the age shown in the **Decisions** rollup (ol
 
 `meta/run` — `nextRun` (string), `critique` (rundown note), `streak` (number) **or** `sessionDays` (ISO date array). Without either, the streak falls back to consecutive check-in days.
 
-Rundown note dismissal is per viewer (`rundown.prefs` in localStorage), keyed to the exact `critique` text: a run that writes new text shows the banner again. Dismissed notes stay in the **note locker** (Settings → Dismissed notes) for 14 days; the one still on the board can be shown again.
+`notes/{id}` — the note locker. A dismissed rundown note is `{ kind: 'note', text, savedAt, projectId: null, inLocker: true }` with a deterministic id per text (`noteId()`), so it syncs across devices. The banner hides any `critique` that is in the locker; a run that writes new text shows it again. Entries older than 14 days drop out of the locker and are deleted on the next dismissal. **Show again** (Settings → Dismissed notes) deletes the entry. If a write is refused, the dismissal falls back to this browser (`rundown.prefs.noteDismissed`), and an older local dismissal is copied to the board once.
 
 ## Publishing
 

@@ -1,24 +1,21 @@
 import { StoreElement } from './base.js';
-import { prefs } from '../lib/prefs.js';
-import { lockNote } from '../lib/note-locker.js';
+import { isDismissed, lockNote } from '../lib/note-locker.js';
 import { setText } from '../lib/dom.js';
 
-/** Rundown note: info alert under the toolbar. Dismissing hides that exact text and keeps it in the note locker (settings). */
+/** Rundown note: info alert under the toolbar. Dismissing keeps that exact text in the note locker on the board (settings). */
 export class RdNote extends StoreElement {
   protected setup(): void {
     const text = this.ref('text');
     let current = '';
-    this.watch(['meta'], (_c, s) => {
+    this.watch(['meta', 'notes'], (_c, s) => {
       current = typeof s.meta.critique === 'string' ? s.meta.critique : '';
-      this.hidden = !current || prefs.get('noteDismissed') === current;
+      // Wait for the locker so a dismissed note doesn't flash on load.
+      this.hidden = !current || s.notes === null || isDismissed(current, s.notes);
       setText(text, current);
     });
     this.ref('dismiss').addEventListener('click', () => {
-      lockNote(current);
       this.hidden = true;
-    });
-    this.listen(document, 'rd:note-restore', (e) => {
-      if ((e as CustomEvent<{ text: string }>).detail.text === current) this.hidden = false;
+      void lockNote(current);
     });
   }
 }

@@ -178,24 +178,32 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
   await none.ctx.close();
 }
 
-// 11. Note locker: dismissed notes stay in settings for 14 days and the current one can be shown again.
+// 11. Note locker: dismissed notes sync to the board db for 14 days; the current one can be shown again.
 {
-  const old = { text: 'Old: archive Token Map.', at: new Date(Date.now() - 3 * 864e5).toISOString() };
-  const expired = { text: 'Expired note.', at: new Date(Date.now() - 15 * 864e5).toISOString() };
-  const seed = (notes) => { if (!localStorage.getItem('rundown.prefs')) localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, noteLocker: notes })); };
-  const { p, ctx, errors } = await page({ init: seed, initArg: [old, expired] });
+  const iso = (days) => new Date(Date.now() - days * 864e5).toISOString();
+  const seed = (docs) => { if (!localStorage.getItem('__notes')) localStorage.setItem('__notes', JSON.stringify(docs)); };
+  const docs = {
+    'note-old': { kind: 'note', text: 'Old: archive Token Map.', savedAt: iso(3), projectId: null, inLocker: true },
+    'note-exp': { kind: 'note', text: 'Expired note.', savedAt: iso(15), projectId: null, inLocker: true },
+    'ans-1': { kind: 'answer', text: 'A saved answer.', savedAt: iso(1), projectId: null, inLocker: true },
+  };
+  const { p, ctx, errors } = await page({ init: seed, initArg: docs });
   check('note shows before dismissal', await p.isVisible('rd-note'));
-  await p.click('.note-x');
+  await p.click('.note-x'); await p.waitForTimeout(50);
   check('dismiss hides the note', !(await p.isVisible('rd-note')));
+  const saved = Object.values(await p.evaluate(() => window.__notes()));
+  check('dismissal is written to the board db', saved.some((d) => d.kind === 'note' && d.text === META.critique && d.inLocker === true && d.projectId === null));
+  check('expired locker notes are pruned on the next dismissal', !saved.some((d) => d.text === 'Expired note.'));
+  check('nothing kept in this browser when the db write lands', await p.evaluate(() => !JSON.parse(localStorage.getItem('rundown.prefs') ?? '{}').noteDismissed));
   await p.reload(); await p.waitForSelector('.pitem');
   check('dismissed note stays hidden after reload', !(await p.isVisible('rd-note')));
   await p.click('.mset'); await p.waitForTimeout(100);
   const items = await p.locator('.nlock-list li .nlock-text').allTextContents();
-  check('locker lists dismissed notes, newest first, expired dropped', items.length === 2 && items[0] === META.critique && items[1] === old.text, JSON.stringify(items));
+  check('locker lists dismissed notes only, newest first', items.length === 2 && items[0] === META.critique && items[1] === 'Old: archive Token Map.', JSON.stringify(items));
   check('only the current note can be shown again', (await p.locator('.nlock-btn').count()) === 1);
   check('settings popover stays in viewport with locker', await p.evaluate(() => { const r = document.getElementById('me-settings').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight && r.right <= innerWidth; }));
   await p.screenshot({ path: join(OUT, 'note-locker.png') });
-  await p.click('.nlock-btn');
+  await p.click('.nlock-btn'); await p.waitForTimeout(50);
   check('show again restores the banner', await p.isVisible('rd-note') && !(await p.isVisible('#me-settings')));
   await p.reload(); await p.waitForSelector('.pitem');
   check('restored note survives reload', await p.isVisible('rd-note'));
@@ -207,8 +215,11 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
   check('no console errors (locker)', errors.length === 0, errors.join(' | '));
   await ctx.close();
   const legacy = await page({ init: () => localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, noteDismissed: 'Three overlapping config-distribution efforts; pick tharness.' })) });
+  await legacy.p.waitForTimeout(100);
+  check('legacy dismissal stays hidden', !(await legacy.p.isVisible('rd-note')));
+  check('legacy dismissal is copied to the board db', Object.values(await legacy.p.evaluate(() => window.__notes())).some((d) => d.text === META.critique));
   await legacy.p.click('.mset'); await legacy.p.waitForTimeout(100);
-  check('note dismissed before the locker existed is kept', (await legacy.p.locator('.nlock-list li').count()) === 1 && (await legacy.p.locator('.nlock-btn').count()) === 1);
+  check('legacy dismissal shows in the locker', (await legacy.p.locator('.nlock-btn').count()) === 1);
   await legacy.ctx.close();
 }
 

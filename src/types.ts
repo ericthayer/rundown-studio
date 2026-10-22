@@ -31,6 +31,9 @@ export interface DecisionItem { text: string; since?: string }
 /** One thing the project waits on. `since` = ISO date the wait started. */
 export interface WaitItem { who: string; what?: string; since?: string }
 
+/** A rundown note the viewer dismissed, kept in the note locker (`notes/{id}`, kind 'note'). */
+export interface LockedNote { id: string; text: string; savedAt: string }
+
 /** `meta/run` document written by the scheduled rundown and /project-checkin. */
 export interface RunMeta {
   nextRun?: string;
@@ -76,6 +79,8 @@ export interface AppState {
   canAsk: boolean;
   /** Local calendar day (YYYY-MM-DD); bumps at midnight so relative dates refresh. */
   day: string;
+  /** Note locker entries from the board db, newest first; null until the first snapshot. */
+  notes: LockedNote[] | null;
 }
 
 export type StateKey = keyof AppState;
@@ -83,9 +88,18 @@ export type StateKey = keyof AppState;
 /** Minimal typings for the artifact runtime capabilities this page uses. */
 export interface DocSnapshot { id: string; data(): Record<string, unknown> | undefined }
 export interface QuerySnapshot { docs: DocSnapshot[] }
+export interface DocRef {
+  onSnapshot(next: (d: DocSnapshot) => void, err?: (e: unknown) => void): () => void;
+  set(data: Record<string, unknown>): Promise<void>;
+  delete(): Promise<void>;
+}
+export interface DbQuery {
+  where(field: string, op: string, value: unknown): DbQuery;
+  onSnapshot(next: (s: QuerySnapshot) => void, err?: (e: unknown) => void): () => void;
+}
 export interface ArtifactDb {
-  collection(name: string): { onSnapshot(next: (s: QuerySnapshot) => void, err?: (e: unknown) => void): () => void };
-  doc(path: string): { onSnapshot(next: (d: DocSnapshot) => void, err?: (e: unknown) => void): () => void };
+  collection(name: string): DbQuery & { doc(id: string): DocRef };
+  doc(path: string): DocRef;
 }
 export interface SampleResult { text: string }
 export type Sampler = (
