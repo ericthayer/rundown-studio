@@ -72,7 +72,9 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
   check('rollup lists open decisions, oldest first', rows.length === 3 && rows[0].includes('One plugin or per framework?') && rows[0].includes('20d open') && rows[2].includes('Ship under MIT?'), rows.join(' | '));
   check('old decision is emphasized', await p.evaluate(() => document.querySelector('rd-decisions time').hasAttribute('data-old')));
   await p.screenshot({ path: join(OUT, 'wide-decisions.png') });
-  await p.locator('rd-decisions .pitem').first().focus(); await p.keyboard.press('Enter'); await p.waitForTimeout(50);
+  await p.locator('rd-decisions .pitem').first().focus(); await p.keyboard.press('Enter');
+  // Focus moves after the view switch renders; wait for it instead of a fixed 50ms (flaky under load).
+  await p.waitForFunction(() => document.activeElement?.dataset?.fk === 'row:a', null, { timeout: 2000 }).catch(() => {});
   check('rollup row opens the project', (await active(p)) === 'row:a' && (await p.textContent('.nscard')).includes('· 20d'), await active(p));
   await p.focus('[data-fk="row:e"]'); await p.keyboard.press('Enter');
   check('card shows who + since', (await p.textContent('[data-key="e"] .nscard')).includes('Waiting onClient: final copy · 5d'));
