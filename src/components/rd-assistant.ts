@@ -5,9 +5,11 @@ import { store } from '../store.js';
 import { prefs } from '../lib/prefs.js';
 import { cardArt } from '../lib/icons.js';
 import { byId, h, preserveFocus, setAttr } from '../lib/dom.js';
+import { dragToDismiss } from '../lib/gestures.js';
 import { topPriorities } from '../domain/projects.js';
 
 const NARROW = '(max-width: 1060px)';
+const PHONE = matchMedia('(max-width: 720px)');
 const W_MIN = 300;
 
 /**
@@ -36,6 +38,13 @@ export class RdAssistant extends StoreElement {
     this.ref('close-x').addEventListener('click', () => this.set(false));
     this.ref('collapse').addEventListener('click', () => this.set(false));
     this.ref('scrim').addEventListener('click', () => this.set(false));
+    // Touch: drag the sheet header down (phone) or right (side drawer) to close; the close button and Esc do the same.
+    dragToDismiss({
+      handle: this.#panel.querySelector<HTMLElement>('.agent-head') ?? this.#panel,
+      target: this.#panel,
+      axis: () => (this.#mq.matches && this.#panel.classList.contains('open') ? (PHONE.matches ? 'down' : 'right') : null),
+      onDismiss: () => this.set(false),
+    });
     this.listen(document, 'keydown', (e) => {
       const k = e as KeyboardEvent;
       if (k.key === 'Escape' && this.#mq.matches && this.#panel.classList.contains('open') && !document.querySelector(':popover-open')) this.set(false);

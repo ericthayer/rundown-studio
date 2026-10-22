@@ -8,7 +8,7 @@ import { needsYou } from '../domain/projects.js';
 import { decisionCount, waits } from '../domain/signals.js';
 
 type NavKey = Extract<RailFilter, keyof typeof ICON>;
-const VIEWS: readonly [NavKey, string][] = [['all', 'Home'], ['needs', 'Needs you'], ['decisions', 'Decisions'], ['waiting', 'Waiting on'], ['blocked', 'Blocked'], ['stale', 'Stale'], ['parked', 'Parked']];
+export const VIEWS: readonly [NavKey, string][] = [['all', 'Home'], ['needs', 'Needs you'], ['decisions', 'Decisions'], ['waiting', 'Waiting on'], ['blocked', 'Blocked'], ['stale', 'Stale'], ['parked', 'Parked']];
 const AREAS: readonly [NavKey, string][] = [['work', 'Work'], ['client', 'Client'], ['personal', 'Personal']];
 
 const BADGE: Partial<Record<NavKey, (ps: readonly Project[]) => number>> = {
@@ -44,6 +44,8 @@ export class RdSidebar extends StoreElement {
         setText(badge, String(n));
         setAttr(btn, 'data-tip', n ? `${label} (${n})` : label);
       }
+      const current = this.#items.get(s.filter as NavKey);
+      if (current) requestAnimationFrame(() => revealTab(current.btn));
     });
     this.watch(['meta'], (_c, s) => setText(this.ref('run'), s.meta.nextRun ? `Next run ${s.meta.nextRun}` : 'Mon & Fri, 3:16am'));
 
@@ -82,6 +84,15 @@ export class RdSidebar extends StoreElement {
       apply(on);
     });
   }
+}
+
+/** Phones: the view tabs scroll sideways; keep the active one centered in view (no page scroll). */
+function revealTab(btn: HTMLElement): void {
+  const nav = btn.parentElement;
+  if (!nav || nav.scrollWidth <= nav.clientWidth) return;
+  const n = nav.getBoundingClientRect(), b = btn.getBoundingClientRect();
+  const behavior: ScrollBehavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  nav.scrollTo({ left: nav.scrollLeft + b.left - n.left - (n.width - b.width) / 2, behavior });
 }
 
 customElements.define('rd-sidebar', RdSidebar);

@@ -4,6 +4,7 @@ import { store } from '../store.js';
 import { prefs } from '../lib/prefs.js';
 import { UI } from '../lib/icons.js';
 import { h, icon, placeUnder, setAttr, setText } from '../lib/dom.js';
+import { dragToDismiss } from '../lib/gestures.js';
 import { GROUPS, SORT_OPTIONS, activeCount, chipValue, defaultFilters, selected, testOption, visibleProjects, withOption, type FilterGroup } from '../domain/filters.js';
 
 interface Option { group: FilterGroup; value: string; inputs: HTMLInputElement[]; counts: HTMLElement[] }
@@ -87,6 +88,7 @@ export class RdToolbar extends StoreElement {
     this.ref('sheet-done').addEventListener('click', () => sheet.close());
     this.ref('sheet-clear').addEventListener('click', () => this.#clear());
     sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); });
+    dragToDismiss({ handle: sheet.querySelector<HTMLElement>('.fsh') ?? sheet, target: sheet, axis: () => (sheet.open ? 'down' : null), onDismiss: () => sheet.close() });
   }
 
   #set(f: ToolbarFilters): void {

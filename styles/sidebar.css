@@ -9,25 +9,25 @@
 .navb { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; border-radius: 10px; padding: 8px 10px; color: var(--muted); font-size: 1rem; text-align: left; }
 .navb svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; flex: none; }
 .navb[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
-.navb .badge { margin-left: auto; min-width: 18px; height: 18px; border-radius: 9px; background: var(--btn); color: var(--btn-ink); font-size: 0.8462rem; display: grid; place-items: center; padding: 0 5px; }
-.sec { margin: 12px -12px 4px; width: auto; display: flex; justify-content: space-between; align-items: center; background: none; border: 0; border-top: 1px solid var(--line); padding: 16px 22px 6px; font-weight: 600; font-size: 0.8462rem; color: var(--muted); }
+.navb .badge { margin-left: auto; min-width: 18px; height: 18px; border-radius: 9px; background: var(--btn); color: var(--btn-ink); font-size: max(var(--fs-floor), 0.8462rem); display: grid; place-items: center; padding: 0 5px; }
+.sec { margin: 12px -12px 4px; width: auto; display: flex; justify-content: space-between; align-items: center; background: none; border: 0; border-top: 1px solid var(--line); padding: 16px 22px 6px; font-weight: 600; font-size: max(var(--fs-floor), 0.8462rem); color: var(--muted); }
 .sec:hover { color: var(--ink); }
 .sec svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; transition: transform .15s; }
 .sec[aria-expanded="false"] svg { transform: rotate(180deg); }
 .hide-areas .area-nav { display: none; }
 .me { margin: auto -12px -12px; padding: 14px 16px 16px; border-top: 1px solid var(--line); color: var(--ink); display: flex; flex-direction: column; gap: 12px; }
 .me-row { display: flex; gap: 10px; align-items: center; }
-.av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8462rem; font-weight: 600; background: linear-gradient(135deg, var(--peach), var(--pink)); color: var(--badge-ink); flex: none; position: relative; }
+.av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: max(var(--fs-floor), 0.8462rem); font-weight: 600; background: linear-gradient(135deg, var(--peach), var(--pink)); color: var(--badge-ink); flex: none; position: relative; }
 .me .av::after { content: ""; position: absolute; right: -1px; bottom: -1px; width: 8px; height: 8px; border-radius: 50%; background: var(--dot-ok); border: 2px solid var(--rail); }
-.me b { display: block; font-size: 0.9231rem; font-weight: 600; }
-.me small { font-size: 0.8462rem; color: var(--muted); }
+.me b { display: block; font-size: max(var(--fs-floor), 0.9231rem); font-weight: 600; }
+.me small { font-size: max(var(--fs-floor), 0.8462rem); color: var(--muted); }
 .me-row > span:not(.av) { flex: 1; min-width: 0; }
 /* Settings: same quiet icon button as the sidebar toggle; popover opens upward. */
 .me .mset { width: 26px; height: 26px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--muted); display: grid; place-items: center; flex: none; }
 .me .mset:hover, .me .mset[aria-expanded="true"] { background: var(--surface); color: var(--ink); }
 .me .mset svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .mpop .fopt svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; color: var(--muted); }
-.me button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 32px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 0 10px; font-size: 0.8846rem; font-weight: 500; color: var(--ink); }
+.me button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 32px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 0 10px; font-size: max(var(--fs-floor), 0.8846rem); font-weight: 500; color: var(--ink); }
 .me button:hover { border-color: var(--muted); }
 .me button .spark { display: grid; place-items: center; }
 .me button .spark svg { width: 13px; height: 13px; fill: var(--peach); }
@@ -40,7 +40,7 @@
   .slim .navs { width: 100%; }
   .slim .navb { justify-content: center; padding: 10px 0; }
   .slim .navb svg { width: 17px; height: 17px; }
-  .slim .navb .badge { position: absolute; top: 3px; right: 6px; min-width: 15px; height: 15px; font-size: 0.6154rem; padding: 0 3px; margin: 0; }
+  .slim .navb .badge { position: absolute; top: 3px; right: 6px; min-width: 15px; height: 15px; font-size: max(var(--fs-floor), 0.6154rem); padding: 0 3px; margin: 0; }
   .slim .sec { display: none; }
   .slim .area-nav { display: block; width: auto; align-self: stretch; margin: 12px -10px 0; padding: 14px 10px 0; border-top: 1px solid var(--line); }
   .slim .me { align-self: stretch; margin-inline: -10px; padding: 12px 0 14px; align-items: center; gap: 10px; }
