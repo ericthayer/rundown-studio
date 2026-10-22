@@ -47,6 +47,9 @@ export type UpdatedWindow = 'any' | 'today' | 'week' | 'month' | 'old';
 export type DueWindow = 'any' | 'overdue' | 'week' | 'has' | 'none';
 export type Flag = 'blockers' | 'decisions' | 'waiting' | 'nonext';
 
+/** Per-viewer color mode. */
+export type ThemeMode = 'system' | 'light' | 'dark';
+
 export interface ToolbarFilters {
   status: ProjectState[];
   updated: UpdatedWindow;

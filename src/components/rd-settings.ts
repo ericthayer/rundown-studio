@@ -1,0 +1,34 @@
+import type { ThemeMode } from '../types.js';
+import { StoreElement } from './base.js';
+import { prefs } from '../lib/prefs.js';
+import { applyTheme } from '../lib/theme.js';
+import { THEME } from '../lib/icons.js';
+import { h, icon, placeAbove } from '../lib/dom.js';
+
+const MODES: readonly [ThemeMode, string][] = [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']];
+
+/** Account settings popover next to the viewer's name. Holds per-viewer preferences (color mode). */
+export class RdSettings extends StoreElement {
+  protected setup(): void {
+    const btn = this.ref<HTMLButtonElement>('btn');
+    const pop = this.ref('pop');
+    const current = prefs.get('theme');
+    pop.replaceChildren(h('fieldset', { class: 'fset' }, h('legend', {}, 'Color mode'),
+      MODES.map(([value, label]) => h('label', { class: 'fopt' },
+        h('input', { type: 'radio', name: 'theme', value, checked: value === current, 'data-fk': `theme:${value}`, onchange: () => this.#set(value) }),
+        icon(THEME[value]), label))));
+    pop.addEventListener('toggle', (e) => {
+      const open = (e as ToggleEvent).newState === 'open';
+      btn.setAttribute('aria-expanded', String(open));
+      if (open) placeAbove(btn, pop);
+    });
+    this.listen(window, 'resize', () => { if (pop.matches(':popover-open')) pop.hidePopover(); });
+  }
+
+  #set(mode: ThemeMode): void {
+    prefs.set('theme', mode);
+    applyTheme(mode);
+  }
+}
+
+customElements.define('rd-settings', RdSettings);

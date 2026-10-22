@@ -29,7 +29,7 @@
   --area-other: #e6e8ea;
   --badge-ink: #111214;
   --shadow: 0 30px 80px -30px rgba(40, 30, 25, 0.35);
-  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font: "Host Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {

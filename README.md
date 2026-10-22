@@ -22,10 +22,10 @@ src/
   types.ts              domain + state types, runtime capability typings
   domain/               projects (needs-you, streak, labels) · filters (groups, sort, visible list)
                         · signals (open decisions with age, waiting on)
-  lib/                  dom helpers (h, preserveFocus, copyCommand) · prefs · dates · icons
+  lib/                  dom helpers (h, preserveFocus, copyCommand) · prefs · theme · dates · icons
   components/           rd-sidebar · rd-count · rd-stat-strip · rd-streak · rd-toolbar · rd-note
-                        rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant · rd-focus
-tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals, focus mode
+                        rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant · rd-focus · rd-settings
+tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals, focus mode, color mode
 ```
 
 ## Rules this codebase keeps
