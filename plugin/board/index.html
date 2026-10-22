@@ -94,7 +94,10 @@
         <div class="handle" data-ref="handle" role="separator" tabindex="0" aria-orientation="horizontal" aria-controls="dbody" aria-label="Resize top priorities. Drag up to collapse." aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"></div>
       </rd-priorities>
       <rd-composer>
-        <div class="ascroll"><div class="answer" data-ref="answer" aria-live="polite" hidden></div></div>
+        <div class="ascroll" data-ref="scroll">
+          <div class="ahead" data-ref="head" hidden><span>Kept until you close this tab</span><button class="aclear" type="button" data-ref="clear">Clear</button></div>
+          <div class="alog" data-ref="log" role="log" aria-label="Ask Rundown answers" aria-live="polite"></div>
+        </div>
         <form class="composer" data-ref="form">
           <label><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c.6 4.8 2.4 7.4 10 10-7.6 2.6-9.4 5.2-10 10-.6-4.8-2.4-7.4-10-10 7.6-2.6 9.4-5.2 10-10z"/></svg><span class="sr">Ask about your projects</span><textarea data-ref="input" rows="2" placeholder="Ask about your projects…" autocomplete="off" aria-describedby="ask-hint"></textarea><span class="sr" id="ask-hint">Enter to send, Shift+Enter for a new line.</span></label>
           <div class="crow">
