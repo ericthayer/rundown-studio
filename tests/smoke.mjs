@@ -43,7 +43,7 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
   await p.waitForTimeout(350);
   check('collapse to icon rail', await p.evaluate(() => document.getElementById('shell').classList.contains('agent-rail')));
   check('no badge for a note seen while open', await p.evaluate(() => !document.querySelector('[data-ref="rail-chat"]').hasAttribute('data-unread')));
-  await p.evaluate((m) => window.__pushMeta({ ...m, critique: 'New: merge agents-config into tharness.' }), META);
+  await p.evaluate((m) => window.__pushMeta({ ...m, critique: 'New: merge the two config efforts.' }), META);
   check('unread badge for a new note while collapsed', await p.evaluate(() => document.querySelector('[data-ref="rail-chat"]').hasAttribute('data-unread')));
   await p.focus('[data-fk="rail:b"]'); await p.keyboard.press('Enter');
   check('focus kept after rail priority', (await active(p)) === 'rail:b', await active(p));

@@ -56,6 +56,18 @@ export interface RunMeta {
   sessionDays?: string[];
 }
 
+/** `meta/config` document written by /rundown:setup. Every field is optional; the board falls back to defaults. */
+export interface BoardConfig {
+  /** Display name in the sidebar footer. */
+  owner?: string;
+  /** The board artifact's own claude.ai URL, handed to the chat with a check-in request. */
+  boardUrl?: string;
+  /** Human schedule text shown before the first rundown sets `meta/run.nextRun`. */
+  schedule?: string;
+  /** Slash command the check-in buttons run or copy. */
+  checkinCommand?: string;
+}
+
 export type RailFilter = 'all' | 'needs' | 'decisions' | 'waiting' | 'blocked' | 'stale' | 'parked' | Area;
 export type SortKey = 'needs' | 'priority' | 'recent' | 'due' | 'name';
 export type UpdatedWindow = 'any' | 'today' | 'week' | 'month' | 'old';
@@ -79,6 +91,7 @@ export type LoadStatus = 'loading' | 'ready' | 'signed-out' | 'error';
 export interface AppState {
   projects: Project[];
   meta: RunMeta;
+  config: BoardConfig;
   status: LoadStatus;
   /** Sidebar / stat-strip filter. */
   filter: RailFilter;

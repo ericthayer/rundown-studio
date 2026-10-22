@@ -41,13 +41,14 @@ export const ROWS = [
   { id: 'd', name: 'Brochure site', priority: 4, state: 'parked', area: 'client', kind: 'chat', due: day(-12), openDecisions: ['Retire the site?'] },
   { id: 'e', name: 'WordPress handoff', priority: 5, state: 'blocked', area: 'client', kind: 'project', lastActivity: day(-5), waitingOn: [{ who: 'Client', what: 'final copy', since: day(-5) }] },
 ];
-export const META = { critique: 'Three overlapping config-distribution efforts; pick tharness.', sessionDays: [day(0), day(-1), day(-2), day(-3), day(-4)] };
+export const META = { critique: 'Three overlapping config-distribution efforts; pick one.', sessionDays: [day(0), day(-1), day(-2), day(-3), day(-4)] };
 
-const stub = ({ rows, meta }) => {
-  const subs = { rows: [], meta: [], notes: [] };
+const stub = ({ rows, meta, config }) => {
+  const subs = { rows: [], meta: [], notes: [], config: [] };
   const snap = (r) => ({ docs: r.map((x) => ({ id: x.id, data: () => x })) });
   window.__push = (r) => subs.rows.forEach((f) => f(snap(r)));
   window.__pushMeta = (m) => subs.meta.forEach((f) => f({ id: 'run', data: () => m }));
+  window.__pushConfig = (c) => subs.config.forEach((f) => f({ id: 'config', data: () => c }));
   // `notes` persists in localStorage under its own key so it survives reloads, like the board db.
   const load = () => JSON.parse(localStorage.getItem('__notes') ?? '{}');
   const notesSnap = () => ({ docs: Object.entries(load()).map(([id, x]) => ({ id, data: () => x })) });
@@ -63,7 +64,9 @@ const stub = ({ rows, meta }) => {
   };
   window.claude = { use: async (n) => (n === 'db' ? {
     collection: (name) => (name === 'notes' ? notes : { onSnapshot: (f) => { subs.rows.push(f); f(snap(rows)); return () => {}; } }),
-    doc: () => ({ onSnapshot: (f) => { subs.meta.push(f); f({ id: 'run', data: () => meta }); return () => {}; } }),
+    doc: (path) => path === 'meta/config'
+      ? { onSnapshot: (f) => { subs.config.push(f); f({ id: 'config', data: () => config }); return () => {}; } }
+      : { onSnapshot: (f) => { subs.meta.push(f); f({ id: 'run', data: () => meta }); return () => {}; } },
   } : null) };
 };
 
@@ -78,10 +81,10 @@ export async function page(opts = {}) {
   const errors = [];
   p.on('pageerror', (e) => errors.push(e.message));
   p.on('console', (m) => { if (m.type() === 'error' && !/fonts\.g|ERR_TUNNEL|net::/.test(m.text())) errors.push(m.text()); });
-  await p.addInitScript(stub, { rows: ROWS, meta: META });
+  await p.addInitScript(stub, { rows: opts.rows ?? ROWS, meta: opts.meta ?? META, config: opts.config });
   if (opts.init) await p.addInitScript(opts.init, opts.initArg);
   await p.goto(URL_);
-  await p.waitForSelector('.pitem');
+  await p.waitForSelector(opts.rows?.length === 0 ? 'rd-stat-strip' : '.pitem');
   return { p, ctx, errors };
 }
 export const active = (p) => p.evaluate(() => document.activeElement?.dataset?.fk ?? document.activeElement?.tagName);
