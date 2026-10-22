@@ -1,4 +1,4 @@
-import type { Project } from '../types.js';
+import type { LockedNote, Project } from '../types.js';
 import { StoreElement } from './base.js';
 import { store } from '../store.js';
 import { ICON, KIND, UI } from '../lib/icons.js';
@@ -6,6 +6,7 @@ import { h, icon, preserveFocus, setAttr, setText, type Kid } from '../lib/dom.j
 import { visibleProjects, activeCount, defaultFilters } from '../domain/filters.js';
 import { AREA_LABEL, isArea, strings, whenLabel } from '../domain/projects.js';
 import { ageLabel, decisions, waitLabel, waitingOnOthers, waits } from '../domain/signals.js';
+import { saveAnswer } from '../lib/note-locker.js';
 
 interface Row {
   li: HTMLLIElement;
@@ -29,7 +30,7 @@ export class RdProjectList extends StoreElement {
   protected setup(): void {
     this.#ul = this.ref<HTMLUListElement>('list');
     this.#empty = h('li', { class: 'empty' });
-    this.watch(['projects', 'filter', 'query', 'filters', 'openId', 'status', 'day'], () => preserveFocus(() => this.#render()));
+    this.watch(['projects', 'filter', 'query', 'filters', 'openId', 'status', 'day', 'notes'], () => preserveFocus(() => this.#render()));
     this.listen(document, 'rd:reveal-project', (e) => this.reveal((e as CustomEvent<{ id: string }>).detail.id));
   }
 
@@ -110,9 +111,10 @@ export class RdProjectList extends StoreElement {
       row.detailSig = '';
       return;
     }
-    const sig = JSON.stringify([p.nextStep, p.leftOff, p.openDecisions, p.waitingOn, p.blockers, p.decided, p.area, whenLabel(p)]);
+    const saved = (store.state.notes ?? []).filter((n) => n.kind === 'answer' && n.projectId === p.id);
+    const sig = JSON.stringify([p.nextStep, p.leftOff, p.openDecisions, p.waitingOn, p.blockers, p.decided, p.area, whenLabel(p), saved]);
     if (row.detail && sig === row.detailSig) return;
-    const card = this.#card(p);
+    const card = this.#card(p, saved);
     const detail = h('div', { class: 'pitem', style: 'padding-top:0' }, h('span'), card);
     if (row.detail) row.detail.replaceWith(detail); else row.li.append(detail);
     row.detail = detail;
@@ -120,7 +122,7 @@ export class RdProjectList extends StoreElement {
   }
 
   /** Next-step card (Primer-style): icon tile, heading, description, detail groups, meta footer. */
-  #card(p: Project): HTMLElement {
+  #card(p: Project, saved: readonly LockedNote[]): HTMLElement {
     const aged = (label: string, age: number | null): Kid[] => [label, age === null ? null : h('span', { class: 'ns-age' }, ` · ${ageLabel(age)}`)];
     const groups = ([
       ['Open decisions', decisions(p).map((d) => aged(d.text, d.age))],
@@ -137,9 +139,20 @@ export class RdProjectList extends StoreElement {
       h('h3', { class: 'ns-h' }, p.nextStep || 'Run a check-in to set a next step.'),
       p.leftOff ? h('p', { class: 'ns-d' }, p.leftOff) : null,
       groups.length ? h('div', { class: 'ns-groups' }, groups) : null,
+      saved.length ? this.#saved(p, saved) : null,
       h('footer', { class: 'ns-meta' },
         h('span', {}, icon(UI.calendar), when === 'parked' ? 'Parked' : when.charAt(0).toUpperCase() + when.slice(1)),
         area ? h('span', {}, icon(ICON[area]), AREA_LABEL[area]) : null));
+  }
+
+  /** Ask Rundown answers saved to this card; removing one keeps it in the Locker if it's there too. */
+  #saved(p: Project, saved: readonly LockedNote[]): HTMLElement {
+    return h('section', { class: 'ns-saved', 'aria-labelledby': `nss-${p.id}` }, h('h4', { id: `nss-${p.id}` }, 'Saved answers'),
+      h('ul', {}, saved.map((n) => h('li', {},
+        n.question ? h('p', { class: 'ns-saved-q' }, n.question) : null,
+        h('p', { class: 'ns-saved-a' }, n.text),
+        h('button', { class: 'fclear', type: 'button', 'data-fk': `saved:rm:${n.id}`, 'aria-label': `Remove saved answer${n.question ? ` to ${n.question}` : ''}`,
+          onclick: () => void saveAnswer(n.question ?? '', n.text, { inLocker: n.inLocker, projectId: null }, n) }, 'Remove')))));
   }
 }
 

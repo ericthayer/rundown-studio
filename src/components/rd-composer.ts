@@ -1,8 +1,10 @@
 import { StoreElement, emit } from './base.js';
 import { store } from '../store.js';
 import { getSampler, revokeSampler } from '../runtime.js';
-import { h } from '../lib/dom.js';
+import { h, setAttr, setText } from '../lib/dom.js';
 import { type AskTurn, loadTurns, saveTurns, recap, MAX_TURNS } from '../lib/ask-history.js';
+import { type RdSaveMenu, savedAnswer } from './rd-save-menu.js';
+import './rd-save-menu.js';
 
 /** Fields sent to the model: status data only. */
 const FIELDS = ['id', 'name', 'area', 'state', 'priority', 'lastActivity', 'due', 'leftOff', 'decided', 'openDecisions', 'waitingOn', 'blockers', 'nextStep'] as const;
@@ -18,6 +20,9 @@ export class RdComposer extends StoreElement {
   #log!: HTMLElement;
   #head!: HTMLElement;
   #turns: AskTurn[] = loadTurns();
+  #menu!: RdSaveMenu;
+  /** Save button per answer element, relabelled as the board's saved answers change. */
+  #saves = new Map<HTMLElement, { btn: HTMLButtonElement; a: string }>();
 
   protected setup(): void {
     this.#input = this.ref<HTMLTextAreaElement>('input');
@@ -25,8 +30,11 @@ export class RdComposer extends StoreElement {
     this.#log = this.ref('log');
     this.#head = this.ref('head');
     this.ref('clear').addEventListener('click', () => this.clear());
-    this.#log.replaceChildren(...this.#turns.map((t) => this.#turnEl(t.q, t.a || "Couldn't get an answer.")[0]));
+    this.#menu = document.createElement('rd-save-menu') as RdSaveMenu;
+    this.append(this.#menu);
+    this.#log.replaceChildren(...this.#turns.map((t) => { const [el] = this.#turnEl(t.q, t.a); this.#addSave(el, t.q, t.a); return el; }));
     this.#sync();
+    this.watch(['notes'], () => this.#labelSaves());
     const form = this.ref<HTMLFormElement>('form');
     form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -65,6 +73,25 @@ export class RdComposer extends StoreElement {
   #sync(): void {
     this.#head.hidden = !this.#turns.length;
     while (this.#log.childElementCount > MAX_TURNS) this.#log.firstElementChild?.remove();
+    for (const el of this.#saves.keys()) if (!el.isConnected) this.#saves.delete(el);
+  }
+
+  /** Save button under a finished answer; opens the shared Save to menu. */
+  #addSave(el: HTMLElement, q: string, a: string): void {
+    const btn = h('button', { class: 'asave', type: 'button', 'aria-haspopup': 'dialog', 'aria-expanded': 'false', 'aria-controls': 'asave-pop', onclick: () => this.#menu.open(btn, q, a) });
+    el.append(h('div', { class: 'afoot' }, btn));
+    this.#saves.set(el, { btn, a });
+    this.#labelSaves();
+  }
+
+  #labelSaves(): void {
+    const notes = store.state.notes;
+    this.#saves.forEach(({ btn, a }, el) => {
+      const saved = Boolean(savedAnswer(a, notes));
+      setText(btn, saved ? 'Saved' : 'Save');
+      btn.classList.toggle('on', saved);
+      setAttr(btn, 'aria-label', `${saved ? 'Saved. Change where' : 'Save'} this answer: ${el.querySelector('.q')?.textContent ?? ''}`);
+    });
   }
 
   async ask(question: string): Promise<void> {
@@ -93,12 +120,13 @@ export class RdComposer extends StoreElement {
       const res = await sample(prompt, { signal: aborter.signal, modelTier: 'quick', onText: ({ text }) => { out.textContent = text; } });
       out.textContent = res.text;
       keep(res.text);
+      this.#addSave(el, question, res.text);
       emit(this, 'rd:answer', undefined);
     } catch (e) {
       const err = e as { name?: string; code?: string };
       if (err.name === 'AbortError') {
         // Superseded by a newer question: keep what streamed, or drop an answer that never started.
-        if (out.textContent && out.textContent !== 'Thinking…') keep(out.textContent);
+        if (out.textContent && out.textContent !== 'Thinking…') { keep(out.textContent); this.#addSave(el, question, out.textContent); }
         else { el.remove(); this.#turns = this.#turns.filter((t) => t !== turn); saveTurns(this.#turns); this.#sync(); }
         return;
       }
