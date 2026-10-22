@@ -1,5 +1,6 @@
 import type { ArtifactDb, DocSnapshot, LockedNote } from '../types.js';
 import { prefs } from './prefs.js';
+import { toast } from './toast.js';
 
 /** How long a dismissed note stays in the locker. */
 export const LOCKER_DAYS = 14;
@@ -79,6 +80,7 @@ export async function lockNote(text: string): Promise<void> {
     await write(text, new Date().toISOString());
   } catch {
     prefs.set('noteDismissed', text);
+    toast({ tone: 'info', key: 'note', text: "Note hidden on this device only. The board couldn't save it to your Locker." });
   }
   for (const id of expired.splice(0)) await db?.collection(NOTES).doc(id).delete().catch(() => undefined);
 }

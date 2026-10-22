@@ -1,0 +1,20 @@
+/* Toasts: bottom-center stack above the phone home indicator, in the top layer (manual popover). */
+.toasts { position: fixed; inset: auto 0 max(16px, calc(env(safe-area-inset-bottom, 0px) + 12px)); margin: 0 auto; width: min(440px, calc(100vw - 32px)); padding: 0; border: 0; background: none; color: inherit; overflow: visible; pointer-events: none; }
+.toasts:popover-open { display: flex; flex-direction: column; gap: 8px; }
+.toast { pointer-events: auto; display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 14px; min-height: 44px; border-radius: 12px; background: var(--btn); color: var(--btn-ink); box-shadow: 0 16px 40px -12px rgba(0, 0, 0, .35); font-size: max(var(--fs-floor), 0.8846rem); line-height: 1.4; animation: toast-in .22s cubic-bezier(.2, .8, .2, 1); }
+.toast-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--dot-ok); }
+.toast.t-info .toast-dot { background: var(--violet); }
+.toast.t-error .toast-dot { background: var(--dot-block); }
+.toast-msg { margin: 0; flex: 1; min-width: 0; text-wrap: pretty; }
+.toast-act { flex: none; border: 0; background: none; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; padding: 4px 6px; border-radius: 6px; }
+.toast-x { flex: none; width: 26px; height: 26px; border: 0; border-radius: 6px; background: none; color: inherit; opacity: .72; display: grid; place-items: center; }
+.toast-x:hover, .toast-act:hover { background: color-mix(in srgb, var(--btn-ink) 14%, transparent); opacity: 1; }
+.toast-x svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 2; }
+.toast :focus-visible { outline: 2px solid var(--peach); outline-offset: 1px; }
+@media (pointer: coarse) {
+  :is(.toast-act, .toast-x) { position: relative; }
+  :is(.toast-act, .toast-x)::before { content: ""; position: absolute; inset: 50% auto auto 50%; width: max(100%, 44px); height: 44px; transform: translate(-50%, -50%); }
+}
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes toast-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .toast { animation-name: toast-fade; } }

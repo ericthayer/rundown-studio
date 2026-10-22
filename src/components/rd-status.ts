@@ -70,8 +70,8 @@ export class RdStatus extends StoreElement {
     if (s.status === 'error' && prev.status !== 'error') this.#say(s.link === 'offline' ? "You're offline. Projects load when you're back." : "Can't reach your board. Try again in a moment.");
     else if (s.link !== prev.link) {
       if (s.link === 'offline') this.#say("You're offline. Showing the last projects loaded.");
-      else if (s.link === 'paused') this.#say('Live updates paused.');
-      else if (s.status === 'ready') this.#say(prev.link === 'paused' ? 'Live updates resumed.' : 'Back online. Projects are up to date.');
+      // Paused and resumed are announced by their toasts (board-toasts.ts).
+      else if (s.status === 'ready' && prev.link !== 'paused') this.#say('Back online. Projects are up to date.');
     } else if (recovered) this.#say('Connected. Projects loaded.');
     if (s.skipped > prev.skipped) this.#say(`${s.skipped} project rows couldn't be read.`);
   }

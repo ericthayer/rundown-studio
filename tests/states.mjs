@@ -112,7 +112,7 @@ if (process.env.LOTTIE_FILE) {
   check('paused: band title', (await text(p, '.lstat strong')) === 'Live updates paused.');
   check('paused: shows when rows were loaded', /Showing projects from \d/.test(await text(p, '.lstat span')));
   check('paused: rows still shown', (await p.locator('rd-project-list .pitem').count()) === ROWS.length);
-  check('paused: announced', (await live(p)) === 'Live updates paused.');
+  check('paused: failure toast is an alert', (await p.getAttribute('.toast.t-error', 'role')) === 'alert');
   const before = await p.evaluate(() => window.__subscribes);
   await p.click('.lstat [data-ref="retry"]');
   await p.waitForSelector('.lstat', { state: 'hidden' });
