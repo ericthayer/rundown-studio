@@ -1,0 +1,15 @@
+{
+  "name": "rundown-studio",
+  "description": "Rundown: a private project status board for your Claude account.",
+  "owner": {
+    "name": "ericthayer",
+    "url": "https://github.com/ericthayer"
+  },
+  "plugins": [
+    {
+      "name": "rundown",
+      "source": "./plugin",
+      "description": "Your own Rundown project status board, check-ins and scheduled rundown."
+    }
+  ]
+}

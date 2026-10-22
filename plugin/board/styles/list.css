@@ -1,0 +1,43 @@
+/* Project rows + next-step card. */
+.plist { list-style: none; margin: 0; padding: 0 16px; overflow-y: auto; flex: 1; min-height: 0; }
+.plist > li + li { border-top: 1px solid var(--line); }
+.pitem { width: 100%; border: 0; background: none; text-align: left; padding: 14px 4px; display: grid; grid-template-columns: 14px minmax(0, 1fr); column-gap: 10px; row-gap: 3px; }
+.dot { width: 10px; height: 10px; border-radius: 3px; border: 1.5px solid var(--line); margin-top: 4px; }
+.dot.blocked { background: var(--dot-block); border-color: var(--dot-block); }
+.dot.stale { background: var(--dot-stale); border-color: var(--dot-stale); }
+.dot.active { background: var(--dot-ok); border-color: var(--dot-ok); }
+.dot.parked { background: transparent; border-color: var(--dot-park); }
+.dot.waiting { background: var(--dot-wait); border-color: var(--dot-wait); }
+.dot.decisions { background: transparent; border-color: var(--dot-decide); border-width: 2px; }
+.pitem b { font-weight: 600; font-size: 1.0769rem; letter-spacing: -0.01em; }
+.pitem .pv { grid-column: 2; color: var(--muted); font-size: max(var(--fs-floor), 0.9231rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pitem[aria-expanded="true"] .pv { display: none; }
+.pitem .meta { grid-column: 2; display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+@container (min-width: 620px) {
+  .pitem { grid-template-columns: 14px minmax(0, 1fr) auto; }
+  .pitem .meta { grid-column: 3; grid-row: 1 / span 2; margin-top: 0; gap: 14px; justify-content: flex-end; }
+}
+.badges { display: flex; }
+.badges span { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--surface); display: grid; place-items: center; font-size: max(var(--fs-floor), 0.6923rem); font-weight: 700; color: var(--badge-ink); }
+.badges span + span { margin-left: -6px; }
+.b-kind svg { width: 11px; height: 11px; fill: none; stroke: var(--badge-ink); stroke-width: 2; }
+.b-work { background: var(--area-work); } .b-client { background: var(--area-client); } .b-personal { background: var(--area-personal); } .b-kind { background: var(--area-other); }
+.pitem time { color: var(--muted); font-size: max(var(--fs-floor), 0.8462rem); min-width: 5em; text-align: right; }
+.pitem time[data-old] { color: var(--ink); font-weight: 600; }
+.empty { color: var(--muted); font-size: max(var(--fs-floor), 0.9231rem); padding: 14px 4px; }
+
+/* Next-step card (Primer-style): icon tile, heading, description, detail groups, meta footer. */
+.nscard { grid-column: 2 / -1; margin: 4px 0 8px; padding: 20px 22px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; gap: 8px; }
+.ns-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--chip); display: grid; place-items: center; margin-bottom: 8px; }
+.ns-icon svg { width: 18px; height: 18px; fill: none; stroke: var(--muted); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.ns-h { margin: 0; font-size: 1.1538rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.3; text-wrap: balance; }
+.ns-d { margin: 0; color: var(--muted); font-size: max(var(--fs-floor), 0.9615rem); line-height: 1.5; max-width: 72ch; text-wrap: pretty; }
+.ns-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 24px; margin-top: 6px; }
+.ns-groups h4 { margin: 0 0 4px; font-size: max(var(--fs-floor), 0.8462rem); font-weight: 600; color: var(--ink); }
+.ns-groups ul { margin: 0; padding-left: 16px; color: var(--muted); font-size: max(var(--fs-floor), 0.9231rem); line-height: 1.5; }
+.ns-groups li::marker { color: var(--muted); }
+.ns-age { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ns-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; color: var(--muted); font-size: max(var(--fs-floor), 0.8462rem); }
+.ns-meta > span { display: inline-flex; align-items: center; gap: 6px; }
+.ns-meta svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 1060px) { .plist { overflow: visible; } }

@@ -1,0 +1,54 @@
+/* Section header (Supabase-style): title row, stat strip + streak, then the list panel. */
+.phead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 16px; }
+.ptitle { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.phead h1 { margin: 0; font-size: clamp(1.5rem, 3cqi, 1.9rem); font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; }
+.phead .count { height: 22px; min-width: 22px; padding: 0 8px; border-radius: 999px; background: var(--chip); border: 1px solid var(--line); display: grid; place-items: center; font-size: max(var(--fs-floor), 0.8077rem); font-weight: 600; color: var(--muted); }
+.pactions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.cta { height: var(--ctl-h, 32px); border: 0; border-radius: 8px; background: var(--btn); color: var(--btn-ink); padding: 0 12px; display: inline-flex; align-items: center; gap: 7px; font-size: max(var(--fs-floor), 0.8846rem); font-weight: 500; white-space: nowrap; }
+.cta svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; flex: none; }
+.cta:hover { opacity: .88; }
+.atoggle { display: none; width: 32px; height: 32px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; place-items: center; flex: none; }
+.atoggle:hover { border-color: var(--muted); }
+.atoggle svg { width: 15px; height: 15px; fill: var(--peach); }
+@media (max-width: 1060px) { .atoggle { display: inline-grid; } }
+/* Focus mode: same quiet square as the assistant toggle; icon swaps expand ↔ collapse. */
+.ftoggle { display: inline-grid; width: 32px; height: 32px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; place-items: center; flex: none; }
+.ftoggle:hover { border-color: var(--muted); }
+.ftoggle svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ftoggle .foff, .ftoggle[aria-pressed="true"] .fon { display: none; }
+.ftoggle[aria-pressed="true"] .foff { display: inline; }
+
+.pmeta { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 16px; margin: -6px 0 2px; }
+.pstats { display: flex; flex-wrap: nowrap; align-items: center; gap: 2px 0; margin-left: -8px; min-height: 30px; flex: 1 1 auto; min-width: 0; overflow: hidden; }
+.pstats > * { flex: none; }
+.pstats-msg { flex: 0 1 auto !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 8px; color: var(--muted); font-size: max(var(--fs-floor), 0.9231rem); }
+.stat { border: 0; background: none; border-radius: 8px; padding: 4px 8px; display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: max(var(--fs-floor), 0.9231rem); white-space: nowrap; }
+.stat b { color: var(--ink); font-weight: 600; font-size: 1.0769rem; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.stat .dot { width: 8px; height: 8px; margin: 0; border-radius: 2.5px; }
+.stat[data-zero] b { color: var(--muted); font-weight: 500; }
+.stat:hover { background: var(--chip); color: var(--ink); }
+.stat[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.ssep { color: var(--line); padding: 0 2px; user-select: none; }
+.smore { color: var(--ink); }
+.smore svg { width: 12px; height: 12px; fill: none; stroke: var(--muted); stroke-width: 2; }
+.smenu { min-width: 180px; }
+.smenu .fopt { width: 100%; border: 0; background: none; color: inherit; font: inherit; text-align: left; }
+.smenu .fopt[aria-pressed="true"] { background: var(--chip); font-weight: 500; }
+
+/* Streak: consecutive days with Claude activity; the flame warms by tier 0 · 1–2 · 3–6 · 7–13 · 14–29 · 30+. */
+.streak { --tier: var(--muted); margin-left: auto; flex: none; height: var(--ctl-h); display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-size: max(var(--fs-floor), 0.8462rem); white-space: nowrap; cursor: default; }
+.streak svg { width: 15px; height: 15px; fill: color-mix(in srgb, var(--tier) 30%, transparent); stroke: var(--tier); stroke-width: 1.6; stroke-linejoin: round; }
+.streak b { font-weight: 700; font-size: max(var(--fs-floor), 0.9615rem); letter-spacing: -0.01em; }
+.streak span { color: var(--muted); }
+.streak[data-tier="0"] svg { fill: none; }
+.streak[data-tier="1"] { --tier: var(--dot-ok); }
+.streak[data-tier="2"] { --tier: var(--dot-stale); }
+.streak[data-tier="3"] { --tier: var(--peach); }
+.streak[data-tier="4"] { --tier: var(--rose); }
+.streak[data-tier="5"] { --tier: var(--violet); }
+.streak[data-tier="5"] svg { fill: color-mix(in srgb, var(--violet) 45%, transparent); }
+@container (max-width: 460px) {
+  .streak span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .cta { padding: 0 9px; }
+  .cta-lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}

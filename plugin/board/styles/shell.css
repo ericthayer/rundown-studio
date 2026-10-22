@@ -1,0 +1,25 @@
+/* App shell: full-viewport glass grid — sidebar | projects | assistant. */
+.shell { width: 100%; margin: 0; background: var(--shell); border-radius: clamp(0px, 1.6vw, 24px); box-shadow: var(--shadow); display: grid; grid-template-columns: clamp(180px, 15vw, 280px) minmax(0, 1fr) clamp(280px, 24vw, 440px); height: calc(100dvh - 2 * var(--pad)); min-height: 560px; overflow: hidden; backdrop-filter: blur(20px); transition: grid-template-columns .22s ease; }
+@media (prefers-reduced-motion: reduce) { .shell { transition: none; } }
+.center { --ctl-h: 32px; --ctl-dash: color-mix(in srgb, var(--muted) 45%, transparent); display: flex; flex-direction: column; gap: 14px; padding: 26px 28px 20px; min-width: 0; min-height: 0; container-type: inline-size; }
+
+@media (min-width: 721px) {
+  .shell.slim { grid-template-columns: 68px minmax(0, 1fr) clamp(280px, 24vw, 440px); }
+}
+/* Wide: assistant column is resizable (--agent-w) and collapses to a 64px icon rail. */
+@media (min-width: 1061px) {
+  .shell { grid-template-columns: clamp(180px, 15vw, 280px) minmax(0, 1fr) var(--agent-w, clamp(300px, 24vw, 440px)); }
+  .shell.slim { grid-template-columns: 68px minmax(0, 1fr) var(--agent-w, clamp(300px, 24vw, 440px)); }
+  .shell.agent-rail { grid-template-columns: clamp(180px, 15vw, 280px) minmax(0, 1fr) 64px; }
+  .shell.slim.agent-rail { grid-template-columns: 68px minmax(0, 1fr) 64px; }
+  .shell.resizing { transition: none; cursor: col-resize; user-select: none; }
+}
+@media (max-width: 1060px) {
+  .shell { grid-template-columns: clamp(170px, 20vw, 210px) minmax(0, 1fr); height: auto; min-height: calc(100dvh - 2 * var(--pad)); align-content: start; backdrop-filter: none; }
+  .shell.slim { grid-template-columns: 68px minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
+  body { --pad: 0px; }
+  .shell, .shell.slim { grid-template-columns: minmax(0, 1fr); border-radius: 20px; }
+  .center { padding: 18px 12px 12px; }
+}

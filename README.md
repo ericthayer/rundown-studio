@@ -2,13 +2,33 @@
 
 Cross-project status board. Vanilla TypeScript Web Components (light DOM), compiled by `tsc` to native ES modules — no bundler, no runtime dependencies. Published as a multi-file Claude artifact; the artifact runtime provides the database (`db`) and model answers (`sample`).
 
+## Use it for your own projects
+
+Rundown ships as a Claude Code plugin. It publishes a private copy of the board into your own Claude account; your data lives in that board's database and nobody else can see it. No API keys or accounts to set up.
+
+```
+/plugin marketplace add ericthayer/rundown-studio
+/plugin install rundown@rundown-studio
+/rundown:setup
+```
+
+| Command | What it does |
+|---|---|
+| `/rundown:setup` | Publishes your board, asks for your name, repos and schedule, and creates the scheduled rundown (or gives you the prompt to paste) |
+| `/rundown:checkin` | Run inside a project: summarizes where it stands and, after you confirm, writes its row to your board |
+| `/rundown:update` | Republishes the latest board code to your existing board link; your data stays |
+
+Open the board once after setup and allow the database and Claude permissions.
+
 ## Commands
 
 | Command | What it does |
 |---|---|
 | `npm run build` | `tsc` → `dist/` (ES2022 modules) |
 | `npm run typecheck` | Strict type check, no emit |
-| `npm test` | Build + Playwright smoke suite (`tests/smoke.mjs`), screenshots in `tests/out/` |
+| `npm test` | Build + Playwright suites (`tests/smoke.mjs`, `mobile.mjs`, `config.mjs`), screenshots in `tests/out/` |
+| `npm run plugin` | Clean build, then copy the board into `plugin/board/` (CI does this on main) |
+| `npm run plugin:check` | Fail if `plugin/board/` differs from the build |
 
 ## Layout
 
@@ -26,6 +46,8 @@ src/
   components/           rd-sidebar · rd-count · rd-stat-strip · rd-streak · rd-toolbar · rd-note
                         rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant · rd-focus · rd-settings
                         rd-note-locker · rd-save-menu
+plugin/                 Claude Code plugin: skills/ (setup, checkin, update), templates/, board/ (generated copy)
+.claude-plugin/         marketplace manifest so the repo installs as a plugin source
 tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals, focus mode, color mode, note locker
 tests/ask.mjs           Ask Rundown transcript and saving answers to the Locker / project cards
 ```
@@ -42,6 +64,8 @@ tests/ask.mjs           Ask Rundown transcript and saving answers to the Locker 
 `projects/{id}` — `name` (required), `area` (`work|client|personal`), `kind` (`project|chat|repo`), `state` (`active|blocked|stale|parked`), `priority` (number, 1 = top), `lastActivity` / `due` (ISO dates), `leftOff`, `nextStep` (strings), `blockers` / `decided` (string arrays), `openDecisions` (strings or `{ text, since }`), `waitingOn` (`{ who, what?, since? }` or strings).
 
 Signals: `since` (ISO date) drives the age shown in the **Decisions** rollup (oldest first, parked projects excluded) and on cards. A `blocked` project with `waitingOn` and no `blockers` is waiting on others: it gets a blue dot and leaves **Needs you** until a wait passes 14 days.
+
+`meta/config` — written by `/rundown:setup`: `owner` (sidebar name), `boardUrl`, `schedule` (shown until the first rundown), `checkinCommand` (default `/project-checkin`), plus `repos` and `timezone` for the rundown. All optional.
 
 `meta/run` — `nextRun` (string), `critique` (rundown note), `streak` (number) **or** `sessionDays` (ISO date array). Without either, the streak falls back to consecutive check-in days.
 
