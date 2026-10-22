@@ -65,7 +65,7 @@ async function page(opts = {}) {
   p.on('pageerror', (e) => errors.push(e.message));
   p.on('console', (m) => { if (m.type() === 'error' && !/fonts\.g|ERR_TUNNEL|net::/.test(m.text())) errors.push(m.text()); });
   await p.addInitScript(stub, { rows: ROWS, meta: META });
-  if (opts.init) await p.addInitScript(opts.init);
+  if (opts.init) await p.addInitScript(opts.init, opts.initArg);
   await p.goto(URL_);
   await p.waitForSelector('.pitem');
   return { p, ctx, errors };
@@ -216,6 +216,35 @@ const active = (p) => p.evaluate(() => document.activeElement?.dataset?.fk ?? do
   check('Escape closes settings', !(await p.isVisible('#me-settings')));
   check('no console errors (settings)', errors.length === 0, errors.join(' | '));
   await ctx.close();
+}
+
+// 10. Check-in button: sends to the chat beside the board, copies when there is none.
+{
+  const withRoom = (state) => {
+    const use = window.claude.use;
+    window.__sent = [];
+    window.claude = { use: async (n) => (n === 'room' ? {
+      canSendToClaudeSession: async () => state,
+      sendToClaudeSession: async (data, opts) => { window.__sent.push({ data, opts }); return { to: 'pane' }; },
+    } : use(n)) };
+  };
+  const { p, ctx, errors } = await page({ init: withRoom, initArg: 'available' });
+  await p.hover('#copy-cmd-2'); await p.waitForTimeout(50);
+  check('check-in labelled as run when chat is beside', (await p.getAttribute('#copy-cmd-2', 'aria-label')) === 'Run /project-checkin in chat');
+  await p.focus('[data-fk="row:b"]'); await p.keyboard.press('Enter');
+  await p.click('#copy-cmd-2'); await p.waitForTimeout(50);
+  const sent = await p.evaluate(() => window.__sent);
+  check('check-in sends one request', sent.length === 1 && sent[0].opts.deliver === 'send' && sent[0].data.command === '/project-checkin');
+  check('check-in names the open project', sent[0]?.data.project?.id === 'b', JSON.stringify(sent[0]?.data.project));
+  check('label confirms the send', (await p.textContent('#copy-cmd-2 .cta-lbl')) === 'Sent to chat');
+  check('no console errors (check-in)', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+  const none = await page({ init: withRoom, initArg: 'no_session' });
+  await none.ctx.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await none.p.hover('#copy-cmd-2'); await none.p.click('#copy-cmd-2'); await none.p.waitForTimeout(50);
+  check('no chat beside: copies instead', (await none.p.evaluate(() => window.__sent.length)) === 0 && (await none.p.textContent('#copy-cmd-2 .cta-lbl')) !== 'Sent to chat');
+  check('no chat beside: labelled as copy', (await none.p.getAttribute('#copy-cmd-2', 'aria-label')) === 'Copy /project-checkin command');
+  await none.ctx.close();
 }
 
 await browser.close();
