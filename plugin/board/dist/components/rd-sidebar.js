@@ -2,9 +2,9 @@ import { StoreElement } from './base.js';
 import { store } from '../store.js';
 import { prefs } from '../lib/prefs.js';
 import { ICON } from '../lib/icons.js';
-import { copyCommand, h, icon, setAttr, setText } from '../lib/dom.js';
+import { h, icon, setAttr, setText } from '../lib/dom.js';
 import { needsYou } from '../domain/projects.js';
-import { checkinCommand, initials } from '../lib/config.js';
+import { initials } from '../lib/config.js';
 import { decisionCount, waits } from '../domain/signals.js';
 export const VIEWS = [['all', 'Home'], ['needs', 'Needs you'], ['decisions', 'Decisions'], ['waiting', 'Waiting on'], ['blocked', 'Blocked'], ['stale', 'Stale'], ['parked', 'Parked']];
 const AREAS = [['work', 'Work'], ['client', 'Client'], ['personal', 'Personal']];
@@ -44,12 +44,9 @@ export class RdSidebar extends StoreElement {
             const owner = s.config.owner ?? 'Rundown';
             setText(this.ref('owner'), owner);
             setText(this.ref('initials'), initials(owner));
-            setAttr(this.ref('copy'), 'data-tip', `Copy ${checkinCommand()}`);
         });
         this.#setupAreas();
         this.#setupSlim();
-        const copy = this.ref('copy');
-        copy.addEventListener('click', () => void copyCommand(this.ref('copy-label'), 'Copy command', checkinCommand()));
     }
     #setupAreas() {
         const sec = this.ref('sec');

@@ -30,7 +30,7 @@ Open the board once after setup and allow the database and Claude permissions.
 4. **The scheduled rundown** keeps rows current between check-ins and leaves a short note at the top of the board.
 5. **`/rundown:update`** after a new release pulls the latest board code into your same link; your projects and notes stay.
 
-The walkthrough uses demo data and shows the board as of v1.3.2. Re-record it with `npm run walkthrough` (needs `ffmpeg`) after any visible UI change.
+The walkthrough uses demo data and shows the board as of v1.3.3. Re-record it with `npm run walkthrough` (needs `ffmpeg`) after any visible UI change.
 
 ## Commands
 

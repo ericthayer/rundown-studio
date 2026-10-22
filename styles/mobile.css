@@ -17,7 +17,7 @@
   /* Settings: the account footer is hidden on phones, so its gear moves to the top bar. */
   .rail { position: relative; }
   .me { display: block; position: absolute; top: 11px; right: 10px; margin: 0; padding: 0; border: 0; }
-  .me-row > .av, .me-row > span:not(.av), .me > [data-ref="copy"] { display: none; }
+  .me-row > .av, .me-row > span:not(.av) { display: none; }
 
   /* Sheet drag handles: vertical drags belong to the gesture, not the page. */
   .agent-head, .fsh { touch-action: none; }
