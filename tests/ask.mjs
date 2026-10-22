@@ -58,8 +58,14 @@ await p.click('.aclear');
 check('Clear empties the transcript and storage', (await p.locator('.alog .answer').count()) === 0 && await p.locator('.ahead').isHidden() && (await p.evaluate(() => sessionStorage.getItem('rundown.askLog'))) === null);
 check('focus returns to the ask box after Clear', await p.evaluate(() => document.activeElement?.tagName === 'TEXTAREA'));
 
+// Touch: a haptic tap on submit (Vibration API where it exists), focus stays in the box.
+const touch = await page({ init: () => { window.__buzz = []; navigator.vibrate = (ms) => { window.__buzz.push(ms); return true; }; }, viewport: { width: 390, height: 844 }, touch: true });
+await touch.p.click('#agent-toggle'); await touch.p.waitForTimeout(400);
+await touch.p.fill('rd-composer textarea', 'Token'); await touch.p.press('rd-composer textarea', 'Enter');
+check('submit gives a haptic tap on touch', (await touch.p.evaluate(() => window.__buzz)).length === 1);
+
 const fresh = await page({ init: withSampler });
 check('a new tab starts with no history', (await fresh.p.locator('.alog .answer').count()) === 0);
-check('no page errors', errors.length === 0 && fresh.errors.length === 0, [...errors, ...fresh.errors].join('; '));
+check('no page errors', errors.length === 0 && fresh.errors.length === 0 && touch.errors.length === 0, [...errors, ...fresh.errors, ...touch.errors].join('; '));
 
 process.exit(await finish());

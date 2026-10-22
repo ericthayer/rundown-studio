@@ -2,6 +2,7 @@ import { StoreElement, emit } from './base.js';
 import { store } from '../store.js';
 import { getSampler, revokeSampler } from '../runtime.js';
 import { h, setAttr, setText } from '../lib/dom.js';
+import { tap } from '../lib/haptics.js';
 import { type AskTurn, loadTurns, saveTurns, recap, MAX_TURNS } from '../lib/ask-history.js';
 import { type RdSaveMenu, savedAnswer } from './rd-save-menu.js';
 import './rd-save-menu.js';
@@ -96,6 +97,7 @@ export class RdComposer extends StoreElement {
 
   async ask(question: string): Promise<void> {
     if (!question) return;
+    tap();
     this.#input.value = question;
     const sample = getSampler();
     if (!sample) {
