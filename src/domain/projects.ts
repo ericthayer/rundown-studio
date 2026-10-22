@@ -1,5 +1,6 @@
 import type { Area, Project, RunMeta } from '../types.js';
 import { ago, daysUntil, parseDay, today } from '../lib/dates.js';
+import { overdueWait, waitingOnOthers } from './signals.js';
 
 export const AREA_LABEL: Record<Area, string> = { work: 'Work', client: 'Client', personal: 'Personal' };
 
@@ -15,8 +16,10 @@ export function dueSoon(p: Project): boolean {
   return n !== null && n <= 7;
 }
 
+/** Blocked on you, stale, or due soon. Blocked only on others counts once the wait is overdue. */
 export function needsYou(p: Project): boolean {
-  return p.state === 'blocked' || p.state === 'stale' || (p.state !== 'parked' && dueSoon(p));
+  const blocked = p.state === 'blocked' && (!waitingOnOthers(p) || overdueWait(p));
+  return blocked || p.state === 'stale' || (p.state !== 'parked' && dueSoon(p));
 }
 
 export function byPriority(a: Project, b: Project): number {

@@ -18,9 +18,18 @@ export interface Project {
   leftOff?: string;
   nextStep?: string;
   decided?: unknown;
+  /** Strings or `DecisionItem`s; `since` lets the rollup show how long a decision has been open. */
   openDecisions?: unknown;
   blockers?: unknown;
+  /** `WaitItem`s (or plain strings naming who): blocked on someone else, not on you. */
+  waitingOn?: unknown;
 }
+
+/** One open decision as /project-checkin writes it. `since` = ISO date it was first raised. */
+export interface DecisionItem { text: string; since?: string }
+
+/** One thing the project waits on. `since` = ISO date the wait started. */
+export interface WaitItem { who: string; what?: string; since?: string }
 
 /** `meta/run` document written by the scheduled rundown and /project-checkin. */
 export interface RunMeta {
@@ -32,11 +41,11 @@ export interface RunMeta {
   sessionDays?: string[];
 }
 
-export type RailFilter = 'all' | 'needs' | 'blocked' | 'stale' | 'parked' | Area;
+export type RailFilter = 'all' | 'needs' | 'decisions' | 'waiting' | 'blocked' | 'stale' | 'parked' | Area;
 export type SortKey = 'needs' | 'priority' | 'recent' | 'due' | 'name';
 export type UpdatedWindow = 'any' | 'today' | 'week' | 'month' | 'old';
 export type DueWindow = 'any' | 'overdue' | 'week' | 'has' | 'none';
-export type Flag = 'blockers' | 'decisions' | 'nonext';
+export type Flag = 'blockers' | 'decisions' | 'waiting' | 'nonext';
 
 export interface ToolbarFilters {
   status: ProjectState[];

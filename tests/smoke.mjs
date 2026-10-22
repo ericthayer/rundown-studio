@@ -35,10 +35,11 @@ const URL_ = `http://localhost:${server.address().port}/`;
 
 const day = (offset) => { const d = new Date(); d.setDate(d.getDate() + offset); return d.toLocaleDateString('en-CA'); };
 const ROWS = [
-  { id: 'a', name: 'Agrikit plugin', priority: 1, state: 'blocked', area: 'work', kind: 'repo', lastActivity: day(-2), due: day(3), leftOff: 'WIP branch in shd-agrikit-ui-lib.', nextStep: 'Ship the MCP adapter.', blockers: ['MCP auth'], openDecisions: ['One plugin or per framework?'], decided: ['React/MUI first', 'Reuse agrikit-mcp'] },
-  { id: 'b', name: 'Portfolio chat agent', priority: 2, state: 'active', area: 'personal', kind: 'project', lastActivity: day(0), nextStep: 'Netlify function for streaming' },
+  { id: 'a', name: 'Agrikit plugin', priority: 1, state: 'blocked', area: 'work', kind: 'repo', lastActivity: day(-2), due: day(3), leftOff: 'WIP branch in shd-agrikit-ui-lib.', nextStep: 'Ship the MCP adapter.', blockers: ['MCP auth'], openDecisions: [{ text: 'One plugin or per framework?', since: day(-20) }, 'Ship under MIT?'], decided: ['React/MUI first', 'Reuse agrikit-mcp'] },
+  { id: 'b', name: 'Portfolio chat agent', priority: 2, state: 'active', area: 'personal', kind: 'project', lastActivity: day(0), nextStep: 'Netlify function for streaming', openDecisions: [{ text: 'Streaming or polling?', since: day(-3) }] },
   { id: 'c', name: 'Token Map', priority: 3, state: 'stale', area: 'personal', kind: 'project', lastActivity: day(-40) },
-  { id: 'd', name: 'Brochure site', priority: 4, state: 'parked', area: 'client', kind: 'chat', due: day(-12) },
+  { id: 'd', name: 'Brochure site', priority: 4, state: 'parked', area: 'client', kind: 'chat', due: day(-12), openDecisions: ['Retire the site?'] },
+  { id: 'e', name: 'WordPress handoff', priority: 5, state: 'blocked', area: 'client', kind: 'project', lastActivity: day(-5), waitingOn: [{ who: 'Client', what: 'final copy', since: day(-5) }] },
 ];
 const META = { critique: 'Three overlapping config-distribution efforts; pick tharness.', sessionDays: [day(0), day(-1), day(-2), day(-3), day(-4)] };
 
@@ -92,10 +93,10 @@ const active = (p) => p.evaluate(() => document.activeElement?.dataset?.fk ?? do
   await p.check('#fp-status input[value=blocked]');
   await p.evaluate((r) => window.__push(r.map((x) => ({ ...x }))), ROWS);
   check('filter popover survives data update', await p.evaluate(() => !!document.querySelector('#fp-status:popover-open')));
-  check('status filter applies', (await p.locator('.plist > li').count()) === 1);
+  check('status filter applies', (await p.locator('rd-project-list .plist > li').count()) === 2);
   await p.keyboard.press('Escape');
   await p.click('.tright .fclear');
-  check('clear restores list', (await p.locator('.plist > li').count()) === 4);
+  check('clear restores list', (await p.locator('rd-project-list .plist > li').count()) === ROWS.length);
   // 3. Contrast tokens (review #2).
   const ratio = await p.evaluate(() => {
     const L = (c) => { const [r, g, b] = c.match(/\d+/g).slice(0, 3).map((n) => { n /= 255; return n <= 0.03928 ? n / 12.92 : ((n + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
@@ -126,14 +127,45 @@ const active = (p) => p.evaluate(() => document.activeElement?.dataset?.fk ?? do
   check('no console errors (wide)', errors.length === 0, errors.join(' | '));
   await ctx.close();
 }
-// 5. Persistence + legacy migration.
+// 5. Signals: decisions rollup + waiting on.
+{
+  const { p, ctx, errors } = await page();
+  const stat = (k) => p.textContent(`[data-fk="stat:${k}"] b`);
+  check('needs-you excludes waiting-only projects', (await stat('needs')) === '2', await stat('needs'));
+  check('waiting stat counts', (await stat('waiting')) === '1', await stat('waiting'));
+  check('decisions stat skips parked', (await stat('decisions')) === '3', await stat('decisions'));
+  check('waiting row gets its own dot', await p.evaluate(() => document.querySelector('[data-fk="row:e"] .dot').classList.contains('waiting')));
+  await p.focus('[data-fk="nav:decisions"]'); await p.keyboard.press('Enter');
+  check('decisions view hides the project list', await p.isHidden('rd-project-list .plist'));
+  const rows = await p.locator('rd-decisions .plist > li').allTextContents();
+  check('rollup lists open decisions, oldest first', rows.length === 3 && rows[0].includes('One plugin or per framework?') && rows[0].includes('20d open') && rows[2].includes('Ship under MIT?'), rows.join(' | '));
+  check('old decision is emphasized', await p.evaluate(() => document.querySelector('rd-decisions time').hasAttribute('data-old')));
+  await p.screenshot({ path: join(OUT, 'wide-decisions.png') });
+  await p.locator('rd-decisions .pitem').first().focus(); await p.keyboard.press('Enter'); await p.waitForTimeout(50);
+  check('rollup row opens the project', (await active(p)) === 'row:a' && (await p.textContent('.nscard')).includes('· 20d'), await active(p));
+  await p.focus('[data-fk="row:e"]'); await p.keyboard.press('Enter');
+  check('card shows who + since', (await p.textContent('[data-key="e"] .nscard')).includes('Waiting onClient: final copy · 5d'));
+  await p.evaluate((r) => window.__push(r.map((x) => (x.id === 'e' ? { ...x, waitingOn: [{ who: 'Client', since: '2000-01-01' }] } : x))), ROWS);
+  check('overdue wait returns to needs-you', (await stat('needs')) === '3', await stat('needs'));
+  const ratio = await p.evaluate(() => {
+    const L = (c) => { const [r, g, b] = c.match(/\d+/g).slice(0, 3).map((n) => { n /= 255; return n <= 0.03928 ? n / 12.92 : ((n + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+    const el = document.createElement('span'); document.body.append(el);
+    const get = (v) => { el.style.color = `var(${v})`; return L(getComputedStyle(el).color); };
+    const bg = get('--surface');
+    return Math.min(...['--dot-wait', '--dot-decide'].map((v) => { const f = get(v); return (Math.max(f, bg) + 0.05) / (Math.min(f, bg) + 0.05); }));
+  });
+  check('signal dots ≥ 3:1 on surface (light)', ratio >= 3, ratio.toFixed(2));
+  check('no console errors (signals)', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+}
+// 6. Persistence + legacy migration.
 {
   const { p, ctx } = await page({ init: () => { if (!localStorage.getItem('rundown.prefs')) { localStorage.setItem('rundown.slim', '1'); localStorage.setItem('rundown.agent', '0'); } } });
   check('legacy prefs migrate (slim + rail)', await p.evaluate(() => { const c = document.getElementById('shell').classList; return c.contains('slim') && c.contains('agent-rail'); }));
   await p.screenshot({ path: join(OUT, 'wide-slim-rail.png') });
   await ctx.close();
 }
-// 6. Narrow: modal drawer focus management.
+// 7. Narrow: modal drawer focus management.
 {
   const { p, ctx, errors } = await page({ viewport: { width: 390, height: 844 }, scheme: 'dark' });
   await p.click('#agent-toggle'); await p.waitForTimeout(350);

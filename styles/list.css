@@ -7,6 +7,8 @@
 .dot.stale { background: var(--dot-stale); border-color: var(--dot-stale); }
 .dot.active { background: var(--dot-ok); border-color: var(--dot-ok); }
 .dot.parked { background: transparent; border-color: var(--dot-park); }
+.dot.waiting { background: var(--dot-wait); border-color: var(--dot-wait); }
+.dot.decisions { background: transparent; border-color: var(--dot-decide); border-width: 2px; }
 .pitem b { font-weight: 600; font-size: 1.0769rem; letter-spacing: -0.01em; }
 .pitem .pv { grid-column: 2; color: var(--muted); font-size: 0.9231rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pitem[aria-expanded="true"] .pv { display: none; }
@@ -21,6 +23,7 @@
 .b-kind svg { width: 11px; height: 11px; fill: none; stroke: var(--badge-ink); stroke-width: 2; }
 .b-work { background: var(--area-work); } .b-client { background: var(--area-client); } .b-personal { background: var(--area-personal); } .b-kind { background: var(--area-other); }
 .pitem time { color: var(--muted); font-size: 0.8462rem; min-width: 5em; text-align: right; }
+.pitem time[data-old] { color: var(--ink); font-weight: 600; }
 .empty { color: var(--muted); font-size: 0.9231rem; padding: 14px 4px; }
 
 /* Next-step card (Primer-style): icon tile, heading, description, detail groups, meta footer. */
@@ -33,6 +36,7 @@
 .ns-groups h4 { margin: 0 0 4px; font-size: 0.8462rem; font-weight: 600; color: var(--ink); }
 .ns-groups ul { margin: 0; padding-left: 16px; color: var(--muted); font-size: 0.9231rem; line-height: 1.5; }
 .ns-groups li::marker { color: var(--muted); }
+.ns-age { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .ns-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; color: var(--muted); font-size: 0.8462rem; }
 .ns-meta > span { display: inline-flex; align-items: center; gap: 6px; }
 .ns-meta svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }

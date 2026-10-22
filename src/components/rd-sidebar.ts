@@ -5,14 +5,17 @@ import { prefs } from '../lib/prefs.js';
 import { ICON } from '../lib/icons.js';
 import { copyCommand, h, icon, setAttr, setText } from '../lib/dom.js';
 import { needsYou } from '../domain/projects.js';
+import { decisionCount, waits } from '../domain/signals.js';
 
 type NavKey = Extract<RailFilter, keyof typeof ICON>;
-const VIEWS: readonly [NavKey, string][] = [['all', 'Home'], ['needs', 'Needs you'], ['blocked', 'Blocked'], ['stale', 'Stale'], ['parked', 'Parked']];
+const VIEWS: readonly [NavKey, string][] = [['all', 'Home'], ['needs', 'Needs you'], ['decisions', 'Decisions'], ['waiting', 'Waiting on'], ['blocked', 'Blocked'], ['stale', 'Stale'], ['parked', 'Parked']];
 const AREAS: readonly [NavKey, string][] = [['work', 'Work'], ['client', 'Client'], ['personal', 'Personal']];
 
-const BADGE: Partial<Record<NavKey, (p: Project) => boolean>> = {
-  needs: needsYou,
-  blocked: (p) => p.state === 'blocked',
+const BADGE: Partial<Record<NavKey, (ps: readonly Project[]) => number>> = {
+  needs: (ps) => ps.filter(needsYou).length,
+  decisions: decisionCount,
+  waiting: (ps) => ps.filter((p) => waits(p).length > 0).length,
+  blocked: (ps) => ps.filter((p) => p.state === 'blocked').length,
 };
 
 interface NavRefs { btn: HTMLButtonElement; badge: HTMLSpanElement; label: string }
@@ -36,7 +39,7 @@ export class RdSidebar extends StoreElement {
       for (const [key, { btn, badge, label }] of this.#items) {
         setAttr(btn, 'aria-pressed', String(s.filter === key));
         const test = BADGE[key];
-        const n = test ? s.projects.filter(test).length : 0;
+        const n = test ? test(s.projects) : 0;
         badge.hidden = !n;
         setText(badge, String(n));
         setAttr(btn, 'data-tip', n ? `${label} (${n})` : label);
