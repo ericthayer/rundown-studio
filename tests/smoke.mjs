@@ -216,7 +216,7 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
   check('a new note shows even after an earlier dismissal', await p.isVisible('rd-note'));
   check('no console errors (locker)', errors.length === 0, errors.join(' | '));
   await ctx.close();
-  const legacy = await page({ init: () => localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, noteDismissed: 'Three overlapping config-distribution efforts; pick tharness.' })) });
+  const legacy = await page({ init: (text) => localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, noteDismissed: text })), initArg: META.critique });
   await legacy.p.waitForTimeout(100);
   check('legacy dismissal stays hidden', !(await legacy.p.isVisible('rd-note')));
   check('legacy dismissal is copied to the board db', Object.values(await legacy.p.evaluate(() => window.__notes())).some((d) => d.text === META.critique));
