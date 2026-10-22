@@ -19,7 +19,7 @@
 .ftoggle .foff, .ftoggle[aria-pressed="true"] .fon { display: none; }
 .ftoggle[aria-pressed="true"] .foff { display: inline; }
 
-.pmeta { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 16px; margin: -2px 0 2px; }
+.pmeta { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 16px; margin: -2px 0 6px; }
 .pstats { display: flex; flex-wrap: nowrap; align-items: center; gap: 2px 0; margin-left: -8px; min-height: 30px; flex: 1 1 auto; min-width: 0; overflow: hidden; }
 .pstats > * { flex: none; }
 .pstats-msg { flex: 0 1 auto !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 8px; color: var(--muted); font-size: max(var(--fs-floor), 0.9231rem); }
