@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node tests/smoke.mjs && node tests/mobile.mjs && node tests/ask.mjs && node tests/config.mjs",
     "plugin": "rm -rf dist && npm run build && node scripts/package-plugin.mjs",
-    "plugin:check": "node scripts/package-plugin.mjs --check"
+    "plugin:check": "node scripts/package-plugin.mjs --check",
+    "walkthrough": "npm run build && node scripts/record-walkthrough.mjs"
   }
 }
