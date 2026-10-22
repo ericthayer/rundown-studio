@@ -3,7 +3,7 @@ import { StoreElement } from './base.js';
 import { prefs } from '../lib/prefs.js';
 import { applyTheme } from '../lib/theme.js';
 import { THEME } from '../lib/icons.js';
-import { h, icon, placeAbove } from '../lib/dom.js';
+import { h, icon, placeAbove, placeUnder } from '../lib/dom.js';
 
 const MODES: readonly [ThemeMode, string][] = [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']];
 
@@ -20,7 +20,8 @@ export class RdSettings extends StoreElement {
     pop.addEventListener('toggle', (e) => {
       const open = (e as ToggleEvent).newState === 'open';
       btn.setAttribute('aria-expanded', String(open));
-      if (open) placeAbove(btn, pop);
+      // Footer gear (desktop) opens upward; the top-bar gear (phones) opens downward.
+      if (open) (btn.getBoundingClientRect().top < innerHeight / 2 ? placeUnder : placeAbove)(btn, pop);
     });
     this.listen(window, 'resize', () => { if (pop.matches(':popover-open')) pop.hidePopover(); });
   }

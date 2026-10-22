@@ -18,7 +18,7 @@ rd-sidebar, rd-assistant, rd-priorities, rd-composer, rd-project-list, rd-decisi
 [data-tip] { position: relative; }
 :is(.slim .rail, .arail) [data-tip]:is(:hover, :focus-visible)::after {
   content: attr(data-tip); position: absolute; top: 50%; left: calc(100% + 12px); transform: translateY(-50%);
-  background: var(--btn); color: var(--btn-ink); font-size: 0.8462rem; font-weight: 500; line-height: 1.2;
+  background: var(--btn); color: var(--btn-ink); font-size: max(var(--fs-floor), 0.8462rem); font-weight: 500; line-height: 1.2;
   padding: 6px 9px; border-radius: 7px; white-space: nowrap; pointer-events: none; z-index: 20;
   box-shadow: 0 6px 18px -6px rgba(0,0,0,.35);
 }

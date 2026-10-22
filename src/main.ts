@@ -19,8 +19,10 @@ import './components/rd-settings.js';
 import { connectRuntime } from './runtime.js';
 import { byId } from './lib/dom.js';
 import { initCheckin } from './lib/checkin.js';
+import { initViewSwipe } from './lib/view-swipe.js';
 
 initCheckin(byId<HTMLButtonElement>('copy-cmd-2'));
+initViewSwipe(document.querySelector<HTMLElement>('.ptable') ?? document.body);
 
 void connectRuntime();
 

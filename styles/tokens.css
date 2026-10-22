@@ -1,5 +1,5 @@
 /* Design tokens. Light-mode text/status colors meet WCAG 2.2 AA:
-   --muted ≥ 4.5:1 on surface, shell and rail; status + signal dots ≥ 3:1 on surface. */
+   --muted ≥ 6:1 on surface, shell, chip and rail (7.3:1 on surface); status + signal dots ≥ 3:1 on surface. */
 :root {
   --field-top: #c8cbcf;
   --field-mid: #d9d2cc;
@@ -7,8 +7,8 @@
   --shell: rgba(244, 245, 245, 0.92);
   --surface: #ffffff;
   --rail: #eceeee;
-  --ink: #111214;
-  --muted: #656a72;
+  --ink: #0b0c0e;
+  --muted: #52575e;
   --line: #e4e6e8;
   --chip: #f1f2f3;
   --btn: #15171a;
@@ -31,6 +31,8 @@
   --shadow: 0 30px 80px -30px rgba(40, 30, 25, 0.35);
   --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Space Grotesk", var(--font);
+  /* Smallest text size; 0 on desktop, raised to 13px on phones and small touch screens (mobile.css). */
+  --fs-floor: 0px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
