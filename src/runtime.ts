@@ -2,6 +2,7 @@ import type { RunMeta, Sampler } from './types.js';
 import { store } from './store.js';
 import { toProject } from './domain/projects.js';
 import { dayKey, msToMidnight } from './lib/dates.js';
+import { connectLocker } from './lib/note-locker.js';
 
 let sampler: Sampler | null = null;
 
@@ -39,6 +40,7 @@ export async function connectRuntime(): Promise<void> {
     (d) => store.set({ meta: (d.data() ?? {}) as RunMeta }),
     () => { /* meta is optional */ },
   );
+  connectLocker(db, (notes) => store.set({ notes }));
 }
 
 /** Relative dates ("2d ago", streaks) refresh when the page stays open past midnight. */

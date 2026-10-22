@@ -72,7 +72,9 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
   check('rollup lists open decisions, oldest first', rows.length === 3 && rows[0].includes('One plugin or per framework?') && rows[0].includes('20d open') && rows[2].includes('Ship under MIT?'), rows.join(' | '));
   check('old decision is emphasized', await p.evaluate(() => document.querySelector('rd-decisions time').hasAttribute('data-old')));
   await p.screenshot({ path: join(OUT, 'wide-decisions.png') });
-  await p.locator('rd-decisions .pitem').first().focus(); await p.keyboard.press('Enter'); await p.waitForTimeout(50);
+  await p.locator('rd-decisions .pitem').first().focus(); await p.keyboard.press('Enter');
+  // Focus moves after the view switch renders; wait for it instead of a fixed 50ms (flaky under load).
+  await p.waitForFunction(() => document.activeElement?.dataset?.fk === 'row:a', null, { timeout: 2000 }).catch(() => {});
   check('rollup row opens the project', (await active(p)) === 'row:a' && (await p.textContent('.nscard')).includes('· 20d'), await active(p));
   await p.focus('[data-fk="row:e"]'); await p.keyboard.press('Enter');
   check('card shows who + since', (await p.textContent('[data-key="e"] .nscard')).includes('Waiting onClient: final copy · 5d'));
@@ -176,6 +178,59 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
   check('no chat beside: copies instead', (await none.p.evaluate(() => window.__sent.length)) === 0 && (await none.p.textContent('#copy-cmd-2 .cta-lbl')) !== 'Sent to chat');
   check('no chat beside: labelled as copy', (await none.p.getAttribute('#copy-cmd-2', 'aria-label')) === 'Copy /project-checkin command');
   await none.ctx.close();
+}
+
+// 11. Note locker: dismissed notes sync to the board db for 14 days; the current one can be shown again.
+{
+  const iso = (days) => new Date(Date.now() - days * 864e5).toISOString();
+  const seed = (docs) => { if (!localStorage.getItem('__notes')) localStorage.setItem('__notes', JSON.stringify(docs)); };
+  const docs = {
+    'note-old': { kind: 'note', text: 'Old: archive Token Map.', savedAt: iso(3), projectId: null, inLocker: true },
+    'note-exp': { kind: 'note', text: 'Expired note.', savedAt: iso(15), projectId: null, inLocker: true },
+    'ans-1': { kind: 'answer', text: 'A saved answer.', savedAt: iso(1), projectId: null, inLocker: true },
+  };
+  const { p, ctx, errors } = await page({ init: seed, initArg: docs });
+  check('note shows before dismissal', await p.isVisible('rd-note'));
+  await p.click('.note-x'); await p.waitForTimeout(50);
+  check('dismiss hides the note', !(await p.isVisible('rd-note')));
+  const saved = Object.values(await p.evaluate(() => window.__notes()));
+  check('dismissal is written to the board db', saved.some((d) => d.kind === 'note' && d.text === META.critique && d.inLocker === true && d.projectId === null));
+  check('expired locker notes are pruned on the next dismissal', !saved.some((d) => d.text === 'Expired note.'));
+  check('nothing kept in this browser when the db write lands', await p.evaluate(() => !JSON.parse(localStorage.getItem('rundown.prefs') ?? '{}').noteDismissed));
+  await p.reload(); await p.waitForSelector('.pitem');
+  check('dismissed note stays hidden after reload', !(await p.isVisible('rd-note')));
+  await p.click('.mset'); await p.waitForTimeout(100);
+  const items = await p.locator('.nlock-list li .nlock-text').allTextContents();
+  check('locker lists dismissed notes only, newest first', items.length === 2 && items[0] === META.critique && items[1] === 'Old: archive Token Map.', JSON.stringify(items));
+  check('only the current note can be shown again', (await p.locator('.nlock-btn').count()) === 1);
+  check('settings popover stays in viewport with locker', await p.evaluate(() => { const r = document.getElementById('me-settings').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight && r.right <= innerWidth; }));
+  await p.screenshot({ path: join(OUT, 'note-locker.png') });
+  await p.click('.nlock-btn'); await p.waitForTimeout(50);
+  check('show again restores the banner', await p.isVisible('rd-note') && !(await p.isVisible('#me-settings')));
+  await p.reload(); await p.waitForSelector('.pitem');
+  check('restored note survives reload', await p.isVisible('rd-note'));
+  await p.click('.mset'); await p.waitForTimeout(100);
+  check('restored note leaves the locker', (await p.locator('.nlock-list li').count()) === 1);
+  await p.keyboard.press('Escape');
+  await p.evaluate((m) => window.__pushMeta({ ...m, critique: 'A newer note.' }), META);
+  check('a new note shows even after an earlier dismissal', await p.isVisible('rd-note'));
+  check('no console errors (locker)', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+  const legacy = await page({ init: () => localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, noteDismissed: 'Three overlapping config-distribution efforts; pick tharness.' })) });
+  await legacy.p.waitForTimeout(100);
+  check('legacy dismissal stays hidden', !(await legacy.p.isVisible('rd-note')));
+  check('legacy dismissal is copied to the board db', Object.values(await legacy.p.evaluate(() => window.__notes())).some((d) => d.text === META.critique));
+  await legacy.p.click('.mset'); await legacy.p.waitForTimeout(100);
+  check('legacy dismissal shows in the locker', (await legacy.p.locator('.nlock-btn').count()) === 1);
+  await legacy.ctx.close();
+  // Only "Show again" deletes a locker note: loading, reloading and a legacy migration never do.
+  const keep = { 'note-keep': { kind: 'note', text: META.critique, savedAt: iso(1), projectId: null, inLocker: true } };
+  const kept = await page({ init: (d) => { if (!localStorage.getItem('__notes')) localStorage.setItem('__notes', JSON.stringify(d)); localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, noteDismissed: 'Some other old note.' })); }, initArg: keep });
+  await kept.p.reload(); await kept.p.waitForSelector('.pitem'); await kept.p.waitForTimeout(100);
+  const after = await kept.p.evaluate(() => window.__notes());
+  check('load + reload + migration keep existing locker notes', !!after['note-keep'] && Object.keys(after).length === 2, Object.keys(after).join(','));
+  check('locked note stays hidden after reload', !(await kept.p.isVisible('rd-note')));
+  await kept.ctx.close();
 }
 
 process.exit((await finish()) ? 1 : 0);
