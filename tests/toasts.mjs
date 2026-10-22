@@ -13,11 +13,13 @@ const msg = (p) => p.evaluate(() => [...document.querySelectorAll('.toasts .toas
   await push([...ROWS, { id: 'n', name: 'New thing', state: 'active', priority: 9 }]);
   check('added: names the project', (await msg(p)).join() === 'New project on the board: New thing.');
   check('stack is a polite live region', (await p.getAttribute('.toasts', 'aria-live')) === 'polite');
-  await p.waitForTimeout(350); // let the entrance animation finish (real time)
+  // Measure once the entrance animation has settled; allow sub-pixel rounding.
+  await p.evaluate(() => Promise.all(document.querySelector('.toast').getAnimations().map((a) => a.finished)));
   const box = await p.locator('.toast').boundingBox();
-  check('bottom center, clear of the edge', Math.abs(box.x + box.width / 2 - 720) < 2 && box.y + box.height <= 860 - 16, JSON.stringify(box));
+  check('bottom center, clear of the edge', Math.abs(box.x + box.width / 2 - 720) < 2 && box.y + box.height <= 860 - 16 + 0.5, JSON.stringify(box));
 
   await p.click('.toast-act');
+  await p.mouse.move(5, 5); // keep the pointer off the next toasts so their timers run
   check('View opens and focuses the row', await p.evaluate(() => document.activeElement?.dataset.fk === 'row:n' && document.activeElement.getAttribute('aria-expanded') === 'true'));
 
   const next = ROWS.map((r) => (r.id === 'b' ? { ...r, state: 'blocked' } : r));
