@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.3.1...rundown-studio-v1.3.2) (2026-10-22)
+
+
+### Bug fixes
+
+* **layout:** shell fills the viewport on tablets and phones; toolbar top hairline ([#16](https://github.com/ericthayer/rundown-studio/issues/16)) ([44a0e68](https://github.com/ericthayer/rundown-studio/commit/44a0e687e19c104d2dff3b0c68fdffef5c5f8f5b))
+
 ## [1.3.1](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.3.0...rundown-studio-v1.3.1) (2026-10-22)
 
 
