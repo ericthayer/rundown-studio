@@ -31,8 +31,20 @@ export interface DecisionItem { text: string; since?: string }
 /** One thing the project waits on. `since` = ISO date the wait started. */
 export interface WaitItem { who: string; what?: string; since?: string }
 
-/** A rundown note the viewer dismissed, kept in the note locker (`notes/{id}`, kind 'note'). */
-export interface LockedNote { id: string; text: string; savedAt: string }
+/**
+ * A `notes/{id}` entry on the board: a rundown note the viewer dismissed (kind 'note', locker only, 14 days),
+ * or a saved Ask Rundown answer (kind 'answer', in the locker and/or on a project card, kept until removed).
+ */
+export interface LockedNote {
+  id: string;
+  kind: 'note' | 'answer';
+  text: string;
+  savedAt: string;
+  /** The question an answer replied to. */
+  question?: string;
+  projectId: string | null;
+  inLocker: boolean;
+}
 
 /** `meta/run` document written by the scheduled rundown and /project-checkin. */
 export interface RunMeta {

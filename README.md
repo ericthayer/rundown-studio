@@ -22,11 +22,12 @@ src/
   types.ts              domain + state types, runtime capability typings
   domain/               projects (needs-you, streak, labels) · filters (groups, sort, visible list)
                         · signals (open decisions with age, waiting on)
-  lib/                  dom helpers (h, preserveFocus, copyCommand) · prefs · theme · dates · icons · note-locker
+  lib/                  dom helpers (h, preserveFocus, copyCommand) · prefs · theme · dates · icons · note-locker · ask-history
   components/           rd-sidebar · rd-count · rd-stat-strip · rd-streak · rd-toolbar · rd-note
                         rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant · rd-focus · rd-settings
-                        rd-note-locker
+                        rd-note-locker · rd-save-menu
 tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals, focus mode, color mode, note locker
+tests/ask.mjs           Ask Rundown transcript and saving answers to the Locker / project cards
 ```
 
 ## Rules this codebase keeps
@@ -44,7 +45,9 @@ Signals: `since` (ISO date) drives the age shown in the **Decisions** rollup (ol
 
 `meta/run` — `nextRun` (string), `critique` (rundown note), `streak` (number) **or** `sessionDays` (ISO date array). Without either, the streak falls back to consecutive check-in days.
 
-`notes/{id}` — the note locker. A dismissed rundown note is `{ kind: 'note', text, savedAt, projectId: null, inLocker: true }` with a deterministic id per text (`noteId()`), so it syncs across devices. The banner hides any `critique` that is in the locker; a run that writes new text shows it again. Entries older than 14 days drop out of the locker and are deleted on the next dismissal. **Show again** (Settings → Dismissed notes) deletes the entry. If a write is refused, the dismissal falls back to this browser (`rundown.prefs.noteDismissed`), and an older local dismissal is copied to the board once.
+`notes/{id}` — the note locker. A dismissed rundown note is `{ kind: 'note', text, savedAt, projectId: null, inLocker: true }` with a deterministic id per text (`noteId()`), so it syncs across devices. The banner hides any `critique` that is in the locker; a run that writes new text shows it again. Entries older than 14 days drop out of the locker and are deleted on the next dismissal. **Show again** (Settings → Locker) deletes the entry. If a write is refused, the dismissal falls back to this browser (`rundown.prefs.noteDismissed`), and an older local dismissal is copied to the board once.
+
+Saved Ask Rundown answers share the collection: `{ kind: 'answer', text, question, savedAt, projectId, inLocker }` with id `answerId(text)`. **Save** under an answer writes it to the Locker, a project card (`projectId`), or both; unticking both deletes it. Answers never expire. The Ask Rundown transcript itself is per tab (`sessionStorage` `rundown.askLog`, 20 turns) and is never written to the board.
 
 ## Publishing
 

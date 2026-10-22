@@ -10,30 +10,45 @@ let db: ArtifactDb | null = null;
 /** Ids of locker notes past the window, deleted on the viewer's next dismissal (never from a snapshot). */
 let expired: string[] = [];
 
-/** Deterministic doc id per note text, so dismissing the same note twice keeps one entry. */
-export function noteId(text: string): string {
+/** FNV-1a 32-bit hex of `text`. */
+function hash(text: string): string {
   let h = 0x811c9dc5;
   for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
-  return `note-${(h >>> 0).toString(16)}`;
+  return (h >>> 0).toString(16);
 }
+
+/** Deterministic doc id per note text, so dismissing the same note twice keeps one entry. */
+export const noteId = (text: string): string => `note-${hash(text)}`;
+/** Same idea for saved Ask Rundown answers: saving the same answer again updates one doc. */
+export const answerId = (text: string): string => `answer-${hash(text)}`;
 
 const fresh = (savedAt: string, now: number): boolean => now - Date.parse(savedAt) < LOCKER_DAYS * DAY_MS;
 
-/** Locker entries from a `notes` snapshot: kind 'note', in the locker, inside the window, newest first. */
+/**
+ * Entries from a `notes` snapshot, newest first. Notes: in the locker and inside the window.
+ * Saved answers: in the locker and/or on a project card; they never expire.
+ */
 export function toLocked(docs: readonly DocSnapshot[], now: number = Date.now()): LockedNote[] {
   const out: LockedNote[] = [];
   for (const d of docs) {
     const o = d.data() ?? {};
-    if (o.kind !== 'note' || o.inLocker !== true || typeof o.text !== 'string' || !o.text) continue;
-    if (typeof o.savedAt !== 'string' || !Number.isFinite(Date.parse(o.savedAt)) || !fresh(o.savedAt, now)) continue;
-    out.push({ id: d.id, text: o.text, savedAt: o.savedAt });
+    if (typeof o.text !== 'string' || !o.text || typeof o.savedAt !== 'string' || !Number.isFinite(Date.parse(o.savedAt))) continue;
+    if (o.kind === 'note') {
+      if (o.inLocker !== true || !fresh(o.savedAt, now)) continue;
+      out.push({ id: d.id, kind: 'note', text: o.text, savedAt: o.savedAt, projectId: null, inLocker: true });
+    } else if (o.kind === 'answer') {
+      const projectId = typeof o.projectId === 'string' && o.projectId ? o.projectId : null;
+      if (o.inLocker !== true && !projectId) continue;
+      const question = typeof o.question === 'string' ? o.question : undefined;
+      out.push({ id: d.id, kind: 'answer', text: o.text, question, savedAt: o.savedAt, projectId, inLocker: o.inLocker === true });
+    }
   }
   return out.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
 }
 
 /** True when the banner should stay hidden for `text` (locker on the board, or a local fallback). */
 export function isDismissed(text: string, notes: readonly LockedNote[]): boolean {
-  return notes.some((n) => n.text === text) || prefs.get('noteDismissed') === text;
+  return notes.some((n) => n.kind === 'note' && n.text === text) || prefs.get('noteDismissed') === text;
 }
 
 function write(text: string, savedAt: string): Promise<void> {
@@ -47,10 +62,10 @@ function write(text: string, savedAt: string): Promise<void> {
  */
 export function connectLocker(next: ArtifactDb, onNotes: (n: LockedNote[]) => void): void {
   db = next;
-  db.collection(NOTES).where('kind', '==', 'note').onSnapshot((s) => {
+  db.collection(NOTES).onSnapshot((s) => {
     const now = Date.now();
     const live = toLocked(s.docs, now);
-    expired = s.docs.filter((d) => d.data()?.inLocker === true && !live.some((n) => n.id === d.id)).map((d) => d.id);
+    expired = s.docs.filter((d) => d.data()?.kind === 'note' && d.data()?.inLocker === true && !live.some((n) => n.id === d.id)).map((d) => d.id);
     onNotes(live);
   }, () => onNotes([]));
   const legacy = prefs.get('noteDismissed');
@@ -72,4 +87,15 @@ export async function lockNote(text: string): Promise<void> {
 export async function unlockNote(text: string): Promise<void> {
   if (prefs.get('noteDismissed') === text) prefs.set('noteDismissed', '');
   await db?.collection(NOTES).doc(noteId(text)).delete().catch(() => undefined);
+}
+
+/** Where a saved answer lives. Neither place set means it isn't saved. */
+export interface AnswerPlace { inLocker: boolean; projectId: string | null }
+
+/** Saves, moves or removes an Ask Rundown answer; keeps its first save date. Rejects when the board refuses the write. */
+export async function saveAnswer(question: string, text: string, place: AnswerPlace, prev?: LockedNote): Promise<void> {
+  if (!db) throw new Error('no db');
+  const ref = db.collection(NOTES).doc(answerId(text));
+  if (!place.inLocker && !place.projectId) return ref.delete();
+  return ref.set({ kind: 'answer', text, question, savedAt: prev?.savedAt ?? new Date().toISOString(), projectId: place.projectId, inLocker: place.inLocker });
 }
