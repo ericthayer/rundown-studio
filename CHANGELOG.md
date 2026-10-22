@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.3.0...rundown-studio-v1.3.1) (2026-10-22)
+
+
+### Bug fixes
+
+* **plugin:** ship the compiled board scripts with the plugin ([#14](https://github.com/ericthayer/rundown-studio/issues/14)) ([111ebe9](https://github.com/ericthayer/rundown-studio/commit/111ebe98cdb79aebbf34444deae21c326aabf9cf))
+
 ## [1.3.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.2.0...rundown-studio-v1.3.0) (2026-10-22)
 
 
