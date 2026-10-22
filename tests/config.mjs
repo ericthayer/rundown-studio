@@ -22,7 +22,6 @@ const text = (p, sel) => p.evaluate((s) => document.querySelector(s)?.textConten
   check('initials from owner', (await text(p, '[data-ref="initials"]')) === 'AL');
   check('schedule from config', (await text(p, '[data-ref="run"]')) === 'Tue 7:00am');
   check('command label from config', (await text(p, '#copy-cmd-2 .cta-lbl')) === '/rundown:checkin');
-  check('sidebar tip names command', (await p.getAttribute('[data-ref="copy"]', 'data-tip')) === 'Copy /rundown:checkin');
   await p.evaluate(() => window.__pushMeta({ nextRun: 'Fri 3:16am' }));
   check('nextRun wins over schedule', (await text(p, '[data-ref="run"]')) === 'Next run Fri 3:16am');
   await p.evaluate(() => window.__pushConfig({ owner: 'Grace', checkinCommand: 'rm -rf', boardUrl: 'https://evil.example/' }));

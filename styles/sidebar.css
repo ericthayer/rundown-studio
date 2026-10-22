@@ -42,14 +42,12 @@
 .me .nlock .nlock-btn:hover { background: var(--chip); }
 .me button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 32px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 0 10px; font-size: max(var(--fs-floor), 0.8846rem); font-weight: 500; color: var(--ink); }
 .me button:hover { border-color: var(--muted); }
-.me button .spark { display: grid; place-items: center; }
-.me button .spark svg { width: 13px; height: 13px; fill: var(--peach); }
 
 /* Slim: icons only; labels stay in the DOM for assistive tech; tooltips from base.css. */
 @media (min-width: 721px) {
   .slim .rail { padding-inline: 10px; align-items: center; }
   .slim .brand { flex-direction: column; gap: 14px; align-self: stretch; margin-inline: -10px; padding: 18px 0 16px; }
-  .slim .brand-name, .slim .navb .lbl, .slim .me-row > span:not(.av), .slim .me-copy-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .slim .brand-name, .slim .navb .lbl, .slim .me-row > span:not(.av) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .slim .navs { width: 100%; }
   .slim .navb { justify-content: center; padding: 10px 0; }
   .slim .navb svg { width: 17px; height: 17px; }
@@ -57,7 +55,6 @@
   .slim .sec { display: none; }
   .slim .area-nav { display: block; width: auto; align-self: stretch; margin: 12px -10px 0; padding: 14px 10px 0; border-top: 1px solid var(--line); }
   .slim .me { align-self: stretch; margin-inline: -10px; padding: 12px 0 14px; align-items: center; gap: 10px; }
-  .slim .me button { width: 36px; height: 36px; padding: 0; }
   .slim .me-row { flex-direction: column; gap: 8px; }
   .slim .me .mset { width: 30px; height: 30px; }
 }
