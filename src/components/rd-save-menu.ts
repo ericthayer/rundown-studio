@@ -1,6 +1,7 @@
 import type { LockedNote, Project } from '../types.js';
 import { StoreElement } from './base.js';
 import { store } from '../store.js';
+import { toast } from '../lib/toast.js';
 import { answerId, saveAnswer, type AnswerPlace } from '../lib/note-locker.js';
 import { UI } from '../lib/icons.js';
 import { h, icon, placeAbove, placeUnder, setText } from '../lib/dom.js';
@@ -91,6 +92,7 @@ export class RdSaveMenu extends StoreElement {
       setText(this.#status, place.inLocker || place.projectId ? this.#where(place) : 'Not saved.');
     } catch {
       setText(this.#status, "Couldn't save to the board. Try again.");
+      toast({ tone: 'error', key: 'save', text: "Couldn't save the answer to the board.", action: { label: 'Retry', run: () => this.#apply() } });
     }
   }
 

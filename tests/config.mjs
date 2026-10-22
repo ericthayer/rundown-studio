@@ -31,11 +31,26 @@ const text = (p, sel) => p.evaluate((s) => document.querySelector(s)?.textConten
   await ctx.close();
 }
 
-// Empty board: onboarding names the configured command.
+// Empty board: the list panel names the configured command.
 {
-  const { p, ctx } = await page({ rows: [], meta: {}, config: own });
-  const msg = await p.evaluate(() => [...document.querySelectorAll('rd-stat-strip *')].map((n) => n.textContent).find((t) => t?.startsWith('No projects yet')));
+  const { p, ctx } = await page({ rows: [], meta: {}, config: own, wait: '.estate' });
+  const msg = await text(p, '.estate-d');
   check('empty state names command', msg?.includes('/rundown:checkin'), msg);
+  check('empty state action names command', (await text(p, '#empty-cta')) === 'Run /rundown:checkin');
+  await ctx.close();
+}
+
+// Feedback links follow meta/config, with the maintainer as the default.
+{
+  const { p, ctx } = await page({ meta: {} });
+  const href = (sel) => p.getAttribute(sel, 'href');
+  check('feedback mails the maintainer by default', (await href('[data-fk="help:feedback"]'))?.startsWith('mailto:ethayer.design@gmail.com?subject=Rundown%20feedback'));
+  check('issue link opens the repo issue form', (await href('[data-fk="help:issue"]')) === 'https://github.com/ericthayer/rundown-studio/issues/new');
+  await p.evaluate(() => window.__pushConfig({ feedbackEmail: 'ada@example.com', issuesUrl: 'https://example.com/issues' }));
+  check('feedbackEmail from config', (await href('[data-fk="help:feedback"]'))?.startsWith('mailto:ada@example.com?'));
+  check('issuesUrl from config', (await href('[data-fk="help:issue"]')) === 'https://example.com/issues');
+  await p.evaluate(() => window.__pushConfig({ feedbackEmail: 'not an email', issuesUrl: 'javascript:alert(1)' }));
+  check('rejects bad feedback targets', (await href('[data-fk="help:feedback"]'))?.startsWith('mailto:ethayer.design@gmail.com?') && (await href('[data-fk="help:issue"]'))?.startsWith('https://github.com/'));
   await ctx.close();
 }
 

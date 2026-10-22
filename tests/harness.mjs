@@ -1,5 +1,5 @@
 // Shared Playwright harness: serves the repo over HTTP (ES modules need it), stubs the artifact runtime,
-// and opens pages against the stub. Used by smoke.mjs and mobile.mjs.
+// and opens pages against the stub. Used by every suite in tests/.
 import http from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
@@ -45,8 +45,12 @@ export const META = { critique: 'Three overlapping config-distribution efforts; 
 
 const stub = ({ rows, meta, config }) => {
   const subs = { rows: [], meta: [], notes: [], config: [] };
+  const rowErrs = [];
   const snap = (r) => ({ docs: r.map((x) => ({ id: x.id, data: () => x })) });
   window.__push = (r) => subs.rows.forEach((f) => f(snap(r)));
+  // Fires the terminal error on every live projects listener (revoked / dead bridge), like the board db.
+  window.__failRows = (code = 'unavailable') => { rowErrs.splice(0).forEach((f) => f({ code, message: code })); subs.rows = []; };
+  window.__subscribes = 0;
   window.__pushMeta = (m) => subs.meta.forEach((f) => f({ id: 'run', data: () => m }));
   window.__pushConfig = (c) => subs.config.forEach((f) => f({ id: 'config', data: () => c }));
   // `notes` persists in localStorage under its own key so it survives reloads, like the board db.
@@ -63,7 +67,13 @@ const stub = ({ rows, meta, config }) => {
     }),
   };
   window.claude = { use: async (n) => (n === 'db' ? {
-    collection: (name) => (name === 'notes' ? notes : { onSnapshot: (f) => { subs.rows.push(f); f(snap(rows)); return () => {}; } }),
+    collection: (name) => (name === 'notes' ? notes : { onSnapshot: (f, err) => {
+      window.__subscribes++;
+      subs.rows.push(f);
+      if (err) rowErrs.push(err);
+      if (!window.__holdRows) f(snap(window.__rows ?? rows));
+      return () => { subs.rows = subs.rows.filter((x) => x !== f); };
+    } }),
     doc: (path) => path === 'meta/config'
       ? { onSnapshot: (f) => { subs.config.push(f); f({ id: 'config', data: () => config }); return () => {}; } }
       : { onSnapshot: (f) => { subs.meta.push(f); f({ id: 'run', data: () => meta }); return () => {}; } },
@@ -76,15 +86,18 @@ export const browser = await chromium.launch();
 
 export async function page(opts = {}) {
   const touch = opts.touch ? { hasTouch: true, isMobile: true } : {};
-  const ctx = await browser.newContext({ viewport: opts.viewport ?? { width: 1440, height: 860 }, colorScheme: opts.scheme ?? 'light', ...touch, ...(opts.video ? { recordVideo: opts.video } : {}) });
+  const ctx = await browser.newContext({ viewport: opts.viewport ?? { width: 1440, height: 860 }, colorScheme: opts.scheme ?? 'light', reducedMotion: opts.motion ?? 'no-preference', ...touch, ...(opts.video ? { recordVideo: opts.video } : {}) });
   const p = await ctx.newPage();
   const errors = [];
   p.on('pageerror', (e) => errors.push(e.message));
   p.on('console', (m) => { if (m.type() === 'error' && !/fonts\.g|ERR_TUNNEL|net::/.test(m.text())) errors.push(m.text()); });
+  // The Lottie player comes from cdnjs: blocked by default (static art), or served from a local copy.
+  await ctx.route('https://cdnjs.cloudflare.com/**', (r) => (opts.lottie ? r.fulfill({ path: opts.lottie, contentType: 'text/javascript', headers: { 'access-control-allow-origin': '*' } }) : r.abort()));
+  if (opts.clock) await p.clock.install();
   await p.addInitScript(stub, { rows: opts.rows ?? ROWS, meta: opts.meta ?? META, config: opts.config });
   if (opts.init) await p.addInitScript(opts.init, opts.initArg);
   await p.goto(URL_);
-  await p.waitForSelector(opts.rows?.length === 0 ? 'rd-stat-strip' : '.pitem');
+  await p.waitForSelector(opts.wait ?? (opts.rows?.length === 0 ? 'rd-stat-strip' : '.pitem'));
   return { p, ctx, errors };
 }
 export const active = (p) => p.evaluate(() => document.activeElement?.dataset?.fk ?? document.activeElement?.tagName);

@@ -6,6 +6,23 @@ import { UI } from '../lib/icons.js';
 import { loadTurns, saveTurns, recap, MAX_TURNS } from '../lib/ask-history.js';
 import { savedAnswer } from './rd-save-menu.js';
 import './rd-save-menu.js';
+/** No streamed text for this long counts as a stalled connection. */
+export const STALL_MS = 45000;
+/** Codes that mean asking can't work in this view: fall back to filtering, never re-ask. */
+const UNAVAILABLE = new Set(['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed']);
+/** Viewer copy per failure, and whether a manual Try again makes sense. Unknown codes read as upstream_error. */
+function failure(code, partial) {
+    switch (code) {
+        case 'rate_limited': return { text: 'Too many questions in a row. Try again in a minute.', retry: true };
+        case 'session_expired': return { text: 'Your claude.ai sign-in expired. Sign in again, then try again.', retry: true };
+        case 'refused': return { text: "Claude couldn't answer that one. Try asking it a different way.", retry: false };
+        case 'empty_completion': return { text: 'Claude came back empty. Try a simpler question.', retry: false };
+        case 'prompt_too_large': return { text: 'Too much project data to send at once. Filter the list down, then ask again.', retry: false };
+        case 'stalled': return { text: 'Claude stopped responding, so this answer timed out.', retry: true };
+        case 'offline': return { text: "You're offline. Ask again when you're back online.", retry: true };
+        default: return { text: partial ? 'Claude became unavailable, so this answer stopped early.' : "Claude isn't available right now. Your projects are fine; only Ask is affected.", retry: true };
+    }
+}
 /** Fields sent to the model: status data only. */
 const FIELDS = ['id', 'name', 'area', 'state', 'priority', 'lastActivity', 'due', 'leftOff', 'decided', 'openDecisions', 'waitingOn', 'blockers', 'nextStep'];
 /**
@@ -116,10 +133,21 @@ export class RdComposer extends StoreElement {
         this.#sync();
         requestAnimationFrame(() => { this.#scroll.scrollTop = this.#scroll.scrollHeight; });
         const keep = (text) => { turn.a = text; saveTurns(this.#turns); };
+        const drop = () => { this.#turns = this.#turns.filter((t) => t !== turn); saveTurns(this.#turns); };
+        if (navigator.onLine === false) {
+            drop();
+            this.#fail(el, out, question, 'offline', '');
+            return;
+        }
         const data = store.state.projects.map((p) => Object.fromEntries(FIELDS.map((k) => [k, p[k]])));
         const prompt = `Today is ${store.state.day}. Below is a JSON list of one person's projects and their latest check-in status. Answer their question in plain text, under 120 words, no markdown headings. Use project names exactly. If the data can't answer it, say what's missing.\n\nProjects:\n${JSON.stringify(data)}\n\n${context ? `Earlier in this conversation:\n${context}\n\n` : ''}Question: ${question}`;
+        // A stream that goes quiet for STALL_MS is aborted and reported as a timeout, not a supersede.
+        let stalled = false;
+        let stall = 0;
+        const arm = () => { clearTimeout(stall); stall = window.setTimeout(() => { stalled = true; aborter.abort(); }, STALL_MS); };
+        arm();
         try {
-            const res = await sample(prompt, { signal: aborter.signal, modelTier: 'quick', onText: ({ text }) => { out.textContent = text; } });
+            const res = await sample(prompt, { signal: aborter.signal, modelTier: 'quick', onText: ({ text }) => { arm(); out.textContent = text; } });
             out.textContent = res.text;
             keep(res.text);
             this.#addSave(el, question, res.text);
@@ -127,30 +155,41 @@ export class RdComposer extends StoreElement {
         }
         catch (e) {
             const err = e;
-            if (err.name === 'AbortError') {
+            const partial = typeof err.text === 'string' && err.text ? err.text : out.textContent !== 'Thinking…' ? out.textContent ?? '' : '';
+            if (!stalled && (err.name === 'AbortError' || err.code === 'cancelled')) {
                 // Superseded by a newer question: keep what streamed, or drop an answer that never started.
-                if (out.textContent && out.textContent !== 'Thinking…') {
-                    keep(out.textContent);
-                    this.#addSave(el, question, out.textContent);
+                if (partial) {
+                    keep(partial);
+                    this.#addSave(el, question, partial);
                 }
                 else {
                     el.remove();
-                    this.#turns = this.#turns.filter((t) => t !== turn);
-                    saveTurns(this.#turns);
+                    drop();
                     this.#sync();
                 }
                 return;
             }
-            this.#turns = this.#turns.filter((t) => t !== turn);
-            saveTurns(this.#turns);
-            if (err.code === 'not_granted') {
-                out.textContent = 'Asking needs permission. The box now filters the list instead.';
+            drop();
+            if (err.code && UNAVAILABLE.has(err.code)) {
+                out.textContent = "Asking Claude isn't available here. The box now filters the list instead.";
                 revokeSampler();
+                return;
             }
-            else {
-                out.textContent = err.code === 'rate_limited' ? 'Too many questions in a row. Try again in a minute.' : "Couldn't get an answer. Try again.";
-            }
+            this.#fail(el, out, question, stalled ? 'stalled' : err.code, err.code === 'refused' ? '' : partial);
         }
+        finally {
+            clearTimeout(stall);
+        }
+    }
+    /** Failed answer: keeps any partial text, says what happened, and offers Try again when it can help. */
+    #fail(el, out, question, code, partial) {
+        const { text, retry } = failure(code, Boolean(partial));
+        el.classList.add('afail');
+        out.replaceChildren(...(partial ? [partial, h('br'), h('br')] : []), h('span', { class: 'aerr' }, text));
+        if (!retry)
+            return;
+        el.append(h('div', { class: 'afoot' }, h('button', { class: 'asave aretry', type: 'button', 'data-fk': 'ask:retry',
+            onclick: () => { el.remove(); this.#sync(); this.focusInput(); void this.ask(question); } }, 'Try again')));
     }
 }
 customElements.define('rd-composer', RdComposer);

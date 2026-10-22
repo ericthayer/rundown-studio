@@ -9,6 +9,7 @@ import './components/rd-stat-strip.js';
 import './components/rd-streak.js';
 import './components/rd-toolbar.js';
 import './components/rd-note.js';
+import './components/rd-status.js';
 import './components/rd-project-list.js';
 import './components/rd-decisions.js';
 import './components/rd-priorities.js';
@@ -20,10 +21,12 @@ import { connectRuntime } from './runtime.js';
 import { byId } from './lib/dom.js';
 import { initCheckin } from './lib/checkin.js';
 import { initViewSwipe } from './lib/view-swipe.js';
+import { initBoardToasts } from './lib/board-toasts.js';
 
 initCheckin(byId<HTMLButtonElement>('copy-cmd-2'));
 initViewSwipe(document.querySelector<HTMLElement>('.ptable') ?? document.body);
 
+initBoardToasts();
 void connectRuntime();
 
 export { store } from './store.js';

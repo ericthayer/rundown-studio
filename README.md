@@ -74,11 +74,19 @@ tests/ask.mjs           Ask Rundown transcript and saving answers to the Locker 
 
 ## Data contract (artifact database)
 
-`projects/{id}` — `name` (required), `area` (`work|client|personal`), `kind` (`project|chat|repo`), `state` (`active|blocked|stale|parked`), `priority` (number, 1 = top), `lastActivity` / `due` (ISO dates), `leftOff`, `nextStep` (strings), `blockers` / `decided` (string arrays), `openDecisions` (strings or `{ text, since }`), `waitingOn` (`{ who, what?, since? }` or strings).
+`projects/{id}` — `name` (required), `area` (`work|client|personal`), `kind` (`project|chat|repo`), `state` (`active|blocked|stale|parked`), `priority` (number, 1 = top), `lastActivity` / `due` (ISO dates), `leftOff`, `nextStep` (strings), `blockers` / `decided` (string arrays), `openDecisions` (strings or `{ text, since }`), `waitingOn` (`{ who, what?, since? }` or strings), `sourceError` (`{ source, detail?, since? }` or a string naming the source: the last check-in couldn't reach it; null or absent once it answers).
 
 Signals: `since` (ISO date) drives the age shown in the **Decisions** rollup (oldest first, parked projects excluded) and on cards. A `blocked` project with `waitingOn` and no `blockers` is waiting on others: it gets a blue dot and leaves **Needs you** until a wait passes 14 days.
 
-`meta/config` — written by `/rundown:setup`: `owner` (sidebar name), `boardUrl`, `schedule` (shown until the first rundown), `checkinCommand` (default `/project-checkin`), plus `repos` and `timezone` for the rundown. All optional.
+`meta/config` — written by `/rundown:setup`: `owner` (sidebar name), `boardUrl`, `schedule` (shown until the first rundown), `checkinCommand` (default `/project-checkin`), `feedbackEmail` and `issuesUrl` (Settings → Help targets; default to the Rundown maintainer and this repo's issue form), plus `repos` and `timezone` for the rundown. All optional.
+
+## Empty and failure states
+
+The list area shows an illustrated panel instead of rows when the board is empty, nothing matches, the database can't be reached (after 12s, or a load error), the browser is offline, or the viewer is signed out. A band under the toolbar covers problems after a good load: offline, live updates paused (a dead `projects` listener; **Try again** opens a fresh one), and rows that couldn't be read (skipped and counted, never thrown on). Changes are announced once each through a polite live region in `<rd-status>`. Ask Rundown failures stay in the transcript with copy per `sample` error code, keep any partial answer, time out after 45s of silence, and offer **Try again** where it can help.
+
+Toasts (bottom center, `src/lib/toast.ts`) say when the board changed: each projects snapshot is diffed against the previous one and summarized in one toast (a new project, a status change, or "Board updated: 3 projects"), never on first load. Successes dismiss after 5s, paused while hovered or focused. Failures (live updates paused, a save the board refused) stay until dismissed and offer **Retry**. The stack is a polite live region, and failure toasts are `role="alert"`.
+
+Illustrations are data (`src/lib/scenes.ts`) rendered as static SVG first and as Lottie (`lottie_light` 5.12.2 from cdnjs, with SRI) only when a panel shows and motion is allowed. Colors come from tokens through tone classes in `styles/states.css`. Set `LOTTIE_FILE=/path/to/lottie_light.min.js` when running `npm test` to also check the real player.
 
 `meta/run` — `nextRun` (string), `critique` (rundown note), `streak` (number) **or** `sessionDays` (ISO date array). Without either, the streak falls back to consecutive check-in days.
 

@@ -16,6 +16,7 @@ Steps:
    - Set `state` to "stale" for any non-parked row whose `lastActivity` is more than 7 days old and that has no newer evidence. Never un-park a parked row.
    - When chats, memory, or commits show real new activity on a project, update `lastActivity` and `leftOff`, and add only decisions {{owner}} personally stated. Set `updatedBy: "rundown"` and `updatedAt` (now, ISO).
    - Keep every existing `since` date on `openDecisions` and `waitingOn`. Never reset one to today.
+   - If a row's repo could not be reached, set `sourceError: {source: "GitHub", detail: "<one short reason>", since: "<YYYY-MM-DD it first failed>"}` on that row (keep an existing `since`). When the repo answers again, set `sourceError` to null. Change nothing else on the row because of the failure.
    - If a clearly new ongoing project appears, add a row (`set`, doc id = kebab-case slug) with state "active", the next unused priority, and nextStep "Run /rundown:checkin to confirm this row".
    - Never invent dates, decisions, priorities or progress. Never delete rows.
 4. Write `meta/run` with `update` + if_version (or `set` if it does not exist): `lastRun` (now, ISO), `nextRun` (the next run time from the schedule "{{schedule}}" in the configured timezone, formatted like "Fri 3:16am"), and `critique` (one candid sentence about the biggest drag across projects, or remove the field if nothing stands out). Leave `streak` and `sessionDays` as they are.

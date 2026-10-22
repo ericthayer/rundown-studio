@@ -5,8 +5,11 @@ import { ICON, KIND, UI } from '../lib/icons.js';
 import { h, icon, preserveFocus, setAttr, setText, type Kid } from '../lib/dom.js';
 import { visibleProjects, activeCount, defaultFilters } from '../domain/filters.js';
 import { AREA_LABEL, isArea, strings, whenLabel } from '../domain/projects.js';
-import { ageLabel, decisions, waitLabel, waitingOnOthers, waits } from '../domain/signals.js';
+import { ageLabel, decisions, sourceError, waitLabel, waitingOnOthers, waits } from '../domain/signals.js';
 import { saveAnswer } from '../lib/note-locker.js';
+import { checkinCommand } from '../lib/config.js';
+import { StatePanel, panelCopy, type PanelKind, type PanelSpec } from '../lib/state-panel.js';
+import { reconnect } from '../runtime.js';
 
 interface Row {
   li: HTMLLIElement;
@@ -26,11 +29,12 @@ export class RdProjectList extends StoreElement {
   #rows = new Map<string, Row>();
   #ul!: HTMLUListElement;
   #empty!: HTMLLIElement;
+  #panel = new StatePanel('estate-h');
 
   protected setup(): void {
     this.#ul = this.ref<HTMLUListElement>('list');
-    this.#empty = h('li', { class: 'empty' });
-    this.watch(['projects', 'filter', 'query', 'filters', 'openId', 'status', 'day', 'notes'], () => preserveFocus(() => this.#render()));
+    this.#empty = h('li', { class: 'empty' }, this.#panel.el);
+    this.watch(['projects', 'filter', 'query', 'filters', 'openId', 'status', 'link', 'day', 'notes', 'config'], () => preserveFocus(() => this.#render()));
     this.listen(document, 'rd:reveal-project', (e) => this.reveal((e as CustomEvent<{ id: string }>).detail.id));
   }
 
@@ -48,16 +52,15 @@ export class RdProjectList extends StoreElement {
     const seen = new Set<string>();
 
     if (!shown.length) {
-      const filtered = s.projects.length > 0;
-      this.#empty.replaceChildren(filtered ? 'Nothing matches. ' : 'Check-ins add rows here.');
-      if (filtered && (activeCount(s.filters) || s.query || s.filter !== 'all')) {
-        this.#empty.append(h('button', { class: 'fclear', type: 'button', 'data-fk': 'list:clear', onclick: () => store.set({ filters: { ...defaultFilters(), sort: s.filters.sort }, query: '', filter: 'all' }) }, 'Clear filters'));
-      }
-      this.#ul.replaceChildren(this.#empty);
+      const spec = this.#spec();
+      if (spec) this.#panel.set(spec);
+      else this.#panel.stop();
+      this.#ul.replaceChildren(...(spec ? [this.#empty] : []));
       this.#rows.clear();
       return;
     }
     this.#empty.remove();
+    this.#panel.stop();
 
     shown.forEach((p, i) => {
       seen.add(p.id);
@@ -69,6 +72,27 @@ export class RdProjectList extends StoreElement {
     for (const [id, row] of this.#rows) {
       if (!seen.has(id)) { row.li.remove(); this.#rows.delete(id); }
     }
+  }
+
+  /** Which panel stands in for the rows; null while the first load is in flight. */
+  #spec(): PanelSpec | null {
+    const s = store.state;
+    const offline = s.link === 'offline' || navigator.onLine === false;
+    let kind: PanelKind | null = s.status === 'signed-out' ? 'signed-out' : s.status === 'error' ? (offline ? 'offline' : 'error') : null;
+    // A retry in flight keeps the failure panel up, with its button busy, instead of blanking the list.
+    const failed = this.#panel.kind === 'error' || this.#panel.kind === 'offline';
+    if (s.status === 'loading') kind = failed ? this.#panel.kind : null;
+    if (s.status === 'ready') kind = s.projects.length ? 'nomatch' : 'empty';
+    this.#panel.busy(s.status === 'loading');
+    if (!kind) return null;
+    const cmd = checkinCommand();
+    const copy = panelCopy(kind, cmd, s.query);
+    const filtered = Boolean(activeCount(s.filters) || s.query || s.filter !== 'all');
+    const retry = { label: 'Try again', run: () => reconnect() };
+    const action = kind === 'empty' ? { label: `Run ${cmd}`, id: 'empty-cta', run: () => document.getElementById('copy-cmd-2')?.click() }
+      : kind === 'nomatch' ? (filtered ? { label: 'Clear filters', run: () => store.set({ filters: { ...defaultFilters(), sort: s.filters.sort }, query: '', filter: 'all' }) } : undefined)
+        : kind === 'error' || kind === 'offline' ? retry : undefined;
+    return { kind, ...copy, action };
   }
 
   #create(p: Project): Row {
@@ -96,13 +120,18 @@ export class RdProjectList extends StoreElement {
     setText(row.time, whenLabel(p));
     setAttr(row.btn, 'aria-expanded', String(open));
 
-    const badgeSig = `${p.area ?? ''}|${p.kind ?? ''}`;
+    const src = sourceError(p);
+    const badgeSig = `${p.area ?? ''}|${p.kind ?? ''}|${src?.source ?? ''}`;
     if (badgeSig !== row.badgeSig) {
       row.badgeSig = badgeSig;
       const area = isArea(p.area) ? p.area : null;
       const kind = p.kind && p.kind in KIND ? p.kind : null;
       row.badges.replaceChildren(h('span', { class: area ? `b-${area}` : 'b-kind', title: area ? AREA_LABEL[area] : 'Other' }, (area ? AREA_LABEL[area] : 'O').charAt(0)));
       if (kind) row.badges.append(h('span', { class: 'b-kind', title: kind.charAt(0).toUpperCase() + kind.slice(1), html: `<svg viewBox="0 0 24 24" aria-hidden="true">${KIND[kind]}</svg>` }));
+      if (src) {
+        const why = `Couldn't reach ${src.source} at the last check-in`;
+        row.badges.append(h('span', { class: 'b-src', role: 'img', 'aria-label': why, title: why, html: `<svg viewBox="0 0 24 24" aria-hidden="true">${UI.unplug}</svg>` }));
+      }
     }
 
     if (!open) {
@@ -112,7 +141,7 @@ export class RdProjectList extends StoreElement {
       return;
     }
     const saved = (store.state.notes ?? []).filter((n) => n.kind === 'answer' && n.projectId === p.id);
-    const sig = JSON.stringify([p.nextStep, p.leftOff, p.openDecisions, p.waitingOn, p.blockers, p.decided, p.area, whenLabel(p), saved]);
+    const sig = JSON.stringify([p.nextStep, p.leftOff, p.openDecisions, p.waitingOn, p.blockers, p.decided, p.sourceError, p.area, whenLabel(p), saved]);
     if (row.detail && sig === row.detailSig) return;
     const card = this.#card(p, saved);
     const detail = h('div', { class: 'pitem', style: 'padding-top:0' }, h('span'), card);
@@ -124,7 +153,9 @@ export class RdProjectList extends StoreElement {
   /** Next-step card (Primer-style): icon tile, heading, description, detail groups, meta footer. */
   #card(p: Project, saved: readonly LockedNote[]): HTMLElement {
     const aged = (label: string, age: number | null): Kid[] => [label, age === null ? null : h('span', { class: 'ns-age' }, ` · ${ageLabel(age)}`)];
+    const src = sourceError(p);
     const groups = ([
+      ["Couldn't reach", src ? [aged(src.detail ? `${src.source}: ${src.detail}` : src.source, src.age)] : []],
       ['Open decisions', decisions(p).map((d) => aged(d.text, d.age))],
       ['Waiting on', waits(p).map((w) => aged(waitLabel(w), w.age))],
       ['Blocked by', strings(p.blockers)],
