@@ -93,8 +93,10 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
 }
 // 6. Persistence + legacy migration.
 {
-  const { p, ctx } = await page({ init: () => { if (!localStorage.getItem('rundown.prefs')) { localStorage.setItem('rundown.slim', '1'); localStorage.setItem('rundown.agent', '0'); } } });
+  const { p, ctx } = await page({ tour: true, init: () => { if (!localStorage.getItem('rundown.prefs')) { localStorage.setItem('rundown.slim', '1'); localStorage.setItem('rundown.agent', '0'); } } });
   check('legacy prefs migrate (slim + rail)', await p.evaluate(() => { const c = document.getElementById('shell').classList; return c.contains('slim') && c.contains('agent-rail'); }));
+  await p.waitForTimeout(1200);
+  check('legacy viewer is not shown the first-run tour', !(await p.isVisible('dialog.tour[open]')));
   await p.screenshot({ path: join(OUT, 'wide-slim-rail.png') });
   await ctx.close();
 }

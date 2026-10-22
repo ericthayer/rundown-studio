@@ -95,6 +95,8 @@ export async function page(opts = {}) {
   await ctx.route('https://cdnjs.cloudflare.com/**', (r) => (opts.lottie ? r.fulfill({ path: opts.lottie, contentType: 'text/javascript', headers: { 'access-control-allow-origin': '*' } }) : r.abort()));
   if (opts.clock) await p.clock.install();
   await p.addInitScript(stub, { rows: opts.rows ?? ROWS, meta: opts.meta ?? META, config: opts.config });
+  // Other suites run as a viewer who has seen the first-run tour; tests/onboarding.mjs passes `tour: true`.
+  if (!opts.tour) await p.addInitScript(() => { if (!localStorage.getItem('rundown.prefs')) localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, tour: 'done', tourVersion: 1 })); });
   if (opts.init) await p.addInitScript(opts.init, opts.initArg);
   await p.goto(URL_);
   await p.waitForSelector(opts.wait ?? (opts.rows?.length === 0 ? 'rd-stat-strip' : '.pitem'));

@@ -1,4 +1,4 @@
-import type { ThemeMode, ToolbarFilters } from '../types.js';
+import type { ThemeMode, ToolbarFilters, TourOutcome } from '../types.js';
 
 /** Per-viewer conveniences only (layout, filters, dismissals). Never shared or durable state. */
 export interface Prefs {
@@ -14,10 +14,15 @@ export interface Prefs {
   noteSeen: string;
   /** Color mode; 'system' follows the OS setting. */
   theme: ThemeMode;
+  /** First-run tour outcome; '' = not seen yet, so it may auto-start once. */
+  tour: TourOutcome;
+  /** Version of the tour the viewer last finished or dismissed. */
+  tourVersion: number;
 }
 
 const KEY = 'rundown.prefs';
-const DEFAULTS: Prefs = { v: 1, slim: false, areasOpen: true, agentOpen: true, agentW: null, drawer: 1, filters: null, noteDismissed: '', noteSeen: '', theme: 'system' };
+const LEGACY = ['rundown.slim', 'rundown.agent', 'rundown.agentW', 'rundown.drawer', 'rundown.filters', 'rundown.noteDismissed', 'rundown.noteSeen'];
+const DEFAULTS: Prefs = { v: 1, slim: false, areasOpen: true, agentOpen: true, agentW: null, drawer: 1, filters: null, noteDismissed: '', noteSeen: '', theme: 'system', tour: '', tourVersion: 0 };
 
 function read(key: string): string | null {
   try { return localStorage.getItem(key); } catch { return null; }
@@ -35,6 +40,8 @@ function migrateLegacy(): Prefs {
   try { p.filters = JSON.parse(read('rundown.filters') ?? 'null') as Partial<ToolbarFilters> | null; } catch { p.filters = null; }
   p.noteDismissed = read('rundown.noteDismissed') ?? '';
   p.noteSeen = read('rundown.noteSeen') ?? '';
+  // Anyone with pre-refactor keys already knows the board; don't interrupt them with the tour.
+  if (LEGACY.some((k) => read(k) !== null)) p.tour = 'done';
   return p;
 }
 
@@ -43,7 +50,9 @@ function load(): Prefs {
   if (!raw) return migrateLegacy();
   try {
     const parsed = JSON.parse(raw) as Partial<Prefs>;
-    return parsed.v === 1 ? { ...DEFAULTS, ...parsed } : { ...DEFAULTS };
+    if (parsed.v !== 1) return { ...DEFAULTS };
+    // Prefs saved before the tour shipped belong to an existing viewer: mark the tour seen.
+    return { ...DEFAULTS, ...('tour' in parsed ? {} : { tour: 'done' as const }), ...parsed };
   } catch {
     return { ...DEFAULTS };
   }
@@ -61,7 +70,7 @@ export const prefs = {
   },
   /** Reset layout + filters to defaults. */
   reset(): void {
-    current = { ...DEFAULTS };
+    current = { ...DEFAULTS, tour: current.tour, tourVersion: current.tourVersion };
     try { localStorage.setItem(KEY, JSON.stringify(current)); } catch { /* ignore */ }
   },
 };

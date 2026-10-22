@@ -1,0 +1,25 @@
+/* First-run tour (lazy: loaded by tour-guide.ts). A full-viewport modal dialog: the spotlight's
+   spread shadow is the scrim on anchored steps, ::backdrop is the scrim on centered ones. */
+.tour { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); overflow: hidden; }
+.tour::backdrop { background: transparent; }
+.tour.centered::backdrop { background: var(--scrim); }
+.tour-spot { position: absolute; border-radius: 12px; box-shadow: 0 0 0 200vmax var(--scrim), 0 0 0 2px var(--surface); pointer-events: none; }
+.tour.centered .tour-spot { display: none; }
+.tour-card { position: absolute; width: min(340px, calc(100vw - 32px)); padding: 16px 16px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); box-shadow: 0 16px 40px -12px rgba(0, 0, 0, .28); }
+.tour-n { margin: 0 0 4px; color: var(--muted); font-size: max(var(--fs-floor), 0.75rem); font-variant-numeric: tabular-nums; }
+.tour-h { margin: 0 0 6px; font-family: var(--font-display); font-size: max(var(--fs-floor), 1.0769rem); font-weight: 600; line-height: 1.3; }
+.tour-h:focus { outline: none; } /* Focused only so screen readers announce each step; not operable. */
+.tour-d p { margin: 0 0 8px; font-size: max(var(--fs-floor), 0.8846rem); line-height: 1.5; color: var(--ink); text-wrap: pretty; }
+.tour-f { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.tour-skip { margin-right: auto; height: 32px; padding: 0 4px; border: 0; background: none; color: var(--muted); font: inherit; font-size: max(var(--fs-floor), 0.8462rem); text-decoration: underline; text-underline-offset: 3px; }
+.tour-skip:hover { color: var(--ink); }
+.tour-btn { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--chip); color: var(--ink); font-family: var(--font-display); font-size: max(var(--fs-floor), 0.8846rem); font-weight: 500; }
+.tour-btn:hover { box-shadow: inset 0 0 0 1px var(--line); }
+@media (pointer: coarse) {
+  .tour-skip, .tour-btn, .tour-next { min-height: 44px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tour-spot { transition: top .25s ease, left .25s ease, width .25s ease, height .25s ease; }
+  .tour-card { transition: top .25s ease, left .25s ease; animation: tour-in .2s ease-out; }
+}
+@keyframes tour-in { from { opacity: 0; transform: translateY(4px); } }
