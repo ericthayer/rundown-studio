@@ -93,8 +93,20 @@ export type Sampler = (
   opts: { signal?: AbortSignal; modelTier?: 'quick' | 'standard'; onText?: (chunk: { text: string }) => void },
 ) => Promise<SampleResult>;
 
+/** `room` capability: only the hand-off to the viewer's own Claude chat beside the board. */
+export type SendAvailability = 'available' | 'available_if_summoned' | 'available_if_opened' | 'no_session' | 'unsupported' | 'off';
+export type ToClaude = { label?: string } & { [key: string]: unknown };
+export interface ArtifactRoom {
+  canSendToClaudeSession(): Promise<SendAvailability>;
+  sendToClaudeSession(data: ToClaude, opts?: { deliver?: 'stage' | 'send'; attachPresence?: boolean }): Promise<{ to: 'pane' | 'session' | 'new' }>;
+}
+
 declare global {
   interface Window {
-    claude?: { use(name: 'db'): Promise<ArtifactDb | null>; use(name: 'sample'): Promise<Sampler | null> };
+    claude?: {
+      use(name: 'db'): Promise<ArtifactDb | null>;
+      use(name: 'sample'): Promise<Sampler | null>;
+      use(name: 'room'): Promise<ArtifactRoom | null>;
+    };
   }
 }

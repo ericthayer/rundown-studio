@@ -17,13 +17,10 @@ import './components/rd-assistant.js';
 import './components/rd-focus.js';
 import './components/rd-settings.js';
 import { connectRuntime } from './runtime.js';
-import { byId, copyCommand } from './lib/dom.js';
+import { byId } from './lib/dom.js';
+import { initCheckin } from './lib/checkin.js';
 
-const cta = byId<HTMLButtonElement>('copy-cmd-2');
-cta.addEventListener('click', () => {
-  const label = cta.querySelector('.cta-lbl');
-  if (label) void copyCommand(label, '/project-checkin');
-});
+initCheckin(byId<HTMLButtonElement>('copy-cmd-2'));
 
 void connectRuntime();
 

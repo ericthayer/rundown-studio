@@ -66,18 +66,23 @@ export function preserveFocus<T>(fn: () => T): T {
   return result;
 }
 
-const copyTimers = new WeakMap<Element, number>();
+const flashTimers = new WeakMap<Element, number>();
 
-/** Copies the check-in command and flashes a confirmation; repeated clicks restart one timer. */
+/** Shows a short confirmation on a button label, then restores it; repeated calls restart one timer. */
+export function flashLabel(labelEl: Element, text: string, idle: string): void {
+  labelEl.textContent = text;
+  clearTimeout(flashTimers.get(labelEl));
+  flashTimers.set(labelEl, window.setTimeout(() => { labelEl.textContent = idle; }, 1800));
+}
+
+/** Copies the check-in command and flashes a confirmation. */
 export async function copyCommand(labelEl: Element, idle: string, command = '/project-checkin'): Promise<void> {
   try {
     await navigator.clipboard.writeText(command);
-    labelEl.textContent = 'Copied';
+    flashLabel(labelEl, 'Copied', idle);
   } catch {
-    labelEl.textContent = `Type ${command}`;
+    flashLabel(labelEl, `Type ${command}`, idle);
   }
-  clearTimeout(copyTimers.get(labelEl));
-  copyTimers.set(labelEl, window.setTimeout(() => { labelEl.textContent = idle; }, 1800));
 }
 
 /** Positions a fixed popover under its anchor, kept inside the viewport. */
