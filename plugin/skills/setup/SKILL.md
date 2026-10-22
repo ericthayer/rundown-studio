@@ -16,7 +16,7 @@ Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
 
 ## Steps
 
-1. **Check for an existing board.** Call `Artifact` with `action: "list"` and look for artifacts titled "Rundown".
+1. **Check for an existing board.** Call `Artifact` with `action: "list"`, `scope: "mine"`, `limit: 200` and look for artifacts titled "Rundown". Never offer a board from a `shared` or `all` listing.
    - None: plan to publish a new board.
    - One or more: show them (title, URL, last updated) and ask whether to reuse one or make a new one. If the user reuses one, skip step 3 and use that URL in every later step. If they want new board code on it, point them to `/rundown:update`.
    - Never write to a board the user did not pick.

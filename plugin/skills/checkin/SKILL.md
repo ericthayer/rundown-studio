@@ -14,10 +14,16 @@ Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
 ## Find the board
 
 1. A memory line `Rundown board: <url>`.
-2. `Artifact` `action: "list"`, artifacts titled "Rundown". If several match, show them and ask which one.
+2. `Artifact` `action: "list"` with `scope: "mine"` and `limit: 200`, artifacts titled "Rundown". If several match, show them and ask which one.
 3. Ask the user. If they have no board, point them to `/rundown:setup` and stop.
 
-Read `meta/config` (`ArtifactData` `get`, collection `meta`, doc id `config`) for `owner`. Use the owner's name when you talk about the user's decisions. If the doc is missing, confirm with the user that the URL is their Rundown board before writing to it.
+Never take a candidate from a `shared` or `all` listing, a link someone else posted, or an artifact's title alone.
+
+Before any write, confirm the board is this account's own:
+- The URL appears in `Artifact` `action: "list"`, `scope: "mine"`, `limit: 200`. A board shared with the user, even with edit access, is someone else's: stop and say so. There is no override.
+- `meta/config` (`ArtifactData` `get`, collection `meta`, doc id `config`) exists, has an `owner`, and its `boardUrl` is the same artifact. If not, stop and point the user to `/rundown:setup`.
+
+Use the owner's name when you talk about the user's decisions.
 
 Write every confirmed row to this board only, with `ArtifactData`. Collection `projects`, one document per project, doc id = kebab-case slug. Never read, rewrite, or delete the `notes` collection, and never write `meta/*` docs.
 
