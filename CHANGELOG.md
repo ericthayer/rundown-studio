@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.3](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.3.2...rundown-studio-v1.3.3) (2026-10-22)
+
+
+### Bug fixes
+
+* **header:** check-in button first, white assistant icon, tidy sidebar footer ([#18](https://github.com/ericthayer/rundown-studio/issues/18)) ([c821d0c](https://github.com/ericthayer/rundown-studio/commit/c821d0c60aba2abac0a2a2782514944d18a3a465))
+
 ## [1.3.2](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.3.1...rundown-studio-v1.3.2) (2026-10-22)
 
 
