@@ -47,6 +47,7 @@ class Store {
 export const store = new Store({
   projects: [],
   meta: {},
+  config: {},
   status: 'loading',
   filter: 'all',
   query: '',

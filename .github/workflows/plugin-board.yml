@@ -1,0 +1,30 @@
+# Keeps plugin/board (the board copy the Rundown plugin publishes) in step with the source on main,
+# so board PRs don't have to regenerate it by hand. Commits only when the built files changed.
+name: Plugin board
+
+on:
+  push:
+    branches: [main]
+    paths: ['index.html', 'styles/**', 'src/**', 'tsconfig.json']
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm i --no-save typescript@5
+      - run: npm run plugin
+      - name: Commit if changed
+        run: |
+          git add plugin/board
+          git diff --cached --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(plugin): sync board copy"
+          git push

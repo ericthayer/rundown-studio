@@ -5,6 +5,7 @@ import { prefs } from '../lib/prefs.js';
 import { ICON } from '../lib/icons.js';
 import { copyCommand, h, icon, setAttr, setText } from '../lib/dom.js';
 import { needsYou } from '../domain/projects.js';
+import { checkinCommand, initials } from '../lib/config.js';
 import { decisionCount, waits } from '../domain/signals.js';
 
 type NavKey = Extract<RailFilter, keyof typeof ICON>;
@@ -47,12 +48,18 @@ export class RdSidebar extends StoreElement {
       const current = this.#items.get(s.filter as NavKey);
       if (current) requestAnimationFrame(() => revealTab(current.btn));
     });
-    this.watch(['meta'], (_c, s) => setText(this.ref('run'), s.meta.nextRun ? `Next run ${s.meta.nextRun}` : 'Mon & Fri, 3:16am'));
+    this.watch(['meta', 'config'], (_c, s) => setText(this.ref('run'), s.meta.nextRun ? `Next run ${s.meta.nextRun}` : s.config.schedule ?? 'No schedule yet'));
+    this.watch(['config'], (_c, s) => {
+      const owner = s.config.owner ?? 'Rundown';
+      setText(this.ref('owner'), owner);
+      setText(this.ref('initials'), initials(owner));
+      setAttr(this.ref('copy'), 'data-tip', `Copy ${checkinCommand()}`);
+    });
 
     this.#setupAreas();
     this.#setupSlim();
     const copy = this.ref<HTMLButtonElement>('copy');
-    copy.addEventListener('click', () => void copyCommand(this.ref('copy-label'), 'Copy command'));
+    copy.addEventListener('click', () => void copyCommand(this.ref('copy-label'), 'Copy command', checkinCommand()));
   }
 
   #setupAreas(): void {
