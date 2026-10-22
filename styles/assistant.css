@@ -75,12 +75,12 @@
 .rbtn.chat[data-unread]::before { content: ""; position: absolute; top: 3px; right: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--peach); box-shadow: 0 0 0 2px var(--shell); }
 
 @media (min-width: 1061px) {
-  .agent { position: relative; }
+  .agent { position: relative; margin: 0; border-radius: 0; background: var(--rail); border-left: 1px solid var(--line); padding: 16px 12px 12px; }
   .aresize { display: block; position: absolute; top: 16px; bottom: 16px; left: -9px; width: 12px; cursor: col-resize; touch-action: none; border-radius: 6px; z-index: 2; }
   .aresize::before { content: ""; position: absolute; top: 0; bottom: 0; left: 4px; width: 4px; border-radius: 2px; background: transparent; transition: background .15s; }
   .aresize:hover::before, .aresize:focus-visible::before { background: var(--line); }
   .resizing .aresize::before { background: var(--muted); }
-  .agent-rail .agent { background: transparent; padding: 14px 0 12px; margin-left: 0; align-items: center; }
+  .agent-rail .agent { padding: 14px 0 12px; align-items: center; }
   .agent-rail .agent > :not(.arail) { display: none; }
   .agent-rail .arail { display: flex; }
   .agent:not(.is-rail) > :not(.arail):not(.aresize) { animation: afade .2s ease; }

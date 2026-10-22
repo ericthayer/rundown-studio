@@ -11,8 +11,9 @@
 /* Phone layout: the shell fills the screen; the list panel runs edge to edge. */
 @media (max-width: 720px) {
   .shell, .shell.slim { border-radius: 0; box-shadow: none; }
-  .center { padding: 18px 16px max(0px, env(safe-area-inset-bottom, 0px)); }
-  .ptable { margin-inline: -16px; border-radius: 0; border-inline: 0; border-bottom: 0; }
+  .center { padding: 18px 0 max(0px, env(safe-area-inset-bottom, 0px)); }
+  .phead, .pmeta { padding-inline: 16px; }
+  .ptable { border-top: 1px solid var(--line); }
 
   /* Settings: the account footer is hidden on phones, so its gear moves to the top bar. */
   .rail { position: relative; }
