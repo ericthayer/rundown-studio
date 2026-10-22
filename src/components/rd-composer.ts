@@ -2,22 +2,31 @@ import { StoreElement, emit } from './base.js';
 import { store } from '../store.js';
 import { getSampler, revokeSampler } from '../runtime.js';
 import { h } from '../lib/dom.js';
+import { type AskTurn, loadTurns, saveTurns, recap, MAX_TURNS } from '../lib/ask-history.js';
 
 /** Fields sent to the model: status data only. */
 const FIELDS = ['id', 'name', 'area', 'state', 'priority', 'lastActivity', 'due', 'leftOff', 'decided', 'openDecisions', 'waitingOn', 'blockers', 'nextStep'] as const;
 
 /**
- * Ask box + answer area. With the `sample` capability it asks Claude about the projects; without it,
- * the same box filters the list (writes `query`).
+ * Ask box + transcript. With the `sample` capability it asks Claude about the projects; without it,
+ * the same box filters the list (writes `query`). The transcript is kept for this tab only.
  */
 export class RdComposer extends StoreElement {
   #aborter: AbortController | null = null;
   #input!: HTMLTextAreaElement;
-  #answer!: HTMLElement;
+  #scroll!: HTMLElement;
+  #log!: HTMLElement;
+  #head!: HTMLElement;
+  #turns: AskTurn[] = loadTurns();
 
   protected setup(): void {
     this.#input = this.ref<HTMLTextAreaElement>('input');
-    this.#answer = this.ref('answer');
+    this.#scroll = this.ref('scroll');
+    this.#log = this.ref('log');
+    this.#head = this.ref('head');
+    this.ref('clear').addEventListener('click', () => this.clear());
+    this.#log.replaceChildren(...this.#turns.map((t) => this.#turnEl(t.q, t.a || "Couldn't get an answer.")[0]));
+    this.#sync();
     const form = this.ref<HTMLFormElement>('form');
     form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -38,6 +47,26 @@ export class RdComposer extends StoreElement {
     this.#input.focus();
   }
 
+  /** Drops this tab's transcript and stops any answer in flight. */
+  clear(): void {
+    this.#aborter?.abort();
+    this.#turns = [];
+    saveTurns(this.#turns);
+    this.#log.replaceChildren();
+    this.#sync();
+    this.focusInput();
+  }
+
+  #turnEl(q: string, a: string): [HTMLElement, HTMLElement] {
+    const out = h('div', {}, a);
+    return [h('article', { class: 'answer' }, h('div', { class: 'q' }, q), out), out];
+  }
+
+  #sync(): void {
+    this.#head.hidden = !this.#turns.length;
+    while (this.#log.childElementCount > MAX_TURNS) this.#log.firstElementChild?.remove();
+  }
+
   async ask(question: string): Promise<void> {
     if (!question) return;
     this.#input.value = question;
@@ -46,21 +75,35 @@ export class RdComposer extends StoreElement {
       store.set({ query: question.toLowerCase() });
       return;
     }
+    this.#input.value = '';
     this.#aborter?.abort();
     const aborter = new AbortController();
     this.#aborter = aborter;
-    const out = h('div', {}, 'Thinking…');
-    this.#answer.hidden = false;
-    this.#answer.replaceChildren(h('div', { class: 'q' }, question), out);
+    const turn: AskTurn = { q: question, a: '', at: new Date().toISOString() };
+    const context = recap(this.#turns);
+    this.#turns = [...this.#turns, turn].slice(-MAX_TURNS);
+    const [el, out] = this.#turnEl(question, 'Thinking…');
+    this.#log.append(el);
+    this.#sync();
+    requestAnimationFrame(() => { this.#scroll.scrollTop = this.#scroll.scrollHeight; });
+    const keep = (text: string): void => { turn.a = text; saveTurns(this.#turns); };
     const data = store.state.projects.map((p) => Object.fromEntries(FIELDS.map((k) => [k, p[k]])));
-    const prompt = `Today is ${store.state.day}. Below is a JSON list of one person's projects and their latest check-in status. Answer their question in plain text, under 120 words, no markdown headings. Use project names exactly. If the data can't answer it, say what's missing.\n\nProjects:\n${JSON.stringify(data)}\n\nQuestion: ${question}`;
+    const prompt = `Today is ${store.state.day}. Below is a JSON list of one person's projects and their latest check-in status. Answer their question in plain text, under 120 words, no markdown headings. Use project names exactly. If the data can't answer it, say what's missing.\n\nProjects:\n${JSON.stringify(data)}\n\n${context ? `Earlier in this conversation:\n${context}\n\n` : ''}Question: ${question}`;
     try {
       const res = await sample(prompt, { signal: aborter.signal, modelTier: 'quick', onText: ({ text }) => { out.textContent = text; } });
       out.textContent = res.text;
+      keep(res.text);
       emit(this, 'rd:answer', undefined);
     } catch (e) {
       const err = e as { name?: string; code?: string };
-      if (err.name === 'AbortError') return;
+      if (err.name === 'AbortError') {
+        // Superseded by a newer question: keep what streamed, or drop an answer that never started.
+        if (out.textContent && out.textContent !== 'Thinking…') keep(out.textContent);
+        else { el.remove(); this.#turns = this.#turns.filter((t) => t !== turn); saveTurns(this.#turns); this.#sync(); }
+        return;
+      }
+      this.#turns = this.#turns.filter((t) => t !== turn);
+      saveTurns(this.#turns);
       if (err.code === 'not_granted') {
         out.textContent = 'Asking needs permission. The box now filters the list instead.';
         revokeSampler();

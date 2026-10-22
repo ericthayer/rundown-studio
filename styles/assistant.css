@@ -27,6 +27,11 @@
 
 .ascroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 .ascroll > :first-child { margin-top: auto; }
+.ahead { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 2px; color: var(--muted); font-size: max(var(--fs-floor), 0.7692rem); }
+.ahead[hidden] { display: none; }
+.aclear { border: 0; background: none; padding: 4px 6px; margin: -4px -6px; border-radius: 6px; color: var(--muted); font: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.aclear:hover { color: var(--ink); }
+.alog { display: flex; flex-direction: column; gap: 10px; }
 .answer { background: var(--chip); border-radius: 10px; padding: 10px 12px; font-size: max(var(--fs-floor), 0.9231rem); white-space: pre-wrap; }
 .answer .q { color: var(--muted); font-size: max(var(--fs-floor), 0.8462rem); margin-bottom: 6px; white-space: normal; }
 .composer { flex: none; border-radius: 14px; padding: 8px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--line); }
