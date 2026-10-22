@@ -4,19 +4,25 @@ import { prefs } from '../lib/prefs.js';
 import { applyTheme } from '../lib/theme.js';
 import { THEME } from '../lib/icons.js';
 import { h, icon, placeAbove, placeUnder } from '../lib/dom.js';
+import type { RdNoteLocker } from './rd-note-locker.js';
+import './rd-note-locker.js';
 
 const MODES: readonly [ThemeMode, string][] = [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']];
 
-/** Account settings popover next to the viewer's name. Holds per-viewer preferences (color mode). */
+/** Account settings popover next to the viewer's name. Holds per-viewer preferences (color mode) and the note locker. */
 export class RdSettings extends StoreElement {
   protected setup(): void {
     const btn = this.ref<HTMLButtonElement>('btn');
     const pop = this.ref('pop');
     const current = prefs.get('theme');
+    const locker = document.createElement('rd-note-locker') as RdNoteLocker;
+    locker.className = 'nlock';
     pop.replaceChildren(h('fieldset', { class: 'fset' }, h('legend', {}, 'Color mode'),
       MODES.map(([value, label]) => h('label', { class: 'fopt' },
         h('input', { type: 'radio', name: 'theme', value, checked: value === current, 'data-fk': `theme:${value}`, onchange: () => this.#set(value) }),
-        icon(THEME[value]), label))));
+        icon(THEME[value]), label))), locker);
+    // Locker entries live in per-viewer storage; re-read them before the popover is measured.
+    pop.addEventListener('beforetoggle', (e) => { if ((e as ToggleEvent).newState === 'open') locker.refresh(); });
     pop.addEventListener('toggle', (e) => {
       const open = (e as ToggleEvent).newState === 'open';
       btn.setAttribute('aria-expanded', String(open));

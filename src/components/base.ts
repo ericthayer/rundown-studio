@@ -44,6 +44,7 @@ export abstract class StoreElement extends HTMLElement {
 export interface RundownEvents {
   'rd:reveal-project': CustomEvent<{ id: string }>;
   'rd:answer': CustomEvent<void>;
+  'rd:note-restore': CustomEvent<{ text: string }>;
 }
 
 export function emit<K extends keyof RundownEvents>(from: Element, type: K, detail: RundownEvents[K]['detail']): void {

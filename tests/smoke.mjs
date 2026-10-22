@@ -178,4 +178,38 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
   await none.ctx.close();
 }
 
+// 11. Note locker: dismissed notes stay in settings for 14 days and the current one can be shown again.
+{
+  const old = { text: 'Old: archive Token Map.', at: new Date(Date.now() - 3 * 864e5).toISOString() };
+  const expired = { text: 'Expired note.', at: new Date(Date.now() - 15 * 864e5).toISOString() };
+  const seed = (notes) => { if (!localStorage.getItem('rundown.prefs')) localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, noteLocker: notes })); };
+  const { p, ctx, errors } = await page({ init: seed, initArg: [old, expired] });
+  check('note shows before dismissal', await p.isVisible('rd-note'));
+  await p.click('.note-x');
+  check('dismiss hides the note', !(await p.isVisible('rd-note')));
+  await p.reload(); await p.waitForSelector('.pitem');
+  check('dismissed note stays hidden after reload', !(await p.isVisible('rd-note')));
+  await p.click('.mset'); await p.waitForTimeout(100);
+  const items = await p.locator('.nlock-list li .nlock-text').allTextContents();
+  check('locker lists dismissed notes, newest first, expired dropped', items.length === 2 && items[0] === META.critique && items[1] === old.text, JSON.stringify(items));
+  check('only the current note can be shown again', (await p.locator('.nlock-btn').count()) === 1);
+  check('settings popover stays in viewport with locker', await p.evaluate(() => { const r = document.getElementById('me-settings').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight && r.right <= innerWidth; }));
+  await p.screenshot({ path: join(OUT, 'note-locker.png') });
+  await p.click('.nlock-btn');
+  check('show again restores the banner', await p.isVisible('rd-note') && !(await p.isVisible('#me-settings')));
+  await p.reload(); await p.waitForSelector('.pitem');
+  check('restored note survives reload', await p.isVisible('rd-note'));
+  await p.click('.mset'); await p.waitForTimeout(100);
+  check('restored note leaves the locker', (await p.locator('.nlock-list li').count()) === 1);
+  await p.keyboard.press('Escape');
+  await p.evaluate((m) => window.__pushMeta({ ...m, critique: 'A newer note.' }), META);
+  check('a new note shows even after an earlier dismissal', await p.isVisible('rd-note'));
+  check('no console errors (locker)', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+  const legacy = await page({ init: () => localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, noteDismissed: 'Three overlapping config-distribution efforts; pick tharness.' })) });
+  await legacy.p.click('.mset'); await legacy.p.waitForTimeout(100);
+  check('note dismissed before the locker existed is kept', (await legacy.p.locator('.nlock-list li').count()) === 1 && (await legacy.p.locator('.nlock-btn').count()) === 1);
+  await legacy.ctx.close();
+}
+
 process.exit((await finish()) ? 1 : 0);

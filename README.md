@@ -22,10 +22,11 @@ src/
   types.ts              domain + state types, runtime capability typings
   domain/               projects (needs-you, streak, labels) · filters (groups, sort, visible list)
                         · signals (open decisions with age, waiting on)
-  lib/                  dom helpers (h, preserveFocus, copyCommand) · prefs · theme · dates · icons
+  lib/                  dom helpers (h, preserveFocus, copyCommand) · prefs · theme · dates · icons · note-locker
   components/           rd-sidebar · rd-count · rd-stat-strip · rd-streak · rd-toolbar · rd-note
                         rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant · rd-focus · rd-settings
-tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals, focus mode, color mode
+                        rd-note-locker
+tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals, focus mode, color mode, note locker
 ```
 
 ## Rules this codebase keeps
@@ -42,6 +43,8 @@ tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer,
 Signals: `since` (ISO date) drives the age shown in the **Decisions** rollup (oldest first, parked projects excluded) and on cards. A `blocked` project with `waitingOn` and no `blockers` is waiting on others: it gets a blue dot and leaves **Needs you** until a wait passes 14 days.
 
 `meta/run` — `nextRun` (string), `critique` (rundown note), `streak` (number) **or** `sessionDays` (ISO date array). Without either, the streak falls back to consecutive check-in days.
+
+Rundown note dismissal is per viewer (`rundown.prefs` in localStorage), keyed to the exact `critique` text: a run that writes new text shows the banner again. Dismissed notes stay in the **note locker** (Settings → Dismissed notes) for 14 days; the one still on the board can be shown again.
 
 ## Publishing
 

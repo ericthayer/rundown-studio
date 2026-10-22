@@ -1,5 +1,8 @@
 import type { ThemeMode, ToolbarFilters } from '../types.js';
 
+/** A rundown note the viewer closed, kept in the note locker. `at` = ISO time it was dismissed. */
+export interface LockedNote { text: string; at: string }
+
 /** Per-viewer conveniences only (layout, filters, dismissals). Never shared or durable state. */
 export interface Prefs {
   v: 1;
@@ -12,12 +15,14 @@ export interface Prefs {
   filters: Partial<ToolbarFilters> | null;
   noteDismissed: string;
   noteSeen: string;
+  /** Dismissed notes, newest first; pruned after the locker's retention window. */
+  noteLocker: LockedNote[];
   /** Color mode; 'system' follows the OS setting. */
   theme: ThemeMode;
 }
 
 const KEY = 'rundown.prefs';
-const DEFAULTS: Prefs = { v: 1, slim: false, areasOpen: true, agentOpen: true, agentW: null, drawer: 1, filters: null, noteDismissed: '', noteSeen: '', theme: 'system' };
+const DEFAULTS: Prefs = { v: 1, slim: false, areasOpen: true, agentOpen: true, agentW: null, drawer: 1, filters: null, noteDismissed: '', noteSeen: '', noteLocker: [], theme: 'system' };
 
 function read(key: string): string | null {
   try { return localStorage.getItem(key); } catch { return null; }

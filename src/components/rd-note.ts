@@ -1,8 +1,9 @@
 import { StoreElement } from './base.js';
 import { prefs } from '../lib/prefs.js';
+import { lockNote } from '../lib/note-locker.js';
 import { setText } from '../lib/dom.js';
 
-/** Rundown note: info alert under the toolbar. Dismissal is remembered for that exact note text. */
+/** Rundown note: info alert under the toolbar. Dismissing hides that exact text and keeps it in the note locker (settings). */
 export class RdNote extends StoreElement {
   protected setup(): void {
     const text = this.ref('text');
@@ -13,8 +14,11 @@ export class RdNote extends StoreElement {
       setText(text, current);
     });
     this.ref('dismiss').addEventListener('click', () => {
-      prefs.set('noteDismissed', current);
+      lockNote(current);
       this.hidden = true;
+    });
+    this.listen(document, 'rd:note-restore', (e) => {
+      if ((e as CustomEvent<{ text: string }>).detail.text === current) this.hidden = false;
     });
   }
 }
