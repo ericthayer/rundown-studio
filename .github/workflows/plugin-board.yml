@@ -1,17 +1,17 @@
-# Keeps plugin/board (the board copy the Rundown plugin publishes) in step with the source on main,
-# so board PRs don't have to regenerate it by hand. Commits only when the built files changed.
+# Fails when plugin/board (the board copy the Rundown plugin publishes) differs from a fresh build.
+# main only takes changes through PRs, so a bot can't sync it after merge: run `npm run plugin` in the PR.
 name: Plugin board
 
 on:
+  pull_request:
   push:
     branches: [main]
-    paths: ['index.html', 'styles/**', 'src/**', 'tsconfig.json']
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  sync:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,12 +19,5 @@ jobs:
         with:
           node-version: 22
       - run: npm i --no-save typescript@5
-      - run: npm run plugin
-      - name: Commit if changed
-        run: |
-          git add plugin/board
-          git diff --cached --quiet && exit 0
-          git config user.name "github-actions[bot]"
-          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(plugin): sync board copy"
-          git push
+      - run: npm run build
+      - run: npm run plugin:check

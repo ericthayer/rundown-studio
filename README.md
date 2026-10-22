@@ -27,7 +27,7 @@ Open the board once after setup and allow the database and Claude permissions.
 | `npm run build` | `tsc` → `dist/` (ES2022 modules) |
 | `npm run typecheck` | Strict type check, no emit |
 | `npm test` | Build + Playwright suites (`tests/smoke.mjs`, `mobile.mjs`, `ask.mjs`, `config.mjs`), screenshots in `tests/out/` |
-| `npm run plugin` | Clean build, then copy the board into `plugin/board/` (CI does this on main) |
+| `npm run plugin` | Clean build, then copy the board into `plugin/board/`. Run it in any PR that touches the board; CI fails if you forget |
 | `npm run plugin:check` | Fail if `plugin/board/` differs from the build |
 
 ## Layout

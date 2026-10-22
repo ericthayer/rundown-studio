@@ -1,4 +1,5 @@
 /* Section header (Supabase-style): title row, stat strip + streak, then the list panel. */
+.phead, .pmeta { padding: 0 20px 0 28px; }
 .phead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 16px; }
 .ptitle { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .phead h1 { margin: 0; font-size: clamp(1.5rem, 3cqi, 1.9rem); font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; }

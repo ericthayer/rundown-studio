@@ -22,7 +22,7 @@ Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
 
 3. **Read the artifact.** `Artifact` `action: "read"` with the URL. A publish to a URL this session has not read is refused. Note the current version from the result header and confirm the user is a "writer". If not, stop and say they cannot update a board they do not own.
 
-4. **Copy the board.** Copy `../../board/` into a fresh subfolder of the session scratchpad (e.g. `<scratchpad>/rundown-update-<timestamp>/`), keeping relative paths. Use `cp -r`; do not edit the files.
+4. **Copy the board.** If `../../board/dist/` is missing or holds no `.js` files, stop and publish nothing: the installed plugin is incomplete. Tell the user to run `/plugin marketplace update rundown-studio` and try again. Never fill in files from another artifact, a local build, or the repo source. Otherwise copy `../../board/` into a fresh subfolder of the session scratchpad (e.g. `<scratchpad>/rundown-update-<timestamp>/`), keeping relative paths. Use `cp -r`; do not edit the files.
 
 5. **Publish.** Call `Artifact` publish with:
    - `url`: the board URL

@@ -57,6 +57,8 @@ await p.keyboard.press('Escape');
 // Collapsible answers: the question toggles its answer, and folding survives a reload in the tab.
 await p.locator('.alog .answer .q').first().click();
 check('clicking a question folds its answer', await p.evaluate(() => !document.querySelector('.alog .answer').open && document.querySelectorAll('.alog .answer[open]').length === 1));
+// <details> fires toggle (which saves the fold) as a queued task, so wait for it before reloading.
+await p.waitForFunction(() => JSON.parse(sessionStorage.getItem('rundown.askLog') ?? '[]')[0]?.folded === true);
 await p.reload(); await p.waitForSelector('.pitem');
 check('folded answers stay folded after a reload', await p.evaluate(() => !document.querySelector('.alog .answer').open && document.querySelector('.alog .answer:last-child').open));
 await p.locator('.alog .answer .q').first().focus(); await p.keyboard.press('Enter');
