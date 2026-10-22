@@ -16,7 +16,7 @@ Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
 
 ## Steps
 
-1. **Check for an existing board.** Call `Artifact` with `action: "list"` and look for artifacts titled "Rundown".
+1. **Check for an existing board.** Call `Artifact` with `action: "list"`, `scope: "mine"`, `limit: 200` and look for artifacts titled "Rundown". Never offer a board from a `shared` or `all` listing.
    - None: plan to publish a new board.
    - One or more: show them (title, URL, last updated) and ask whether to reuse one or make a new one. If the user reuses one, skip step 3 and use that URL in every later step. If they want new board code on it, point them to `/rundown:update`.
    - Never write to a board the user did not pick.
@@ -29,6 +29,7 @@ Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
    If reusing a board, read its `meta/config` first and offer the current values as defaults.
 
 3. **Publish the board** (new board only).
+   - If `../../board/dist/` is missing or holds no `.js` files, stop: the installed plugin is incomplete. Tell the user to run `/plugin marketplace update rundown-studio` and try again. Never fill in files from another artifact, a local build, or the repo source.
    - Copy `../../board/` into a fresh subfolder of the session scratchpad (e.g. `<scratchpad>/rundown-board-<timestamp>/`), keeping relative paths. Use `cp -r`; do not edit the files.
    - List the copied files. Build `files` as a map from each published path to its copied source, one entry per `styles/*.css` and `dist/**/*.js` file, with the published path equal to the path relative to the board folder (e.g. `"dist/app.js": "<copy>/dist/app.js"`).
    - Call `Artifact` publish with:
