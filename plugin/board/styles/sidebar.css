@@ -22,6 +22,7 @@
 .me b { display: block; font-size: max(var(--fs-floor), 0.9231rem); font-weight: 600; }
 .me small { font-size: max(var(--fs-floor), 0.8462rem); color: var(--muted); }
 .me-row > span:not(.av) { flex: 1; min-width: 0; }
+.me-row :is(b, small) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Settings: same quiet icon button as the sidebar toggle; popover opens upward. */
 .me .mset { width: 26px; height: 26px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--muted); display: grid; place-items: center; flex: none; }
 .me .mset:hover, .me .mset[aria-expanded="true"] { background: var(--surface); color: var(--ink); }
