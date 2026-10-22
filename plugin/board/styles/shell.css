@@ -15,11 +15,11 @@
   .shell.resizing { transition: none; cursor: col-resize; user-select: none; }
 }
 @media (max-width: 1060px) {
-  .shell { grid-template-columns: clamp(170px, 20vw, 210px) minmax(0, 1fr); height: auto; min-height: calc(100dvh - 2 * var(--pad)); align-content: start; backdrop-filter: none; }
+  .shell { grid-template-columns: clamp(170px, 20vw, 210px) minmax(0, 1fr); height: auto; min-height: calc(100dvh - 2 * var(--pad)); backdrop-filter: none; }
   .shell.slim { grid-template-columns: 68px minmax(0, 1fr); }
 }
 @media (max-width: 720px) {
   body { --pad: 0px; }
-  .shell, .shell.slim { grid-template-columns: minmax(0, 1fr); border-radius: 20px; }
+  .shell, .shell.slim { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; border-radius: 20px; }
   .center { padding: 18px 0 0; }
 }
