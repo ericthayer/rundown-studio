@@ -33,6 +33,11 @@ export abstract class StoreElement extends HTMLElement {
     this.#cleanups.push(() => target.removeEventListener(type, fn));
   }
 
+  /** Runs `fn` on disconnect, for observers and other teardown the helpers above don't cover. */
+  protected onCleanup(fn: () => void): void {
+    this.#cleanups.push(fn);
+  }
+
   protected ref<T extends Element = HTMLElement>(name: string): T {
     const el = this.querySelector<T>(`[data-ref="${name}"]`);
     if (!el) throw new Error(`<${this.localName}> missing [data-ref="${name}"]`);

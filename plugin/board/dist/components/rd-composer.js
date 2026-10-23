@@ -8,6 +8,7 @@ import { loadTurns, saveTurns, recap, MAX_TURNS } from '../lib/ask-history.js';
 import { savedAnswer } from './rd-save-menu.js';
 import { STALL_MS, UNAVAILABLE, failure } from '../lib/sample-errors.js';
 import { modelRows } from '../lib/sample-json.js';
+import { watchDockLift } from '../lib/dock-lift.js';
 import './rd-save-menu.js';
 /**
  * Ask box + transcript. With the `sample` capability it asks Claude about the projects; without it,
@@ -53,6 +54,8 @@ export class RdComposer extends StoreElement {
             this.#input.addEventListener('input', () => { this.#input.style.height = 'auto'; this.#input.style.height = `${this.#input.scrollHeight}px`; });
         }
         this.querySelectorAll('.chip[data-q]').forEach((b) => b.addEventListener('click', () => void this.ask(b.dataset.q ?? '')));
+        if (this.classList.contains('dock'))
+            this.onCleanup(watchDockLift(this, [...document.querySelectorAll('.center .plist')]));
         this.watch(['canAsk'], (_c, s) => { this.#input.placeholder = s.canAsk ? 'Ask about your projects…' : 'Filter projects…'; });
     }
     focusInput() {

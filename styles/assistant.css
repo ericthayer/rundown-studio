@@ -64,8 +64,10 @@
 .send svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
 
 /* Ask Rundown, docked under the project list: answer tray above a one-line ask bar. */
-/* Pinned to the bottom of the main panel at every width, lifted off the list by a soft shadow. */
-rd-composer.dock { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 10px 16px 14px; border-top: 1px solid var(--line); background: var(--surface); position: sticky; bottom: 0; z-index: 5; box-shadow: var(--dock-shadow); }
+/* Pinned to the bottom of the main panel at every width; the soft shadow shows only while rows sit under it (.lifted, dock-lift.ts). */
+rd-composer.dock { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 10px 16px 14px; border-top: 1px solid var(--line); background: var(--surface); position: sticky; bottom: 0; z-index: 5; transition: box-shadow .18s ease; }
+rd-composer.dock.lifted { box-shadow: var(--dock-shadow); }
+@media (prefers-reduced-motion: reduce) { rd-composer.dock { transition: none; } }
 .dock .ascroll { flex: none; max-height: min(34vh, 300px); }
 .dock .ascroll > :first-child { margin-top: 0; }
 :is(.ascroll, .alog)[hidden] { display: none; }
