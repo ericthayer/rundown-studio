@@ -25,8 +25,9 @@ export function toConfig(raw) {
 }
 export const checkinCommand = () => store.state.config.checkinCommand ?? DEFAULT_COMMAND;
 /** mailto: link with a subject and the page URL, so a report says which board it came from. */
+export const feedbackAddress = () => store.state.config.feedbackEmail ?? FEEDBACK_EMAIL;
 export function feedbackHref() {
-    const to = store.state.config.feedbackEmail ?? FEEDBACK_EMAIL;
+    const to = feedbackAddress();
     const subject = encodeURIComponent('Rundown feedback');
     const body = encodeURIComponent(`\n\n---\nBoard: ${store.state.config.boardUrl ?? location.href}\nBrowser: ${navigator.userAgent}`);
     return `mailto:${to}?subject=${subject}&body=${body}`;

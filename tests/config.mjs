@@ -45,6 +45,14 @@ const text = (p, sel) => p.evaluate((s) => document.querySelector(s)?.textConten
   const { p, ctx } = await page({ meta: {} });
   const href = (sel) => p.getAttribute(sel, 'href');
   check('feedback mails the maintainer by default', (await href('[data-fk="help:feedback"]'))?.startsWith('mailto:ethayer.design@gmail.com?subject=Rundown%20feedback'));
+  check('feedback opens in a new window (the frame cannot navigate to mailto:)', (await p.getAttribute('[data-fk="help:feedback"]', 'target')) === '_blank');
+  await ctx.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await p.click('.mset'); await p.waitForTimeout(50);
+  await p.evaluate(() => { window.open = () => null; document.querySelector('[data-fk="help:feedback"]').addEventListener('click', (e) => e.preventDefault()); });
+  await p.click('[data-fk="help:feedback"]'); await p.waitForTimeout(100);
+  check('feedback copies the address', (await p.evaluate(() => navigator.clipboard.readText())) === 'ethayer.design@gmail.com');
+  check('feedback says where it went', /ethayer\.design@gmail\.com/.test(await p.textContent('.toasts') ?? ''));
+  await p.keyboard.press('Escape');
   check('issue link opens the repo issue form', (await href('[data-fk="help:issue"]')) === 'https://github.com/ericthayer/rundown-studio/issues/new');
   await p.evaluate(() => window.__pushConfig({ feedbackEmail: 'ada@example.com', issuesUrl: 'https://example.com/issues' }));
   check('feedbackEmail from config', (await href('[data-fk="help:feedback"]'))?.startsWith('mailto:ada@example.com?'));

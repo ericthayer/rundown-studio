@@ -2,7 +2,8 @@ import { StoreElement } from './base.js';
 import { prefs } from '../lib/prefs.js';
 import { applyTheme } from '../lib/theme.js';
 import { THEME, UI } from '../lib/icons.js';
-import { feedbackHref, issuesHref } from '../lib/config.js';
+import { feedbackAddress, feedbackHref, issuesHref } from '../lib/config.js';
+import { toast } from '../lib/toast.js';
 import { startTour } from '../lib/onboarding.js';
 import { dragToDismiss } from '../lib/gestures.js';
 import { h, icon, placeAbove, placeUnder, setAttr } from '../lib/dom.js';
@@ -79,10 +80,22 @@ export class RdSettings extends StoreElement {
     /** Tour replay and feedback links. Link targets come from `meta/config` when set, so they're refreshed on config changes. */
     #help() {
         const tour = h('button', { class: 'fopt', type: 'button', 'data-fk': 'help:tour', onclick: () => { this.close(); void startTour(this.#btn); } }, icon(UI.tour), 'Take the tour');
-        const mail = h('a', { class: 'fopt', 'data-fk': 'help:feedback' }, icon(UI.mail), 'Send feedback');
+        // A new window, because the artifact frame can't navigate itself to mailto:. The address is copied too,
+        // so feedback still has somewhere to go when no mail app answers.
+        const mail = h('a', { class: 'fopt', target: '_blank', rel: 'noopener noreferrer', 'data-fk': 'help:feedback', onclick: () => void this.#copyAddress() }, icon(UI.mail), 'Send feedback', h('span', { class: 'sr' }, ' (opens your email app)'));
         const issue = h('a', { class: 'fopt', target: '_blank', rel: 'noopener noreferrer', 'data-fk': 'help:issue' }, icon(UI.bug), 'Report an issue', h('span', { class: 'sr' }, ' (opens in a new tab)'));
         this.watch(['config'], () => { setAttr(mail, 'href', feedbackHref()); setAttr(issue, 'href', issuesHref()); });
         return h('fieldset', { class: 'fset fhelp' }, h('legend', {}, 'Help'), tour, mail, issue);
+    }
+    async #copyAddress() {
+        const to = feedbackAddress();
+        try {
+            await navigator.clipboard.writeText(to);
+            toast({ tone: 'info', text: `Opening your email app. ${to} is copied too.`, key: 'feedback' });
+        }
+        catch {
+            toast({ tone: 'info', text: `Opening your email app. No app? Write to ${to}.`, key: 'feedback' });
+        }
     }
     #set(mode) {
         prefs.set('theme', mode);
