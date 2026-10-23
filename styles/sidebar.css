@@ -67,3 +67,15 @@
   .sec, .area-nav, .me { display: none; }
   .brand { margin: 0 0 4px; padding: 0 8px 10px; border-bottom: 0; }
 }
+
+/* Settings on phones: the popover's content in a bottom sheet (shares .fsheet/.fsh with the filter sheet). */
+.msheet { max-width: 100%; }
+.msheet-body { overflow-y: auto; overscroll-behavior: contain; padding: 8px 10px calc(16px + env(safe-area-inset-bottom, 0px)); }
+/* One scroll surface: the locker list grows with the sheet instead of scrolling on its own. */
+.msheet .nlock-list { max-height: none; overflow: visible; }
+/* WebKit draws a fieldset's top edge through its legend; a floated legend lays out as a plain row instead. */
+.msheet .fset legend { float: left; width: 100%; box-sizing: border-box; }
+.msheet .fhelp button.fopt { justify-content: flex-start; }
+/* The sheet lives inside .me, so undo the footer's outlined-button style on its close button. */
+.msheet .ibtn { height: 24px; padding: 0; border: 0; border-radius: 50%; background: var(--chip); color: var(--muted); }
+.msheet .ibtn:hover { color: var(--ink); }
