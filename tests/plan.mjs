@@ -15,6 +15,8 @@ const withSampler = (plan) => {
   const use = window.claude.use;
   window.claude.use = async (n) => (n === 'sample' ? async (prompt, opts = {}) => {
     window.__calls.push({ prompt, tier: opts.modelTier });
+    // Like the runtime: an unknown tier is a bad request, not an outage.
+    if (opts.modelTier !== undefined && !['quick', 'default', 'complex'].includes(opts.modelTier)) throw { code: 'invalid_request', message: 'modelTier' };
     const mode = window.__mode;
     if (mode === 'junk') return { text: 'Sure! Here is your plan: focus on Agrikit.' };
     if (mode) throw { code: mode, message: mode };
@@ -31,7 +33,7 @@ check('Ask Rundown is docked under the project list', await p.evaluate(() => doc
 await p.click('[data-fk="plan:draft"]');
 await p.waitForSelector('.wed');
 const call = await p.evaluate(() => window.__calls[0]);
-check('draft uses the standard tier', call.tier === 'standard');
+check('draft uses a tier the runtime accepts', call.tier === 'default', String(call.tier));
 check('prompt leaves parked rows out', !call.prompt.includes('"Brochure site"') && call.prompt.includes('"Agrikit plugin"'));
 const picked = await p.$$eval('.wed-row select', (s) => s.map((x) => x.value));
 check('unknown, parked and repeated ids are dropped', picked.join() === 'a,e', picked.join());
@@ -81,6 +83,13 @@ await p.evaluate(() => { window.__mode = 'rate_limited'; });
 await p.click('[data-fk="plan:retry"]');
 await p.waitForFunction(() => document.querySelector('.werr p')?.textContent?.startsWith('Too many'));
 check('rate limit copy', true);
+await p.evaluate(() => { window.__mode = 'invalid_request'; });
+await p.click('[data-fk="plan:retry"]');
+await p.waitForFunction(() => document.querySelector('.werr p')?.textContent?.includes('board bug'));
+check('bad request reads as a board bug, not an outage, with no retry', !(await p.textContent('.werr p')).includes("isn't available") && !(await p.isVisible('.werr [data-fk="plan:retry"]')));
+await p.evaluate(() => { window.__mode = 'rate_limited'; });
+await p.click('[data-fk="plan:redraft"]');
+await p.waitForFunction(() => document.querySelector('.werr p')?.textContent?.startsWith('Too many'));
 await p.evaluate(() => { window.__mode = 'not_granted'; });
 await p.click('[data-fk="plan:retry"]');
 await p.waitForFunction(() => document.querySelector('.werr p')?.textContent?.startsWith('Drafting needs Claude'));

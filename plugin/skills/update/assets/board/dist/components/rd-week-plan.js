@@ -140,7 +140,7 @@ export class RdWeekPlan extends StoreElement {
         this.#setError(null);
         this.#render(s);
         this.#say('Drafting your week.');
-        const res = await sampleJson(planPrompt(s.projects, s.day), { tier: 'standard', signal: aborter.signal });
+        const res = await sampleJson(planPrompt(s.projects, s.day), { tier: 'default', signal: aborter.signal });
         this.#drafting = false;
         if (!res.ok && res.code === 'cancelled')
             return this.#render(store.state);
