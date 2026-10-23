@@ -68,14 +68,26 @@
   .brand { margin: 0 0 4px; padding: 0 8px 10px; border-bottom: 0; }
 }
 
-/* Settings on phones: the popover's content in a bottom sheet (shares .fsheet/.fsh with the filter sheet). */
+/* Settings on phones and touch tablets: the popover's content in a bottom sheet (shares .fsheet/.fsh with the filter sheet).
+   Full height on phones, 75dvh on tablets; the body is the one scroll surface. */
 .msheet { max-width: 100%; }
-.msheet-body { overflow-y: auto; overscroll-behavior: contain; padding: 8px 10px calc(16px + env(safe-area-inset-bottom, 0px)); }
+.msheet:focus { outline: none; }
+.msheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 8px 10px calc(16px + env(safe-area-inset-bottom, 0px)); }
 /* One scroll surface: the locker list grows with the sheet instead of scrolling on its own. */
 .msheet .nlock-list { max-height: none; overflow: visible; }
-/* WebKit draws a fieldset's top edge through its legend; a floated legend lays out as a plain row instead. */
-.msheet .fset legend { float: left; width: 100%; box-sizing: border-box; }
-.msheet .fhelp button.fopt { justify-content: flex-start; }
+/* WebKit starts a fieldset's box at the middle of its legend, so the Help divider (a fieldset shadow) crossed the label.
+   In the sheet the divider is the locker's bottom border instead, drawn above the fieldset. */
+.msheet .nlock { padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.msheet .fhelp { margin-top: 6px; padding-top: 0; box-shadow: none; }
+/* Take the tour is a button inside .me: drop the footer button's centering, height and padding so it lines up with the links. */
+.msheet .fhelp button.fopt { justify-content: flex-start; height: auto; padding: 7px 8px; border-radius: 8px; }
 /* The sheet lives inside .me, so undo the footer's outlined-button style on its close button. */
 .msheet .ibtn { height: 24px; padding: 0; border: 0; border-radius: 50%; background: var(--chip); color: var(--muted); }
 .msheet .ibtn:hover { color: var(--ink); }
+@media (max-width: 720px) {
+  .fsheet.msheet { width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; }
+  .msheet .fsh { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+}
+@media (min-width: 721px) and (max-width: 1060px) and (pointer: coarse) {
+  .fsheet.msheet { height: 75dvh; max-height: 75dvh; }
+}

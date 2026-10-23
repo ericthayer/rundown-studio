@@ -9,10 +9,11 @@ import { dragToDismiss } from '../lib/gestures.js';
 import { h, icon, placeAbove, placeUnder, setAttr } from '../lib/dom.js';
 import './rd-note-locker.js';
 const MODES = [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']];
-const PHONE = matchMedia('(max-width: 720px)');
+/** Phones and touch tablets (the same range as the type floor in mobile.css) get the sheet. */
+const SHEET = matchMedia('(max-width: 720px), (pointer: coarse) and (max-width: 1060px)');
 /**
  * Account settings next to the viewer's name: color mode, the note locker, and Help (tour replay, feedback, issues).
- * Desktop: an anchored popover. Phones: the same content in a modal bottom sheet (scrolling body, focus trap,
+ * Desktop: an anchored popover. Phones and touch tablets: the same content in a modal bottom sheet (scrolling body, focus trap,
  * Escape, close button; dragging the header down is a shortcut for the close button).
  */
 export class RdSettings extends StoreElement {
@@ -39,19 +40,19 @@ export class RdSettings extends StoreElement {
                 (this.#btn.getBoundingClientRect().top < innerHeight / 2 ? placeUnder : placeAbove)(this.#btn, this.#pop);
         });
         this.#buildSheet();
-        // On phones the gear opens the sheet instead; cancelling the click stops its popovertarget.
+        // On phones and touch tablets the gear opens the sheet instead; cancelling the click stops its popovertarget.
         this.#btn.addEventListener('click', (e) => {
-            if (!PHONE.matches)
+            if (!SHEET.matches)
                 return;
             e.preventDefault();
             this.#openSheet();
         });
         this.listen(window, 'resize', () => { if (this.#pop.matches(':popover-open'))
             this.#pop.hidePopover(); });
-        const leavePhone = () => { if (this.#sheet.open)
+        const leaveSheet = () => { if (this.#sheet.open)
             this.#sheet.close(); };
-        PHONE.addEventListener('change', leavePhone);
-        this.onCleanup(() => PHONE.removeEventListener('change', leavePhone));
+        SHEET.addEventListener('change', leaveSheet);
+        this.onCleanup(() => SHEET.removeEventListener('change', leaveSheet));
     }
     /** Closes whichever surface is showing the settings. */
     close() {
@@ -64,7 +65,7 @@ export class RdSettings extends StoreElement {
         const x = h('button', { class: 'ibtn', type: 'button', 'aria-label': 'Close settings', onclick: () => this.#sheet.close() }, icon('<path d="m3 3 6 6M9 3 3 9"/>', '0 0 12 12'));
         const head = h('header', { class: 'fsh' }, h('h2', { id: 'msheet-h' }, 'Settings'), x);
         this.#body = h('div', { class: 'msheet-body' });
-        this.#sheet = h('dialog', { class: 'fsheet msheet mpop', id: 'msheet', 'aria-labelledby': 'msheet-h' }, head, this.#body);
+        this.#sheet = h('dialog', { class: 'fsheet msheet mpop', id: 'msheet', 'aria-labelledby': 'msheet-h', tabindex: -1 }, head, this.#body);
         this.#sheet.addEventListener('click', (e) => { if (e.target === this.#sheet)
             this.#sheet.close(); });
         this.#sheet.addEventListener('close', () => this.#btn.setAttribute('aria-expanded', 'false'));
@@ -75,6 +76,8 @@ export class RdSettings extends StoreElement {
         this.#body.replaceChildren(this.#content);
         this.#body.scrollTop = 0;
         this.#sheet.showModal();
+        // Focus the sheet itself, so screen readers start at its title and no focus ring lands on Close; Tab stays trapped inside.
+        this.#sheet.focus();
         this.#btn.setAttribute('aria-expanded', 'true');
     }
     /** Tour replay and feedback links. Link targets come from `meta/config` when set, so they're refreshed on config changes. */

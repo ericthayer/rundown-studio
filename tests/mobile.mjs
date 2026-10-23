@@ -86,7 +86,7 @@ const smallText = (p) => p.evaluate(() => [...document.querySelectorAll('body *'
 }
 
 // Settings sheet: on phones the gear opens a modal bottom sheet with a scrolling body (a full locker overflows a
-// popover); Close, Escape, the backdrop and a header drag all close it, and focus goes back to the gear.
+// popover); Close, Escape and a header drag close it (plus the backdrop on tablets), and focus goes back to the gear.
 for (const scheme of ['light', 'dark']) {
   const iso = (days) => new Date(Date.now() - days * 864e5).toISOString();
   const docs = Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`ans-${i}`, { kind: 'answer', text: `Saved answer ${i + 1}: pick one config-distribution effort and fold the others in.`, savedAt: iso(i), projectId: null, inLocker: true }]));
@@ -96,7 +96,13 @@ for (const scheme of ['light', 'dark']) {
   await p.tap('.mset'); await p.waitForTimeout(150);
   check(`phone ${scheme}: gear opens the settings sheet, not the popover`, await isOpen() && !(await p.evaluate(() => document.getElementById('me-settings').matches(':popover-open'))));
   check(`phone ${scheme}: gear reports expanded`, (await p.getAttribute('.mset', 'aria-expanded')) === 'true');
-  check(`phone ${scheme}: sheet sits on the bottom edge, inside the viewport`, await p.evaluate(() => { const r = document.getElementById('msheet').getBoundingClientRect(); return r.top >= 0 && Math.round(r.bottom) === innerHeight && r.left === 0 && Math.round(r.right) === innerWidth; }));
+  check(`phone ${scheme}: sheet fills the screen`, await p.evaluate(() => { const r = document.getElementById('msheet').getBoundingClientRect(); return r.top === 0 && Math.round(r.bottom) === innerHeight && r.left === 0 && Math.round(r.right) === innerWidth; }));
+  check(`phone ${scheme}: focus lands on the sheet, not Close`, await p.evaluate(() => document.activeElement?.id === 'msheet'));
+  check(`phone ${scheme}: Help divider sits above its label`, await p.evaluate(() => {
+    const line = document.querySelector('#msheet .nlock').getBoundingClientRect().bottom;
+    return document.querySelector('#msheet .fhelp legend').getBoundingClientRect().top >= line && getComputedStyle(document.querySelector('#msheet .fhelp')).boxShadow === 'none';
+  }));
+  check(`phone ${scheme}: Help rows line up`, await p.evaluate(() => new Set([...document.querySelectorAll('#msheet .fhelp .fopt svg')].map((s) => Math.round(s.getBoundingClientRect().left))).size === 1));
   check(`phone ${scheme}: sheet body scrolls to the last Help link`, await p.evaluate(() => {
     const body = document.querySelector('.msheet-body');
     if (body.scrollHeight <= body.clientHeight) return false;
@@ -123,9 +129,6 @@ for (const scheme of ['light', 'dark']) {
     await p.tap('#msheet [aria-label="Close settings"]'); await p.waitForTimeout(100);
     check('phone: Close button closes the sheet', !(await isOpen()));
     await p.tap('.mset'); await p.waitForTimeout(100);
-    await p.mouse.click(200, 20); await p.waitForTimeout(100);
-    check('phone: tapping the backdrop closes the sheet', !(await isOpen()));
-    await p.tap('.mset'); await p.waitForTimeout(100);
     const h2 = await p.locator('#msheet-h').boundingBox();
     await touchDrag(p, { x: h2.x + 10, y: h2.y + 5 }, { x: h2.x + 10, y: h2.y + 30 });
     await p.waitForTimeout(150);
@@ -139,6 +142,23 @@ for (const scheme of ['light', 'dark']) {
     await p.keyboard.press('Escape');
   }
   check(`no console errors (phone settings ${scheme})`, errors.length === 0, errors.join(' | '));
+  await ctx.close();
+}
+
+// Touch tablets get the sheet too, at 75% of the viewport height.
+{
+  const { p, ctx, errors } = await page({ viewport: { width: 820, height: 1180 }, touch: true });
+  await p.tap('.mset'); await p.waitForTimeout(150);
+  check('tablet: gear opens the settings sheet', await p.evaluate(() => document.getElementById('msheet').open && !document.getElementById('me-settings').matches(':popover-open')));
+  check('tablet: sheet is 75dvh on the bottom edge', await p.evaluate(() => { const r = document.getElementById('msheet').getBoundingClientRect(); return Math.abs(r.height - innerHeight * 0.75) <= 1 && Math.round(r.bottom) === innerHeight; }));
+  check('tablet: sheet targets ≥ 44px', (await smallTargets(p, '#msheet')).length === 0, (await smallTargets(p, '#msheet')).join(', '));
+  await p.screenshot({ path: join(OUT, 'tablet-settings.png') });
+  await p.mouse.click(410, 40); await p.waitForTimeout(100);
+  check('tablet: tapping the backdrop closes the sheet', await p.evaluate(() => !document.getElementById('msheet').open));
+  await p.tap('.mset'); await p.waitForTimeout(150);
+  await p.keyboard.press('Escape'); await p.waitForTimeout(100);
+  check('tablet: Escape closes the sheet', await p.evaluate(() => !document.getElementById('msheet').open));
+  check('no console errors (tablet settings)', errors.length === 0, errors.join(' | '));
   await ctx.close();
 }
 

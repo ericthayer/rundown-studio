@@ -8,10 +8,10 @@ updatedBy: claude
 Released: v1.7.0 <!-- x-release-please-version -->
 
 ## Left off
-On phones the settings gear now opens a bottom-sheet drawer (scrolling body, focus trap, Escape, Close button, drag the header down) instead of the popover, which ran off the screen once the locker filled up. The desktop popover is unchanged. Send feedback opens the mail app in a new window and copies the address, since the artifact frame blocks mailto: in place.
+The settings drawer is now full height on phones and 75dvh on touch tablets (which used to get the popover). The Help divider no longer crosses its label in WebKit, Take the tour lines up with the other Help rows, and opening the drawer focuses the drawer instead of its Close button.
 
 ## Next step
-Merge the settings drawer PR, then republish Board B from main.
+Merge the settings drawer height PR, then republish Board B from main.
 
 ## Blockers
 - None
