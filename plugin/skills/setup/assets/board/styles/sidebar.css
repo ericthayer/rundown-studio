@@ -1,11 +1,15 @@
 /* Left rail: sections split by full-bleed hairlines — brand | views | areas | account footer. */
 .rail { background: var(--rail); border-right: 1px solid var(--line); padding: 22px 12px 12px; display: flex; flex-direction: column; gap: 4px; }
-.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1.1538rem; letter-spacing: -0.01em; margin: -22px -12px 10px; padding: 18px 7px 16px 20px; border-bottom: 1px solid var(--line); }
-.brand svg { width: 20px; height: 20px; }
-.brand-name { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.1538rem; letter-spacing: -0.01em; margin: -22px -12px 10px; padding: 18px 7px 16px 22px; border-bottom: 1px solid var(--line); }
+/* App tile in Claude clay: exactly as tall as the title + version line boxes, so the two read as one unit.
+   Its left edge sits on the nav icon column. */
+.brand-mark { --tile: calc(1.1538rem * 1.1 + max(var(--fs-floor), 0.7692rem) * 1.05); flex: none; width: var(--tile); height: var(--tile); border-radius: calc(var(--tile) * 0.27); background: var(--tile-bg); color: var(--tile-ink); display: grid; place-items: center; }
+.brand-mark svg { width: 68%; height: 68%; }
+.brand-name { flex: 1; display: flex; flex-direction: column; min-width: 0; line-height: 1.1; }
 /* Release version under the wordmark, so the build in use is visible at a glance. */
-.brand-ver { font-family: var(--font); font-size: max(var(--fs-floor), 0.7692rem); font-weight: 400; letter-spacing: 0; color: var(--muted); }
-.rtoggle { width: 26px; height: 26px; border: 0; border-radius: 8px; background: none; color: var(--muted); display: grid; place-items: center; flex: none; }
+.brand-ver { font-family: var(--font); font-size: max(var(--fs-floor), 0.7692rem); font-weight: 400; letter-spacing: 0; line-height: 1.05; color: var(--muted); }
+/* No padding: the glyph centers in the button, so it shares the tile's centerline in the slim rail. */
+.rtoggle { width: 26px; height: 26px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--muted); display: grid; place-items: center; flex: none; }
 .rtoggle:hover { background: var(--surface); color: var(--ink); }
 .rtoggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; }
 .navb { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; border-radius: 10px; padding: 8px 10px; color: var(--muted); font-size: 1rem; text-align: left; }
@@ -67,7 +71,7 @@
   .navs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; }
   .navs .navb { width: auto; white-space: nowrap; }
   .sec, .area-nav, .me { display: none; }
-  .brand { margin: 0 0 4px; padding: 0 8px 10px; border-bottom: 0; }
+  .brand { margin: 0 0 4px; padding: 0 8px 10px 10px; border-bottom: 0; }
 }
 
 /* Settings on phones and touch tablets: the popover's content in a bottom sheet (shares .fsheet/.fsh with the filter sheet).

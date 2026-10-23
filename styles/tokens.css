@@ -28,6 +28,9 @@
   --area-personal: #dccdf3;
   --area-other: #e6e8ea;
   --badge-ink: #111214;
+  /* Brand tile: Claude clay with cream, a nod to the platform. Same in both themes, like an app icon. */
+  --tile-bg: #d97757;
+  --tile-ink: #faf9f5;
   --shadow: 0 30px 80px -30px rgba(40, 30, 25, 0.35);
   /* Lifts the main panel's pinned chat row off the list scrolling under it. */
   --dock-shadow: 0 -10px 24px -14px rgba(20, 22, 26, 0.18);
