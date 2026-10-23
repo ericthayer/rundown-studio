@@ -5,7 +5,7 @@ updatedBy: claude
 ---
 # Status
 
-Released: v1.7.6 <!-- x-release-please-version -->
+Released: v1.8.0 <!-- x-release-please-version -->
 
 ## Left off
 The sidebar logo is now a Claude clay tile with the glyph in cream, sized to the Rundown title plus version so the two line up. In the slim rail the tile, the sidebar toggle and the nav icons share one centerline.
