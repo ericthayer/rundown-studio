@@ -5,7 +5,7 @@ updatedBy: claude
 ---
 # Status
 
-Released: v1.4.0 <!-- x-release-please-version -->
+Released: v1.5.0 <!-- x-release-please-version -->
 
 ## Left off
 Weekly plan (#24) and the Stalled tab with nudges (#26) are merged. This PR adds STATUS.md, read by check-ins and the scheduled rundown.
