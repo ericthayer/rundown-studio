@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.4.0...rundown-studio-v1.5.0) (2026-10-23)
+
+
+### Features
+
+* **assistant:** stale-work nudges in a Stalled tab ([#26](https://github.com/ericthayer/rundown-studio/issues/26)) ([2a8f744](https://github.com/ericthayer/rundown-studio/commit/2a8f7448740b004de4357ca802930b947cf2e370))
+* **assistant:** weekly plan in the panel, Ask Rundown docked under the list ([#24](https://github.com/ericthayer/rundown-studio/issues/24)) ([d58c5d3](https://github.com/ericthayer/rundown-studio/commit/d58c5d3fc6ff765707b700d4abb188160ecbb2b4))
+* **status:** STATUS.md per repo, read by check-ins and the rundown ([#27](https://github.com/ericthayer/rundown-studio/issues/27)) ([ab70674](https://github.com/ericthayer/rundown-studio/commit/ab70674c8fc5ff62489542d96f3087d2871ed9cb))
+
 ## [1.4.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.3.3...rundown-studio-v1.4.0) (2026-10-22)
 
 
