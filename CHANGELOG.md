@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.5](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.4...rundown-studio-v1.7.5) (2026-10-23)
+
+
+### Bug fixes
+
+* **plan:** draft this week with a model tier the runtime accepts ([#41](https://github.com/ericthayer/rundown-studio/issues/41)) ([eb6401d](https://github.com/ericthayer/rundown-studio/commit/eb6401d7b39519b86105c4709029c0a1f6ca6e49))
+
 ## [1.7.4](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.3...rundown-studio-v1.7.4) (2026-10-23)
 
 

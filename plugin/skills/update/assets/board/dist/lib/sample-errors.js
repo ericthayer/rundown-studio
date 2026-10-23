@@ -12,6 +12,7 @@ export function failure(code, partial) {
         case 'empty_completion': return { text: 'Claude came back empty. Try a simpler question.', retry: false };
         case 'prompt_too_large': return { text: 'Too much project data to send at once. Filter the list down, then ask again.', retry: false };
         case 'stalled': return { text: 'Claude stopped responding, so this answer timed out.', retry: true };
+        case 'invalid_request': return { text: "The board sent Claude a request it couldn't read. This is a board bug, not an outage.", retry: false };
         case 'offline': return { text: "You're offline. Ask again when you're back online.", retry: true };
         default: return { text: partial ? 'Claude became unavailable, so this answer stopped early.' : "Claude isn't available right now. Your projects are fine; only Ask is affected.", retry: true };
     }
