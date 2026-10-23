@@ -8,10 +8,10 @@ updatedBy: claude
 Released: v1.7.2 <!-- x-release-please-version -->
 
 ## Left off
-The Your week drawer now matches the settings drawer: full screen on phones, and full height at 40dvw on the right for tablet widths (721 to 1060px). Board B is on v1.7.1.
+Claude app installs of the plugin kept only each skill's own folder, so /rundown:setup found no board or templates. The board copies and templates now ship inside the setup, update and checkin skills, and plugin:check guards every copy and version. Board B is on v1.7.1.
 
 ## Next step
-Merge the Your week drawer PR; its release merge republishes Board B.
+Re-run /rundown:setup from the Claude app on the non-enterprise test account after the 1.7.3 release.
 
 ## Blockers
 - None
