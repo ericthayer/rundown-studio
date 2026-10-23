@@ -8,10 +8,10 @@ updatedBy: claude
 Released: v1.6.0 <!-- x-release-please-version -->
 
 ## Left off
-The shell now fills the viewport: no body padding or gradient, no shell radius, shadow or blur, and `--shell`/`--rail` are solid #f6f6f6 light and #1f2125 dark. The Ask Rundown dock is pinned to the bottom of the main panel at every width with a soft shadow that shows only while rows sit under it, and condenses to one line on phones.
+On phones the settings gear now opens a bottom-sheet drawer (scrolling body, focus trap, Escape, Close button, drag the header down) instead of the popover, which ran off the screen once the locker filled up. The desktop popover is unchanged.
 
 ## Next step
-Merge the full-viewport shell PR, then republish Board B from main.
+Merge the settings drawer PR, then republish Board B from main.
 
 ## Blockers
 - None

@@ -39,7 +39,9 @@ export class RdNoteLocker extends StoreElement {
   }
 
   #restore(text: string): void {
-    this.closest<HTMLElement>('[popover]')?.hidePopover();
+    const sheet = this.closest('dialog');
+    if (sheet) sheet.close();
+    else this.closest<HTMLElement>('[popover]')?.hidePopover();
     // Optimistic: the banner comes back now; the db snapshot confirms it.
     store.set({ notes: (store.state.notes ?? []).filter((n) => n.kind !== 'note' || n.text !== text) });
     void unlockNote(text);
