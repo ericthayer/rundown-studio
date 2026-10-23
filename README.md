@@ -4,7 +4,7 @@ Cross-project status board. Vanilla TypeScript Web Components (light DOM), compi
 
 ## Use it for your own projects
 
-Rundown ships as a Claude Code plugin. Run its commands in Claude Code (the Claude desktop app's Code tab, or `claude` in a terminal): publishing the board and writing to it use tools that chat in the Claude app doesn't have. It publishes a private copy of the board into your own Claude account; your data lives in that board's database and nobody else can see it. No API keys or accounts to set up.
+Rundown ships as a Claude Code plugin. Run its commands in Claude Code (the Claude desktop app's Code tab, or `claude` in a terminal): publishing the board and writing to it use tools that chat in the Claude app doesn't have. Claude Code needs a paid Claude plan, so on a free account setup stops and says so. It publishes a private copy of the board into your own Claude account; your data lives in that board's database and nobody else can see it. No API keys or accounts to set up.
 
 ```
 /plugin marketplace add ericthayer/rundown-studio
