@@ -1,0 +1,52 @@
+/* This week | Stalled tabs, stale-work suggestion cards, row chips, and the stalled count badges. */
+.atabs { flex: none; display: flex; gap: 2px; padding: 3px; background: var(--chip); border-radius: 10px; }
+.atabs [role="tab"] { flex: 1; height: 30px; border: 0; border-radius: 8px; background: none; color: var(--muted); font: 500 max(var(--fs-floor), 0.8846rem) var(--font-display); display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.atabs [role="tab"]:hover { color: var(--ink); }
+.atabs [aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .08), inset 0 0 0 1px var(--line); }
+.bdg { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--btn); color: var(--btn-ink); font: 600 max(var(--fs-floor), 0.7308rem)/18px var(--font); text-align: center; }
+.bdg[hidden], .rb[hidden], .tbdg[hidden], .sugm[hidden], .setb[hidden] { display: none; }
+.tpanel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.tpanel[hidden] { display: none; }
+
+.stall { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 2px; }
+.stall .dhead { gap: 8px; min-height: 22px; }
+.stall .cta { height: 30px; }
+.stall .cta svg { fill: currentColor; stroke: none; width: 12px; height: 12px; }
+.stall h3:focus-visible { outline-offset: 2px; }
+.nlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.nset { display: grid; gap: 6px; margin-top: 4px; }
+.nset h4 { margin: 0; }
+
+/* One suggestion: dashed violet so it reads as a proposal, not board data; "Suggested" says it in text too. */
+.ncard { border: 1px dashed color-mix(in srgb, var(--violet) 70%, var(--line)); background: color-mix(in srgb, var(--violet) 7%, var(--surface)); border-radius: 10px; padding: 9px 10px; display: grid; gap: 3px; }
+.ncard .np { display: flex; align-items: center; gap: 7px; font: 600 max(var(--fs-floor), 0.8462rem) var(--font-display); }
+.ncard .np > span:not(.dot) { flex: 1; min-width: 0; }
+.ncard .np .dot { margin: 0; width: 8px; height: 8px; flex: none; }
+.ncard .nl { font-size: max(var(--fs-floor), 0.6923rem); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: color-mix(in srgb, var(--dot-decide) 80%, var(--ink)); display: flex; gap: 5px; align-items: center; margin-top: 2px; }
+.ncard .nl svg, .sugm svg { width: 10px; height: 10px; fill: var(--violet); stroke: none; flex: none; }
+.ncard .ns { font-size: max(var(--fs-floor), 0.8846rem); font-weight: 500; line-height: 1.35; }
+.ncard .nw { font-size: max(var(--fs-floor), 0.7692rem); color: var(--muted); line-height: 1.35; }
+.ncard .na { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 4px; }
+.ncard .na .cta { height: 28px; font-size: max(var(--fs-floor), 0.8077rem); padding: 0 10px; }
+.ncard .na .fclear { color: var(--ink); }
+.ncard .na button:disabled { opacity: .5; }
+.ncard.done { border-style: solid; border-color: var(--line); background: var(--chip); }
+.nscard .ncard { margin-top: 4px; max-width: 72ch; }
+
+/* Row chips: an open suggestion, or a next step set on the board from one. */
+.sugm, .setb { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 1px 8px; font-size: max(var(--fs-floor), 0.7692rem); white-space: nowrap; color: color-mix(in srgb, var(--dot-decide) 80%, var(--ink)); }
+.sugm { font-weight: 600; border: 1px dashed color-mix(in srgb, var(--violet) 70%, var(--line)); background: color-mix(in srgb, var(--violet) 8%, var(--surface)); cursor: pointer; }
+.setb { border: 1px solid color-mix(in srgb, var(--violet) 60%, var(--line)); justify-self: start; }
+.pitem .meta { gap: 8px; }
+
+/* Count badges: the rail's ✦ button and the header toggle on narrow screens. */
+.rbtn.rstall { position: relative; }
+.rbtn.rstall svg { fill: currentColor; stroke: none; }
+.rb { position: absolute; top: 1px; right: 1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: var(--btn); color: var(--btn-ink); font: 700 max(var(--fs-floor), 0.6538rem)/16px var(--font); text-align: center; box-shadow: 0 0 0 2px var(--rail); }
+.atoggle { position: relative; }
+.tbdg { position: absolute; top: -5px; right: -5px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--btn); color: var(--btn-ink); font: 700 max(var(--fs-floor), 0.6923rem)/17px var(--font); text-align: center; box-shadow: 0 0 0 2px var(--surface); }
+
+@media (pointer: coarse) {
+  .atabs [role="tab"] { height: 44px; }
+  .ncard .na :is(.cta, .fclear) { min-height: 44px; }
+}

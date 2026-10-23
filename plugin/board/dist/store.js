@@ -52,4 +52,6 @@ export const store = new Store({
     day: dayKey(),
     notes: null,
     plans: null,
+    rows: [],
+    nudges: null,
 });

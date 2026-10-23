@@ -25,7 +25,15 @@ export interface Project {
   waitingOn?: unknown;
   /** `SourceError` written by a check-in that couldn't reach the project's repo or source; cleared on the next good one. */
   sourceError?: unknown;
+  /** ISO time of the last write, and who wrote it (`checkin` or `rundown`). Ends a board-set overlay when `checkin`. */
+  updatedAt?: string;
+  updatedBy?: string;
+  /** Page-only: an accepted nudge laid over this row (never read from or written to the db). */
+  boardSet?: BoardSet;
 }
+
+/** What an accepted nudge changed on a row, and when it was set on the board. */
+export interface BoardSet { kind: NudgeKind; text: string; at: string }
 
 /** A source the last check-in couldn't reach, e.g. `{source: 'GitHub', since: '2026-10-22'}`. */
 export interface SourceError { source: string; detail?: string; since?: string }
@@ -59,6 +67,23 @@ export interface PlanVersion { items: PlanItem[]; basis: string; generatedAt: st
 
 /** `plans/{week}` (e.g. `plans/2026-W43`), written only by the board page. */
 export interface WeekPlan { week: string; draft: PlanVersion | null; pinned: PlanVersion | null }
+
+export type NudgeKind = 'next' | 'park';
+/** `superseded` = a later check-in replaced what was set on the board (the Restore toast showed once). */
+export type NudgeStatus = 'suggested' | 'accepted' | 'dismissed' | 'superseded';
+
+/** `nudges/{projectId}`, written only by the board page: one suggested next step (or park) for a stalled row. */
+export interface Nudge {
+  projectId: string;
+  status: NudgeStatus;
+  kind: NudgeKind;
+  text: string;
+  why: string;
+  /** Fingerprint of the row when suggested; a different value means the row changed since. */
+  basis: string;
+  generatedAt: string;
+  decidedAt: string | null;
+}
 
 /** `meta/run` document written by the scheduled rundown and /project-checkin. */
 export interface RunMeta {
@@ -138,6 +163,10 @@ export interface AppState {
   notes: LockedNote[] | null;
   /** Weekly plans from the board db, newest week first; null until the first snapshot. */
   plans: WeekPlan[] | null;
+  /** Project rows exactly as the db holds them; `projects` is these with accepted nudges laid over. */
+  rows: Project[];
+  /** Stale-work nudges from the board db; null until the first snapshot. */
+  nudges: Nudge[] | null;
 }
 
 export type StateKey = keyof AppState;

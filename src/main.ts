@@ -16,6 +16,9 @@ import './components/rd-priorities.js';
 import './components/rd-composer.js';
 import './components/rd-week-plan.js';
 import './components/rd-assistant.js';
+// After rd-assistant: on rd:show-stalled the panel opens before the tab and card take focus.
+import './components/rd-panel-tabs.js';
+import './components/rd-stalled.js';
 import './components/rd-focus.js';
 import './components/rd-settings.js';
 import { connectRuntime } from './runtime.js';
@@ -25,6 +28,7 @@ import { initViewSwipe } from './lib/view-swipe.js';
 import { initBoardToasts } from './lib/board-toasts.js';
 import { initOnboarding } from './lib/onboarding.js';
 import { initUpdateNotice } from './lib/update-notice.js';
+import { watchReplaced } from './lib/nudge-actions.js';
 
 initCheckin(byId<HTMLButtonElement>('copy-cmd-2'));
 initViewSwipe(document.querySelector<HTMLElement>('.ptable') ?? document.body);
@@ -32,6 +36,7 @@ initViewSwipe(document.querySelector<HTMLElement>('.ptable') ?? document.body);
 initBoardToasts();
 initUpdateNotice();
 initOnboarding();
+watchReplaced();
 void connectRuntime();
 
 export { store } from './store.js';
