@@ -1,0 +1,29 @@
+# STATUS.md says where work left off; the board reads it. Fails when the file is malformed and
+# warns (without failing) when a feat or fix PR doesn't touch it. Release-please bumps its Released line.
+name: Status file
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run status:check
+      - name: Warn when a feat or fix PR leaves STATUS.md alone
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if echo "$TITLE" | grep -Eq '^(feat|fix)(\(.+\))?!?:' && ! git diff --name-only "$BASE"...HEAD | grep -qx STATUS.md; then
+            echo "::warning file=STATUS.md::This $(echo "$TITLE" | cut -d: -f1) PR doesn't update STATUS.md. Update Left off and Next step before merging."
+          fi
