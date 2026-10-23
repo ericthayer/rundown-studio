@@ -2,7 +2,7 @@
  * Structured calls to the board's own Claude (`sample`): asks for one JSON object, enforces the
  * stall timeout, and maps every failure to a code the caller turns into copy via `failure()`.
  */
-import type { Project } from '../types.js';
+import type { ModelTier, Project } from '../types.js';
 import { getSampler, revokeSampler } from '../runtime.js';
 import { STALL_MS, UNAVAILABLE } from './sample-errors.js';
 
@@ -23,7 +23,7 @@ export function extractJson(text: string): unknown {
   try { return JSON.parse(text.slice(start, end + 1)) as unknown; } catch { return undefined; }
 }
 
-export async function sampleJson(prompt: string, opts: { tier: 'quick' | 'standard'; signal?: AbortSignal }): Promise<JsonResult> {
+export async function sampleJson(prompt: string, opts: { tier: ModelTier; signal?: AbortSignal }): Promise<JsonResult> {
   const sample = getSampler();
   if (!sample) return { ok: false, code: 'not_granted' };
   if (navigator.onLine === false) return { ok: false, code: 'offline' };

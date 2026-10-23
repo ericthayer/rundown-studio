@@ -188,9 +188,12 @@ export interface ArtifactDb {
   doc(path: string): DocRef;
 }
 export interface SampleResult { text: string }
+/** The runtime's `modelTier` values; anything else rejects `invalid_request`. */
+export type ModelTier = 'quick' | 'default' | 'complex';
+
 export type Sampler = (
   prompt: string,
-  opts: { signal?: AbortSignal; modelTier?: 'quick' | 'standard'; onText?: (chunk: { text: string }) => void },
+  opts: { signal?: AbortSignal; modelTier?: ModelTier; onText?: (chunk: { text: string }) => void },
 ) => Promise<SampleResult>;
 
 /** `room` capability: only the hand-off to the viewer's own Claude chat beside the board. */
