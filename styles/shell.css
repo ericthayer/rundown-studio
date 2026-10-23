@@ -15,7 +15,8 @@
   .shell.resizing { transition: none; cursor: col-resize; user-select: none; }
 }
 @media (max-width: 1060px) {
-  .shell { grid-template-columns: clamp(170px, 20vw, 210px) minmax(0, 1fr); height: auto; min-height: 100dvh; }
+  /* The page scrolls here; clip (not hidden) so the shell isn't a scroll container and the dock can stick to the viewport. */
+  .shell { grid-template-columns: clamp(170px, 20vw, 210px) minmax(0, 1fr); height: auto; min-height: 100dvh; overflow: clip; }
   .shell.slim { grid-template-columns: 68px minmax(0, 1fr); }
 }
 @media (max-width: 720px) {
