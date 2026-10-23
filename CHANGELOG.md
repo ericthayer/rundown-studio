@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.6.0...rundown-studio-v1.7.0) (2026-10-23)
+
+
+### Features
+
+* **settings:** bottom-sheet settings drawer on phones, working Send feedback ([#30](https://github.com/ericthayer/rundown-studio/issues/30)) ([3642ce4](https://github.com/ericthayer/rundown-studio/commit/3642ce44fff71a106146a0abff2f7e38e4cd3757))
+
 ## [1.6.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.5.0...rundown-studio-v1.6.0) (2026-10-23)
 
 

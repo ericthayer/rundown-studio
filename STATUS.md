@@ -5,7 +5,7 @@ updatedBy: claude
 ---
 # Status
 
-Released: v1.6.0 <!-- x-release-please-version -->
+Released: v1.7.0 <!-- x-release-please-version -->
 
 ## Left off
 On phones the settings gear now opens a bottom-sheet drawer (scrolling body, focus trap, Escape, Close button, drag the header down) instead of the popover, which ran off the screen once the locker filled up. The desktop popover is unchanged. Send feedback opens the mail app in a new window and copies the address, since the artifact frame blocks mailto: in place.
