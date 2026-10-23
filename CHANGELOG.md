@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.3](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.2...rundown-studio-v1.7.3) (2026-10-23)
+
+
+### Bug fixes
+
+* **plugin:** keep board and templates inside each skill so claude.ai installs work ([#36](https://github.com/ericthayer/rundown-studio/issues/36)) ([e1e6224](https://github.com/ericthayer/rundown-studio/commit/e1e6224d242398c7a022d77305c8dcd99b7a5897))
+
 ## [1.7.2](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.1...rundown-studio-v1.7.2) (2026-10-23)
 
 
