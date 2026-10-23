@@ -128,8 +128,9 @@ class DialogGuide implements TourGuide {
     } else if (r.bottom + GAP + ht <= floor) {
       top = r.bottom + GAP;
       left = clampX(r.left + r.width / 2 - w / 2);
-    } else if (r.top - GAP - ht >= EDGE) {
-      top = r.top - GAP - ht;
+    } else if (Math.min(r.top - GAP, floor) - ht >= EDGE) {
+      // Targets flush with the bottom edge (sidebar footer) sit inside the band; stay above it.
+      top = Math.min(r.top - GAP, floor) - ht;
       left = clampX(r.left + r.width / 2 - w / 2);
     } else {
       top = Math.max(EDGE, Math.min(r.top, floor - ht));

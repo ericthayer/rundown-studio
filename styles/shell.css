@@ -1,5 +1,5 @@
-/* App shell: full-viewport glass grid — sidebar | projects | assistant. */
-.shell { width: 100%; margin: 0; background: var(--shell); border-radius: clamp(0px, 1.6vw, 24px); box-shadow: var(--shadow); display: grid; grid-template-columns: clamp(180px, 15vw, 280px) minmax(0, 1fr) clamp(280px, 24vw, 440px); height: calc(100dvh - 2 * var(--pad)); min-height: 560px; overflow: hidden; backdrop-filter: blur(20px); transition: grid-template-columns .22s ease; }
+/* App shell: full-viewport grid — sidebar | projects | assistant. */
+.shell { width: 100%; margin: 0; background: var(--shell); display: grid; grid-template-columns: clamp(180px, 15vw, 280px) minmax(0, 1fr) clamp(280px, 24vw, 440px); height: 100dvh; min-height: 560px; overflow: hidden; transition: grid-template-columns .22s ease; }
 @media (prefers-reduced-motion: reduce) { .shell { transition: none; } }
 .center { --ctl-h: 32px; --ctl-dash: color-mix(in srgb, var(--muted) 45%, transparent); display: flex; flex-direction: column; gap: 14px; padding: 30px 0 0 0; min-width: 0; min-height: 0; container-type: inline-size; }
 
@@ -15,11 +15,11 @@
   .shell.resizing { transition: none; cursor: col-resize; user-select: none; }
 }
 @media (max-width: 1060px) {
-  .shell { grid-template-columns: clamp(170px, 20vw, 210px) minmax(0, 1fr); height: auto; min-height: calc(100dvh - 2 * var(--pad)); backdrop-filter: none; }
+  /* The page scrolls here; clip (not hidden) so the shell isn't a scroll container and the dock can stick to the viewport. */
+  .shell { grid-template-columns: clamp(170px, 20vw, 210px) minmax(0, 1fr); height: auto; min-height: 100dvh; overflow: clip; }
   .shell.slim { grid-template-columns: 68px minmax(0, 1fr); }
 }
 @media (max-width: 720px) {
-  body { --pad: 0px; }
-  .shell, .shell.slim { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; border-radius: 20px; }
+  .shell, .shell.slim { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
   .center { padding: 18px 0 0; }
 }

@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build && node tests/smoke.mjs && node tests/mobile.mjs && node tests/ask.mjs && node tests/config.mjs && node tests/states.mjs && node tests/toasts.mjs && node tests/onboarding.mjs && node tests/plan.mjs && node tests/nudges.mjs && node tests/status.mjs",
+    "test": "npm run build && node tests/smoke.mjs && node tests/mobile.mjs && node tests/ask.mjs && node tests/config.mjs && node tests/states.mjs && node tests/toasts.mjs && node tests/onboarding.mjs && node tests/plan.mjs && node tests/nudges.mjs && node tests/status.mjs && node tests/dock.mjs",
     "plugin": "rm -rf dist && npm run build && node scripts/package-plugin.mjs",
     "plugin:check": "node scripts/package-plugin.mjs --check",
     "status:check": "node scripts/status-check.mjs STATUS.md",

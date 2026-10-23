@@ -64,7 +64,10 @@
 .send svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
 
 /* Ask Rundown, docked under the project list: answer tray above a one-line ask bar. */
-rd-composer.dock { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 10px 16px 14px; border-top: 1px solid var(--line); background: var(--surface); }
+/* Pinned to the bottom of the main panel at every width; the soft shadow shows only while rows sit under it (.lifted, dock-lift.ts). */
+rd-composer.dock { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 10px 16px 14px; border-top: 1px solid var(--line); background: var(--surface); position: sticky; bottom: 0; z-index: 5; transition: box-shadow .18s ease; }
+rd-composer.dock.lifted { box-shadow: var(--dock-shadow); }
+@media (prefers-reduced-motion: reduce) { rd-composer.dock { transition: none; } }
 .dock .ascroll { flex: none; max-height: min(34vh, 300px); }
 .dock .ascroll > :first-child { margin-top: 0; }
 :is(.ascroll, .alog)[hidden] { display: none; }
@@ -78,8 +81,13 @@ rd-composer.dock { flex: none; display: flex; flex-direction: column; gap: 8px; 
   .dock .composer { flex-direction: column; align-items: stretch; }
   .dock .crow { flex-wrap: wrap; }
 }
-@media (max-width: 1060px) { rd-composer.dock { position: sticky; bottom: 0; z-index: 5; } }
-@media (max-width: 720px) { rd-composer.dock { padding-bottom: max(14px, env(safe-area-inset-bottom, 0px)); } }
+/* Phone: one condensed line (ask box + send); the quick-ask chips open under it while the box has focus. */
+@media (max-width: 720px) {
+  rd-composer.dock { gap: 6px; padding: 8px 12px max(8px, env(safe-area-inset-bottom, 0px)); }
+  .dock .ascroll { max-height: min(28vh, 240px); }
+  .dock .composer:not(:focus-within) { flex-direction: row; align-items: center; padding: 4px 4px 4px 8px; }
+  .dock .composer:not(:focus-within) .chip { display: none; }
+}
 
 /* Icon rail (collapsed, wide only). */
 .arail { flex-direction: column; align-items: center; gap: 4px; height: 100%; width: 100%; }

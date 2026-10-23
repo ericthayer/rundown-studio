@@ -8,10 +8,10 @@ updatedBy: claude
 Released: v1.5.0 <!-- x-release-please-version -->
 
 ## Left off
-Weekly plan (#24) and the Stalled tab with nudges (#26) are merged. This PR adds STATUS.md, read by check-ins and the scheduled rundown.
+The shell now fills the viewport: no body padding or gradient, no shell radius, shadow or blur, and `--shell`/`--rail` are solid #f6f6f6 light and #1f2125 dark. The Ask Rundown dock is pinned to the bottom of the main panel at every width with a soft shadow that shows only while rows sit under it, and condenses to one line on phones.
 
 ## Next step
-Merge #26, then republish Board B from main.
+Merge the full-viewport shell PR, then republish Board B from main.
 
 ## Blockers
 - None

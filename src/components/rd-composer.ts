@@ -8,6 +8,7 @@ import { type AskTurn, loadTurns, saveTurns, recap, MAX_TURNS } from '../lib/ask
 import { type RdSaveMenu, savedAnswer } from './rd-save-menu.js';
 import { STALL_MS, UNAVAILABLE, failure } from '../lib/sample-errors.js';
 import { modelRows } from '../lib/sample-json.js';
+import { watchDockLift } from '../lib/dock-lift.js';
 import './rd-save-menu.js';
 
 /**
@@ -51,6 +52,7 @@ export class RdComposer extends StoreElement {
       this.#input.addEventListener('input', () => { this.#input.style.height = 'auto'; this.#input.style.height = `${this.#input.scrollHeight}px`; });
     }
     this.querySelectorAll<HTMLButtonElement>('.chip[data-q]').forEach((b) => b.addEventListener('click', () => void this.ask(b.dataset.q ?? '')));
+    if (this.classList.contains('dock')) this.onCleanup(watchDockLift(this, [...document.querySelectorAll<HTMLElement>('.center .plist')]));
     this.watch(['canAsk'], (_c, s) => { this.#input.placeholder = s.canAsk ? 'Ask about your projects…' : 'Filter projects…'; });
   }
 

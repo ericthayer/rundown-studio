@@ -24,6 +24,10 @@ export class StoreElement extends HTMLElement {
         target.addEventListener(type, fn);
         this.#cleanups.push(() => target.removeEventListener(type, fn));
     }
+    /** Runs `fn` on disconnect, for observers and other teardown the helpers above don't cover. */
+    onCleanup(fn) {
+        this.#cleanups.push(fn);
+    }
     ref(name) {
         const el = this.querySelector(`[data-ref="${name}"]`);
         if (!el)
