@@ -1,6 +1,6 @@
 {
   "name": "rundown",
-  "version": "1.7.5",
+  "version": "1.7.6",
   "description": "Your own Rundown project status board: publishes a private board into your Claude account, records project check-ins, and keeps it current with a scheduled rundown.",
   "author": {
     "name": "ericthayer",

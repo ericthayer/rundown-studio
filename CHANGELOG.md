@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.6](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.5...rundown-studio-v1.7.6) (2026-10-23)
+
+
+### Bug fixes
+
+* **settings:** show the board version and line up the Help section ([#40](https://github.com/ericthayer/rundown-studio/issues/40)) ([6f1d514](https://github.com/ericthayer/rundown-studio/commit/6f1d5145f0761e13a7d8ccf94e5c976b98c40902))
+
 ## [1.7.5](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.4...rundown-studio-v1.7.5) (2026-10-23)
 
 
