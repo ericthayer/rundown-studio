@@ -8,10 +8,10 @@ updatedBy: claude
 Released: v1.7.1 <!-- x-release-please-version -->
 
 ## Left off
-The settings drawer is now full screen on phones and a full-height 40dvw side drawer on the right on touch tablets (which used to get the popover). The Help divider no longer crosses its label in WebKit, Take the tour lines up with the other Help rows, and opening the drawer focuses the drawer instead of its Close button.
+The Your week drawer now matches the settings drawer: full screen on phones, and full height at 40dvw on the right for tablet widths (721 to 1060px). Board B is on v1.7.1.
 
 ## Next step
-Merge the settings drawer height PR, then republish Board B from main.
+Merge the Your week drawer PR; its release merge republishes Board B.
 
 ## Blockers
 - None
