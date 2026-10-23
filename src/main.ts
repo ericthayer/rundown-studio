@@ -14,6 +14,7 @@ import './components/rd-project-list.js';
 import './components/rd-decisions.js';
 import './components/rd-priorities.js';
 import './components/rd-composer.js';
+import './components/rd-week-plan.js';
 import './components/rd-assistant.js';
 import './components/rd-focus.js';
 import './components/rd-settings.js';

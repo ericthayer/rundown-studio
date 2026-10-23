@@ -64,7 +64,7 @@ check('folded answers stay folded after a reload', await p.evaluate(() => !docum
 await p.locator('.alog .answer .q').first().focus(); await p.keyboard.press('Enter');
 check('keyboard Enter unfolds it', await p.evaluate(() => document.querySelector('.alog .answer').open));
 
-await p.click('.aclear');
+await p.click('.aclr');
 check('Clear empties the transcript and storage', (await p.locator('.alog .answer').count()) === 0 && await p.locator('.ahead').isHidden() && (await p.evaluate(() => sessionStorage.getItem('rundown.askLog'))) === null);
 check('focus returns to the ask box after Clear', await p.evaluate(() => document.activeElement?.tagName === 'TEXTAREA'));
 

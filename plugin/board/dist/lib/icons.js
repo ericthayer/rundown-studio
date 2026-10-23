@@ -29,6 +29,11 @@ export const UI = {
     bug: '<path d="M9 7V5a3 3 0 0 1 6 0v2"/><rect x="7" y="7" width="10" height="13" rx="5"/><path d="M12 11v9M3 13h4M17 13h4M4 7l3 2M20 7l-3 2M4 20l3-2M20 20l-3-2"/>',
     tour: '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
     calendar: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>',
+    spark: '<path d="M12 2c.6 4.8 2.4 7.4 10 10-7.6 2.6-9.4 5.2-10 10-.6-4.8-2.4-7.4-10-10 7.6-2.6 9.4-5.2 10-10z"/>',
+    up: '<path d="m7 14 5-5 5 5"/>',
+    down: '<path d="m7 10 5 5 5-5"/>',
+    close: '<path d="M7 7l10 10M17 7 7 17"/>',
+    plus: '<path d="M12 6v12M6 12h12"/>',
 };
 /**
  * Priority artwork. Gradient ids must be unique per document, so each placement passes its own

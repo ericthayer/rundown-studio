@@ -60,15 +60,17 @@ src/
   runtime.ts            artifact db/sample bridge, midnight tick
   types.ts              domain + state types, runtime capability typings
   domain/               projects (needs-you, streak, labels) · filters (groups, sort, visible list)
-                        · signals (open decisions with age, waiting on)
+                        · signals (open decisions with age, waiting on) · week-plan (ISO weeks, prompt, validation)
   lib/                  dom helpers (h, preserveFocus, copyCommand) · prefs · theme · dates · icons · note-locker · ask-history
+                        · sample-json / sample-errors (shared `sample` calls) · plan-store · reveal · hash
   components/           rd-sidebar · rd-count · rd-stat-strip · rd-streak · rd-toolbar · rd-note
                         rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant · rd-focus · rd-settings
-                        rd-note-locker · rd-save-menu
+                        rd-note-locker · rd-save-menu · rd-week-plan · plan-editor
 plugin/                 Claude Code plugin: skills/ (setup, checkin, update), templates/, board/ (generated copy)
 .claude-plugin/         marketplace manifest so the repo installs as a plugin source
 tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals, focus mode, color mode, note locker
 tests/ask.mjs           Ask Rundown transcript and saving answers to the Locker / project cards
+tests/plan.mjs          This week: draft, edit, pin, failures, no-Claude path, phone
 ```
 
 ## Rules this codebase keeps
@@ -99,6 +101,10 @@ Illustrations are data (`src/lib/scenes.ts`) rendered as static SVG first and as
 `notes/{id}` — the note locker. A dismissed rundown note is `{ kind: 'note', text, savedAt, projectId: null, inLocker: true }` with a deterministic id per text (`noteId()`), so it syncs across devices. The banner hides any `critique` that is in the locker; a run that writes new text shows it again. Entries older than 14 days drop out of the locker and are deleted on the next dismissal. **Show again** (Settings → Locker) deletes the entry. If a write is refused, the dismissal falls back to this browser (`rundown.prefs.noteDismissed`), and an older local dismissal is copied to the board once.
 
 Saved Ask Rundown answers share the collection: `{ kind: 'answer', text, question, savedAt, projectId, inLocker }` with id `answerId(text)`. **Save** under an answer writes it to the Locker, a project card (`projectId`), or both; unticking both deletes it. Answers never expire. The Ask Rundown transcript itself is per tab (`sessionStorage` `rundown.askLog`, 20 turns) and is never written to the board.
+
+`plans/{week}` — **This week** in the right panel, keyed by ISO week (`2026-W43`): `{ week, draft, pinned }`, each a version `{ items: [{ projectId, name, why }], basis, generatedAt, pinnedAt? }` (up to 3 items). **Draft this week** asks the board's own Claude (`sample`, standard tier) for JSON, keeps only known, non-parked ids, and opens the draft in an editor; **Pin plan** writes `pinned` and clears `draft`. Without Claude, **Plan it yourself** opens the same editor empty. `basis` is a hash of the rows the draft read, so a changed board offers **Redraft**. The page writes this collection and never writes `projects`; check-ins don't read or write it. The newest 8 weeks are kept.
+
+Layout: the right panel holds **Top priorities** and **This week**. Ask Rundown is docked under the project list and stays on screen on every width; its answers fold away with **Hide answers** (remembered per browser).
 
 ## Publishing
 

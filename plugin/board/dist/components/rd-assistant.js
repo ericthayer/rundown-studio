@@ -20,7 +20,8 @@ export class RdAssistant extends StoreElement {
     #pending = '';
     #panel;
     #shell;
-    get #composer() { return this.querySelector('rd-composer'); }
+    /** Ask Rundown is docked under the project list, outside this panel. */
+    get #composer() { return document.querySelector('rd-composer'); }
     get #priorities() { return this.querySelector('rd-priorities'); }
     setup() {
         this.#panel = this.ref('panel');
@@ -46,14 +47,13 @@ export class RdAssistant extends StoreElement {
         });
         this.listen(document, 'rd:reveal-project', () => { if (this.#mq.matches)
             this.set(false); });
-        this.listen(this, 'rd:answer', () => this.#flag('answer'));
         const onMq = () => this.set(this.#mq.matches ? false : prefs.get('agentOpen'), { focus: false });
         this.#mq.addEventListener('change', onMq);
         this.watch(['meta'], (_c, s) => {
             const note = typeof s.meta.critique === 'string' ? s.meta.critique : '';
             if (note && note !== prefs.get('noteSeen')) {
                 this.#pending = note;
-                this.#flag('note');
+                this.#flag();
             }
         });
         // First paint: restore the remembered layout without animating the column.
@@ -68,7 +68,7 @@ export class RdAssistant extends StoreElement {
         const toggle = byId('agent-toggle');
         const bg = [this.#shell.querySelector('.rail'), this.#shell.querySelector('.center')];
         setAttr(toggle, 'aria-expanded', String(open));
-        setAttr(toggle, 'aria-label', open ? 'Close assistant' : 'Open assistant');
+        setAttr(toggle, 'aria-label', open ? 'Close your week' : 'Open your week');
         if (!this.#mq.matches) {
             this.#open = open;
             prefs.set('agentOpen', open);
@@ -119,11 +119,11 @@ export class RdAssistant extends StoreElement {
     /** Icon rail: expand, top priorities, quick asks, chat. */
     #setupRail() {
         this.ref('rail-open').addEventListener('click', () => this.set(true));
-        this.ref('rail-chat').addEventListener('click', () => { this.set(true, { focus: false }); requestAnimationFrame(() => this.#composer.focusInput()); });
+        // Chat and quick asks go to the docked ask box; the panel stays collapsed.
+        this.ref('rail-chat').addEventListener('click', () => { this.#seen(); this.#composer.focusInput(); });
         this.querySelectorAll('.rbtn[data-rq]').forEach((b) => b.addEventListener('click', () => {
-            this.set(true, { focus: false });
             void this.#composer.ask(b.dataset.rq ?? '');
-            requestAnimationFrame(() => this.#composer.focusInput());
+            this.#composer.focusInput();
         }));
         const group = this.ref('rail-pri');
         const buttons = new Map();
@@ -139,7 +139,7 @@ export class RdAssistant extends StoreElement {
                 let b = buttons.get(p.id);
                 if (!b) {
                     const id = p.id;
-                    b = h('button', { class: 'rbtn art', type: 'button', 'data-fk': `rail:${id}`, onclick: () => { store.set({ openId: id }); emit(this, 'rd:reveal-project', { id }); } });
+                    b = h('button', { class: 'rbtn rart', type: 'button', 'data-fk': `rail:${id}`, onclick: () => { store.set({ openId: id }); emit(this, 'rd:reveal-project', { id }); } });
                     buttons.set(id, b);
                 }
                 if (b.dataset.idx !== String(i)) {
@@ -155,18 +155,17 @@ export class RdAssistant extends StoreElement {
             });
         }));
     }
-    /** Unread dot on the rail's chat button; only meaningful while collapsed. */
-    #flag(kind) {
+    /** Unread dot on the rail's chat button for a new rundown note; only meaningful while collapsed. */
+    #flag() {
         const railed = this.#shell.classList.contains('agent-rail');
         if (!railed) {
-            if (kind === 'note')
-                this.#seen();
+            this.#seen();
             return;
         }
         const chat = this.ref('rail-chat');
         chat.toggleAttribute('data-unread', true);
-        chat.setAttribute('aria-label', `Ask about your projects, new ${kind === 'note' ? 'rundown note' : 'answer'}`);
-        chat.dataset.tip = kind === 'note' ? 'New rundown note' : 'New answer';
+        chat.setAttribute('aria-label', 'Ask about your projects, new rundown note');
+        chat.dataset.tip = 'New rundown note';
     }
     #seen() {
         if (this.#pending)

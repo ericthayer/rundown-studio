@@ -4,6 +4,7 @@ import { toProject } from './domain/projects.js';
 import { dayKey, msToMidnight } from './lib/dates.js';
 import { connectLocker } from './lib/note-locker.js';
 import { toConfig } from './lib/config.js';
+import { connectPlans } from './lib/plan-store.js';
 
 /** No first snapshot by then → show the can't-reach state (a late snapshot still flips it to ready). */
 export const CONNECT_TIMEOUT = 12000;
@@ -70,6 +71,7 @@ async function connect(): Promise<void> {
     () => { /* meta is optional */ },
   );
   connectLocker(db, (notes) => store.set({ notes }));
+  connectPlans(db, (plans) => store.set({ plans }));
   db.doc('meta/config').onSnapshot(
     (d) => store.set({ config: toConfig(d.data()) }),
     () => { /* config is optional */ },

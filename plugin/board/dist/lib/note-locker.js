@@ -1,5 +1,6 @@
 import { prefs } from './prefs.js';
 import { toast } from './toast.js';
+import { hash } from './hash.js';
 /** How long a dismissed note stays in the locker. */
 export const LOCKER_DAYS = 14;
 const DAY_MS = 864e5;
@@ -7,13 +8,6 @@ export const NOTES = 'notes';
 let db = null;
 /** Ids of locker notes past the window, deleted on the viewer's next dismissal (never from a snapshot). */
 let expired = [];
-/** FNV-1a 32-bit hex of `text`. */
-function hash(text) {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < text.length; i++)
-        h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
-    return (h >>> 0).toString(16);
-}
 /** Deterministic doc id per note text, so dismissing the same note twice keeps one entry. */
 export const noteId = (text) => `note-${hash(text)}`;
 /** Same idea for saved Ask Rundown answers: saving the same answer again updates one doc. */

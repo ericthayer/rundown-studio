@@ -1,6 +1,6 @@
 const KEY = 'rundown.prefs';
 const LEGACY = ['rundown.slim', 'rundown.agent', 'rundown.agentW', 'rundown.drawer', 'rundown.filters', 'rundown.noteDismissed', 'rundown.noteSeen'];
-const DEFAULTS = { v: 1, slim: false, areasOpen: true, agentOpen: true, agentW: null, drawer: 1, filters: null, noteDismissed: '', noteSeen: '', theme: 'system', tour: '', tourVersion: 0 };
+const DEFAULTS = { v: 1, slim: false, areasOpen: true, agentOpen: true, agentW: null, drawer: 1, filters: null, noteDismissed: '', noteSeen: '', theme: 'system', tour: '', tourVersion: 0, askOpen: true };
 function read(key) {
     try {
         return localStorage.getItem(key);
