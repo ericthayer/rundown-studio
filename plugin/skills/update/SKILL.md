@@ -9,7 +9,13 @@ Republish the plugin's board code to the user's existing board URL. The board's 
 
 Paths below are relative to this skill's own folder, the one holding this SKILL.md. Claude Code prints it as "Base directory for this skill: ..."; in claude.ai chat the folder is copied into the code sandbox. Everything this skill needs is inside that folder: never look for files elsewhere in the plugin. Board source: `assets/board/` (`index.html`, `styles/*.css`, `dist/**/*.js`).
 
-Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
+## Before anything else: check the tools
+
+This skill needs Claude Code's `Artifact` tool, the one whose publish takes `file_path`, `files` and `capabilities` and returns a `claude.ai/artifact/...` URL, plus `ArtifactData`. Look for both in your tool list (load them with ToolSearch `select:Artifact,ArtifactData` if they are deferred). If either is missing, as in claude.ai chat, stop before asking any questions and reply:
+
+> Rundown update needs Claude Code. Open the Claude desktop app's Code tab, or run `claude` in a terminal, and run `/rundown:update` there. Your board will work everywhere once it exists.
+
+Never create a board any other way (an inline chat artifact, an HTML file, a code block), and never show a board URL unless an `Artifact` publish in this session returned it.
 
 ## Steps
 
