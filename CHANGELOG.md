@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.4](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.3...rundown-studio-v1.7.4) (2026-10-23)
+
+
+### Bug fixes
+
+* **plugin:** stop setup, update and checkin where the artifact tools are missing ([#38](https://github.com/ericthayer/rundown-studio/issues/38)) ([efb2b23](https://github.com/ericthayer/rundown-studio/commit/efb2b2328bda25fa4f8471a9d2397e4224792664))
+
 ## [1.7.3](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.2...rundown-studio-v1.7.3) (2026-10-23)
 
 
