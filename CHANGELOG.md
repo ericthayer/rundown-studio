@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.6...rundown-studio-v1.8.0) (2026-10-23)
+
+
+### Features
+
+* **sidebar:** Claude clay brand tile aligned to the title stack ([#44](https://github.com/ericthayer/rundown-studio/issues/44)) ([39be556](https://github.com/ericthayer/rundown-studio/commit/39be5563e0c8409bd29ee211cca89cb5b2d62a20))
+
 ## [1.7.6](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.5...rundown-studio-v1.7.6) (2026-10-23)
 
 
