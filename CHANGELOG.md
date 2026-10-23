@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.5.0...rundown-studio-v1.6.0) (2026-10-23)
+
+
+### Features
+
+* **layout:** full-viewport shell with solid shell and rail tokens ([#28](https://github.com/ericthayer/rundown-studio/issues/28)) ([2c6732f](https://github.com/ericthayer/rundown-studio/commit/2c6732fc9c61a2be9ddcb391467f6d32aca1c02b))
+
 ## [1.5.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.4.0...rundown-studio-v1.5.0) (2026-10-23)
 
 
