@@ -37,6 +37,8 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
     return Math.min(...bgs.map((b) => (Math.max(fg, b) + 0.05) / (Math.min(fg, b) + 0.05)));
   });
   check('--muted ≥ 4.5:1 on surface/rail/chip (light)', ratio >= 4.5, ratio.toFixed(2));
+  const [tile, stack] = await p.evaluate(() => ['.brand-mark', '.brand-name'].map((s) => document.querySelector(s).getBoundingClientRect()).map((r) => [r.y, r.height]));
+  check('brand tile matches the title + version stack', Math.abs(tile[0] - stack[0]) <= 0.5 && Math.abs(tile[1] - stack[1]) <= 0.5, `${tile} vs ${stack}`);
   await p.screenshot({ path: join(OUT, 'wide-light.png') });
   // 4. Icon rail + unread badge + resize.
   await p.click('[data-ref="collapse"]');
@@ -99,6 +101,8 @@ import { META, OUT, ROWS, active, check, finish, page } from './harness.mjs';
   check('legacy prefs migrate (slim + rail)', await p.evaluate(() => { const c = document.getElementById('shell').classList; return c.contains('slim') && c.contains('agent-rail'); }));
   await p.waitForTimeout(1200);
   check('legacy viewer is not shown the first-run tour', !(await p.isVisible('dialog.tour[open]')));
+  const cx = await p.evaluate(() => ['.brand-mark', '.rtoggle svg', '.navb svg'].map((s) => { const r = document.querySelector(s).getBoundingClientRect(); return r.x + r.width / 2; }));
+  check('slim: brand tile, sidebar toggle and nav icons share a centerline', Math.max(...cx) - Math.min(...cx) <= 0.5, cx.map((x) => x.toFixed(2)).join(', '));
   await p.screenshot({ path: join(OUT, 'wide-slim-rail.png') });
   await ctx.close();
 }
