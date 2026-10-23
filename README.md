@@ -89,6 +89,8 @@ tests/nudges.mjs        Stalled: suggest, Use this / Not now / Undo, overlay acr
 
 Signals: `since` (ISO date) drives the age shown in the **Decisions** rollup (oldest first, parked projects excluded) and on cards. A `blocked` project with `waitingOn` and no `blockers` is waiting on others: it gets a blue dot and leaves **Needs you** until a wait passes 14 days.
 
+`STATUS.md` (optional, repos only) — a repo's own record of where work left off. Check-ins and the scheduled rundown copy its sections onto the row when it's newer than the row. Format and rules: [CONTRIBUTING.md](CONTRIBUTING.md#statusmd).
+
 `meta/config` — written by `/rundown:setup`: `owner` (sidebar name), `boardUrl`, `schedule` (shown until the first rundown), `checkinCommand` (default `/project-checkin`), `feedbackEmail` and `issuesUrl` (Settings → Help targets; default to the Rundown maintainer and this repo's issue form), plus `repos` and `timezone` for the rundown. All optional.
 
 ## Empty and failure states

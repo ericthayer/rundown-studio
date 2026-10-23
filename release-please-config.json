@@ -72,6 +72,10 @@
         {
           "type": "generic",
           "path": "plugin/board/dist/version.js"
+        },
+        {
+          "type": "generic",
+          "path": "STATUS.md"
         }
       ]
     }

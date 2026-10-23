@@ -71,7 +71,7 @@ The board ages open decisions and waits from `since`, so the date must survive a
 2. **Gather history** with whatever tools exist. Try each; skip the ones that are not available.
    - Chats: `recent_chats` with `after` set to the start of the lookback window (paginate with `before`, max ~5 calls). For the 1-3 most relevant chats, `conversation_search` with `within_conversation_id` on the project's key terms, then `read_conversation` at the hit's `page_token`. One page per chat; never page through whole chats.
    - Memory: account or project memory if available (MEMORY.md, the Project's memory, a memory tool).
-   - Repo, if one is attached: `STATUS.md`, `CLAUDE.md`, `docs/decisions.md` if present, plus `git log --oneline -15`. Note open PRs or WIP branches.
+   - Repo, if one is attached: `STATUS.md` (see STATUS.md below) on the current branch, `CLAUDE.md`, `docs/decisions.md` if present, plus `git log --oneline -15`. Note open PRs or WIP branches.
    - Track provenance: a decision counts only if a user turn states it. Assistant suggestions are suggestions, not decisions.
    - Keep a list of sources that were unavailable; state it in one line in step 4.
 
@@ -97,8 +97,23 @@ The board ages open decisions and waits from `since`, so the date must survive a
 6. **On confirmation only:**
    - `ArtifactData` `set` (new row, no `if_version`) or `update` (existing row, `if_version` = the version you read). On a version conflict, re-read and redo the write; never overwrite blind.
    - Project memory, if one exists (MEMORY.md or the Project's memory): one line `status <YYYY-MM-DD>: <where it stands> - next: <next step>`, replacing any prior status line.
-   - If a repo is attached, ask whether to write the same line to `STATUS.md` and commit. Do it only if the user agrees.
+   - If a repo is attached, ask whether to write the confirmed row to `STATUS.md`. Only if the user agrees: start from the repo's `STATUS.md` (or `plugin/templates/STATUS.md` from this plugin if it has none), replace each section with the confirmed row, set `updated` to today and `updatedBy` to `claude`, and leave any `Released:` line as it is. Commit it on the current working branch if one is open; otherwise open a PR titled `chore(status): update STATUS.md`. Never push to the default branch.
    - Reply with one line naming what was updated.
+
+## STATUS.md
+
+Some repos keep a `STATUS.md` at the root that any agent working in the repo updates. It's optional; projects without a repo never have one. Format:
+
+- Front matter: `state` (active | blocked | parked), `updated` (YYYY-MM-DD), `updatedBy`.
+- An optional `Released: vX.Y.Z` line, bumped by the repo's release tooling.
+- Sections `## Left off`, `## Next step` (one line), `## Blockers`, `## Waiting on` (`- who: what · since YYYY-MM-DD`), `## Open decisions` (`- question · since YYYY-MM-DD`). `- None` or `- Nobody` means an empty list.
+
+Reading it:
+- If `updated` is newer than the row's `updatedAt`, treat the file as the latest word on `leftOff`, `nextStep`, `blockers`, `waitingOn` and `openDecisions` when you draft the check-in. Older files are context only.
+- Keep an existing `since` on any item already on the row. Never take `decided` from the file; it records only what the user stated.
+- `state` from the file never un-parks a parked row, and the file can't set `stale`.
+- Show the `Released:` version in the check-in text if there is one. Don't write it to the row.
+- A missing or malformed file changes nothing; fall back to commits.
 
 ## Rules
 
