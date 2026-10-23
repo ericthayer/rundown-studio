@@ -24,7 +24,7 @@ Scopes are optional; use the component name (`sidebar`, `toolbar`, `list`, `assi
 - **Check-ins** write it through a branch or a `chore(status):` PR, never straight to `main`.
 - `npm run status:check` validates the file. CI fails a PR when it's malformed.
 
-Format (template: `plugin/templates/STATUS.md`):
+Format (template: `plugin/skills/checkin/assets/STATUS.md`):
 
 ```md
 ---

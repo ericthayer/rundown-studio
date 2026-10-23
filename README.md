@@ -45,8 +45,8 @@ The walkthrough uses demo data and shows the board as of v1.3.3. Re-record it wi
 | `npm run build` | `tsc` → `dist/` (ES2022 modules) |
 | `npm run typecheck` | Strict type check, no emit |
 | `npm test` | Build + Playwright suites (`tests/smoke.mjs`, `mobile.mjs`, `ask.mjs`, `config.mjs`), screenshots in `tests/out/` |
-| `npm run plugin` | Clean build, then copy the board into `plugin/board/`. Run it in any PR that touches the board; CI fails if you forget |
-| `npm run plugin:check` | Fail if `plugin/board/` differs from the build |
+| `npm run plugin` | Clean build, then copy the board into the setup and update skills (`plugin/skills/*/assets/board/`). Run it in any PR that touches the board; CI fails if you forget |
+| `npm run plugin:check` | Fail if a plugin board copy differs from the build, or plugin versions disagree |
 | `npm run walkthrough` | Build, then record `docs/walkthrough.gif` against demo data |
 
 ## Layout
@@ -68,7 +68,7 @@ src/
                         rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant · rd-focus · rd-settings
                         rd-note-locker · rd-save-menu · rd-week-plan · plan-editor
                         rd-panel-tabs · rd-stalled · nudge-card
-plugin/                 Claude Code plugin: skills/ (setup, checkin, update), templates/, board/ (generated copy)
+plugin/                 Claude plugin: skills/ (setup, checkin, update), each with its own assets/ (board copies are generated)
 .claude-plugin/         marketplace manifest so the repo installs as a plugin source
 tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals, focus mode, color mode, note locker
 tests/ask.mjs           Ask Rundown transcript and saving answers to the Locker / project cards

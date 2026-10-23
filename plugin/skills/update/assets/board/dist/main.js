@@ -1,0 +1,40 @@
+/**
+ * Rundown — entry module. Defines custom elements (each module self-registers), then connects the
+ * artifact runtime. Markup is server-rendered in index.html; components enhance it in place.
+ */
+import './lib/theme.js';
+import './components/rd-sidebar.js';
+import './components/rd-count.js';
+import './components/rd-stat-strip.js';
+import './components/rd-streak.js';
+import './components/rd-toolbar.js';
+import './components/rd-note.js';
+import './components/rd-status.js';
+import './components/rd-project-list.js';
+import './components/rd-decisions.js';
+import './components/rd-priorities.js';
+import './components/rd-composer.js';
+import './components/rd-week-plan.js';
+import './components/rd-assistant.js';
+// After rd-assistant: on rd:show-stalled the panel opens before the tab and card take focus.
+import './components/rd-panel-tabs.js';
+import './components/rd-stalled.js';
+import './components/rd-focus.js';
+import './components/rd-settings.js';
+import { connectRuntime } from './runtime.js';
+import { byId } from './lib/dom.js';
+import { initCheckin } from './lib/checkin.js';
+import { initViewSwipe } from './lib/view-swipe.js';
+import { initBoardToasts } from './lib/board-toasts.js';
+import { initOnboarding } from './lib/onboarding.js';
+import { initUpdateNotice } from './lib/update-notice.js';
+import { watchReplaced } from './lib/nudge-actions.js';
+initCheckin(byId('copy-cmd-2'));
+initViewSwipe(document.querySelector('.ptable') ?? document.body);
+initBoardToasts();
+initUpdateNotice();
+initOnboarding();
+watchReplaced();
+void connectRuntime();
+export { store } from './store.js';
+export { prefs } from './lib/prefs.js';

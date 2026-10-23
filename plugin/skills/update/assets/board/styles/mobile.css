@@ -1,0 +1,60 @@
+/* Phones and touch screens: type floor, edge-to-edge shell, settings in the top bar,
+   44px hit areas (invisible; visual sizes unchanged), press feedback, gesture surfaces. */
+
+/* Type floor: the authored scale (1rem = 13px), nothing below 13px. */
+@media (max-width: 720px), (pointer: coarse) and (max-width: 1060px) {
+  html { font-size: 13px; }
+  :root { --fs-floor: 13px; }
+  :is(.navb, .fbtn) .badge { line-height: 1; }
+}
+
+/* Phone layout: the shell fills the screen; the list panel runs edge to edge. */
+@media (max-width: 720px) {
+  .shell, .shell.slim { border-radius: 0; box-shadow: none; }
+  .center { padding: 18px 0 max(0px, env(safe-area-inset-bottom, 0px)); }
+  .phead, .pmeta { padding-inline: 16px; }
+
+  /* Settings: the account footer is hidden on phones, so its gear moves to the top bar. */
+  .rail { position: relative; }
+  .me { display: block; position: absolute; top: 11px; right: 10px; margin: 0; padding: 0; border: 0; }
+  .me-row > .av, .me-row > span:not(.av) { display: none; }
+
+  /* Sheet drag handles: vertical drags belong to the gesture, not the page. */
+  .agent-head, .fsh { touch-action: none; }
+}
+@media (min-width: 721px) and (max-width: 1060px) {
+  .agent-head { touch-action: pan-y; }
+}
+
+@media (pointer: coarse) {
+  button, label, input, select, textarea, [role="separator"] { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  /* iOS zooms into inputs under 16px on focus. */
+  .psearch input, .composer textarea { font-size: 16px; }
+
+  /* Hit areas: a centered pseudo-element at least 44×44px, so taps land without growing the control. */
+  :is(.ibtn, .note-x, .send, .chip, .cta, .atoggle, .ftoggle, .stat, .fbtn, .psearch, .navb, .mset, .fclear, .rtoggle, .sec, .nlock-btn, .asave, .aclear) { position: relative; }
+  :is(.ibtn, .note-x, .send, .chip, .cta, .atoggle, .ftoggle, .stat, .fbtn, .psearch, .navb, .mset, .fclear, .rtoggle, .sec, .nlock-btn, .asave, .aclear)::before {
+    content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+  }
+  .handle { position: relative; }
+  .handle::after { content: ""; position: absolute; inset: -6px 0 -24px; }
+  /* Scrolling rows would clip the hit areas; pad them open without moving anything. */
+  .navs { padding-block: 5px 9px; margin-top: -5px; }
+  .pstats { padding-block: 9px; margin-block: -9px; }
+  /* Option rows in popovers and the filter sheet: full-height rows (no visible box until pressed). */
+  .fopt { min-height: 44px; }
+
+  /* Press feedback. */
+  :is(button, .psearch, .fopt):active { opacity: .72; }
+  .agent, .fgroups, .ascroll { overscroll-behavior: contain; }
+}
+@media (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+  :is(.ibtn, .note-x, .send, .chip, .cta, .atoggle, .ftoggle, .navb, .mset, .fbtn, .stat, .rbtn):active { opacity: 1; transform: scale(.94); }
+  :is(.pitem, .card):active { opacity: 1; transform: scale(.985); }
+  button { transition: transform .12s ease, opacity .12s ease; }
+
+  /* View swipe: the list slides in from the side it came from. */
+  .ptable[data-swipe] :is(rd-project-list, rd-decisions) > .plist { animation: swipe-in .22s cubic-bezier(.2, .8, .2, 1); }
+  .ptable[data-swipe="prev"] :is(rd-project-list, rd-decisions) > .plist { --swipe-from: -24px; }
+}
+@keyframes swipe-in { from { opacity: 0; transform: translateX(var(--swipe-from, 24px)); } }
