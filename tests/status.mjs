@@ -71,7 +71,7 @@ fails('unknown section', `${valid}\n## Decided\n- Ship it\n`, 'unknown section')
 fails('no front matter', valid.slice(valid.indexOf('# Status')), 'must start with ---');
 fails('non-bullet list line', valid.replace('- Need a Stripe test key', 'Need a Stripe test key'), 'not a "- " bullet');
 
-for (const file of ['STATUS.md', 'plugin/templates/STATUS.md']) {
+for (const file of ['STATUS.md', 'plugin/skills/checkin/assets/STATUS.md']) {
   const src = await readFile(new URL(`../${file}`, import.meta.url), 'utf8');
   const { errors } = parseStatus(file.startsWith('plugin') ? src.replace('YYYY-MM-DD', '2026-01-01') : src);
   check(`${file} is valid`, errors.length === 0, errors.join('; '));

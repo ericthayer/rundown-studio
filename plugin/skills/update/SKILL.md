@@ -7,7 +7,7 @@ description: Use when the user wants to upgrade their existing Rundown board to 
 
 Republish the plugin's board code to the user's existing board URL. The board's database (projects, run state, config, notes) stays as it is.
 
-Paths below are relative to this skill's base directory (Claude Code prints "Base directory for this skill: ..." when the skill loads). Board source: `../../board/` (`index.html`, `styles/*.css`, `dist/**/*.js`).
+Paths below are relative to this skill's own folder, the one holding this SKILL.md. Claude Code prints it as "Base directory for this skill: ..."; in claude.ai chat the folder is copied into the code sandbox. Everything this skill needs is inside that folder: never look for files elsewhere in the plugin. Board source: `assets/board/` (`index.html`, `styles/*.css`, `dist/**/*.js`).
 
 Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
 
@@ -23,7 +23,7 @@ Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
 
 3. **Confirm it is this account's Rundown board.** `ArtifactData` `get` collection `meta`, doc id `config`. Stop unless the doc exists, has an `owner`, and its `boardUrl` is the same artifact as the URL from step 1; point the user to `/rundown:setup` instead. Note the doc's `version` and whether it has `checkinCommand`. Then `Artifact` `action: "read"` with the URL (a publish to a URL this session has not read is refused) and confirm the user is a "writer". Show the board's title, URL, and `owner`, and ask "Update this board?" Publish only on a yes.
 
-4. **Copy the board.** If `../../board/dist/` is missing or holds no `.js` files, stop and publish nothing: the installed plugin is incomplete. Tell the user to run `/plugin marketplace update rundown-studio` and try again. Never fill in files from another artifact, a local build, or the repo source. Otherwise copy `../../board/` into a fresh subfolder of the session scratchpad (e.g. `<scratchpad>/rundown-update-<timestamp>/`), keeping relative paths. Use `cp -r`; do not edit the files.
+4. **Copy the board.** If `assets/board/dist/` is missing or holds no `.js` files, stop and publish nothing: the installed plugin is incomplete. Tell the user to run `/plugin marketplace update rundown-studio` and try again. Never fill in files from another artifact, a local build, or the repo source. Otherwise copy `assets/board/` into a fresh subfolder of the session scratchpad (e.g. `<scratchpad>/rundown-update-<timestamp>/`), keeping relative paths. Use `cp -r`; do not edit the files.
 
 5. **Publish.** Call `Artifact` publish with:
    - `url`: the board URL

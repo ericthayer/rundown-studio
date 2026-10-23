@@ -25,7 +25,7 @@ Before any write, confirm the board is this account's own:
 
 Use the owner's name when you talk about the user's decisions.
 
-Record the plugin version: read `version` from `../../.claude-plugin/plugin.json` (relative to this skill's base directory). If `meta/config` has no `pluginVersion` or a different one, `ArtifactData` `update` collection `meta`, doc id `config`, data `{"pluginVersion": "<version>"}`, `if_version` = the config doc's version; on a conflict, re-read and retry once. The board compares it with its own build and offers `/rundown:update` when it is behind. Change no other config field.
+Record the plugin version: read the version from `assets/VERSION.md` in this skill's own folder (the one holding this SKILL.md). If `meta/config` has no `pluginVersion` or a different one, `ArtifactData` `update` collection `meta`, doc id `config`, data `{"pluginVersion": "<version>"}`, `if_version` = the config doc's version; on a conflict, re-read and retry once. The board compares it with its own build and offers `/rundown:update` when it is behind. Change no other config field.
 
 Write every confirmed row to this board only, with `ArtifactData`. Collection `projects`, one document per project, doc id = kebab-case slug. Never read, rewrite, or delete the `notes` collection, never write `plans` or `nudges` (the board page owns them; you only read `nudges`), and never write `meta/*` docs except `pluginVersion`.
 
@@ -97,7 +97,7 @@ The board ages open decisions and waits from `since`, so the date must survive a
 6. **On confirmation only:**
    - `ArtifactData` `set` (new row, no `if_version`) or `update` (existing row, `if_version` = the version you read). On a version conflict, re-read and redo the write; never overwrite blind.
    - Project memory, if one exists (MEMORY.md or the Project's memory): one line `status <YYYY-MM-DD>: <where it stands> - next: <next step>`, replacing any prior status line.
-   - If a repo is attached, ask whether to write the confirmed row to `STATUS.md`. Only if the user agrees: start from the repo's `STATUS.md` (or `plugin/templates/STATUS.md` from this plugin if it has none), replace each section with the confirmed row, set `updated` to today and `updatedBy` to `claude`, and leave any `Released:` line as it is. Commit it on the current working branch if one is open; otherwise open a PR titled `chore(status): update STATUS.md`. Never push to the default branch.
+   - If a repo is attached, ask whether to write the confirmed row to `STATUS.md`. Only if the user agrees: start from the repo's `STATUS.md` (or `assets/STATUS.md` from this skill's folder if it has none), replace each section with the confirmed row, set `updated` to today and `updatedBy` to `claude`, and leave any `Released:` line as it is. Commit it on the current working branch if one is open; otherwise open a PR titled `chore(status): update STATUS.md`. Never push to the default branch.
    - Reply with one line naming what was updated.
 
 ## STATUS.md

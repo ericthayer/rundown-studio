@@ -1,4 +1,4 @@
-# Fails when plugin/board (the board copy the Rundown plugin publishes) differs from a fresh build.
+# Fails when the board copies the Rundown plugin publishes (plugin/skills/{setup,update}/assets/board) differ from a fresh build.
 # main only takes changes through PRs, so a bot can't sync it after merge: run `npm run plugin` in the PR.
 name: Plugin board
 

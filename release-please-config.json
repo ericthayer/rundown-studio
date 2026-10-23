@@ -71,11 +71,19 @@
         },
         {
           "type": "generic",
-          "path": "plugin/board/dist/version.js"
+          "path": "STATUS.md"
         },
         {
           "type": "generic",
-          "path": "STATUS.md"
+          "path": "plugin/skills/setup/assets/board/dist/version.js"
+        },
+        {
+          "type": "generic",
+          "path": "plugin/skills/update/assets/board/dist/version.js"
+        },
+        {
+          "type": "generic",
+          "path": "plugin/skills/checkin/assets/VERSION.md"
         }
       ]
     }

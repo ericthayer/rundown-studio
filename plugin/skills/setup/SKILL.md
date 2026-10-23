@@ -7,10 +7,10 @@ description: Use when the user wants to create their own Rundown project status 
 
 Publish the user's own Rundown board as a private artifact, write its config, and schedule the recurring rundown that keeps it current.
 
-Paths below are relative to this skill's base directory (Claude Code prints "Base directory for this skill: ..." when the skill loads):
+Paths below are relative to this skill's own folder, the one holding this SKILL.md. Claude Code prints it as "Base directory for this skill: ..."; in claude.ai chat the folder is copied into the code sandbox. Everything this skill needs is inside that folder: never look for files elsewhere in the plugin.
 
-- Board source: `../../board/` (`index.html`, `styles/*.css`, `dist/**/*.js`)
-- Scheduled prompt template: `../../templates/rundown-prompt.md`
+- Board source: `assets/board/` (`index.html`, `styles/*.css`, `dist/**/*.js`)
+- Scheduled prompt template: `assets/rundown-prompt.md`
 
 Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
 
@@ -29,8 +29,8 @@ Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
    If reusing a board, read its `meta/config` first and offer the current values as defaults.
 
 3. **Publish the board** (new board only).
-   - If `../../board/dist/` is missing or holds no `.js` files, stop: the installed plugin is incomplete. Tell the user to run `/plugin marketplace update rundown-studio` and try again. Never fill in files from another artifact, a local build, or the repo source.
-   - Copy `../../board/` into a fresh subfolder of the session scratchpad (e.g. `<scratchpad>/rundown-board-<timestamp>/`), keeping relative paths. Use `cp -r`; do not edit the files.
+   - If `assets/board/dist/` is missing or holds no `.js` files, stop: the installed plugin is incomplete. Tell the user to run `/plugin marketplace update rundown-studio` and try again. Never fill in files from another artifact, a local build, or the repo source.
+   - Copy `assets/board/` into a fresh subfolder of the session scratchpad (e.g. `<scratchpad>/rundown-board-<timestamp>/`), keeping relative paths. Use `cp -r`; do not edit the files.
    - List the copied files. Build `files` as a map from each published path to its copied source, one entry per `styles/*.css` and `dist/**/*.js` file, with the published path equal to the path relative to the board folder (e.g. `"dist/app.js": "<copy>/dist/app.js"`).
    - Call `Artifact` publish with:
      - `file_path`: the copied `index.html`
@@ -58,7 +58,7 @@ Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
 5. **Save the URL to memory.** If a memory directory or memory tool is available, write one line: `Rundown board: <url>`, replacing any earlier `Rundown board:` line. If none exists, skip this step and say so in the final reply.
 
 6. **Schedule the rundown.**
-   - Read `../../templates/rundown-prompt.md` and replace:
+   - Read `assets/rundown-prompt.md` and replace:
      - `{{owner}}` with the display name
      - `{{boardUrl}}` with the board URL
      - `{{repos}}` with a bullet list (`- owner/name`, one per line) or `none`
