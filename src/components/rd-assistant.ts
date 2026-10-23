@@ -1,5 +1,6 @@
 import type { RdComposer } from './rd-composer.js';
 import type { RdPriorities } from './rd-priorities.js';
+import type { RdPanelTabs } from './rd-panel-tabs.js';
 import { StoreElement, emit } from './base.js';
 import { store } from '../store.js';
 import { prefs } from '../lib/prefs.js';
@@ -7,6 +8,7 @@ import { cardArt } from '../lib/icons.js';
 import { byId, h, preserveFocus, setAttr } from '../lib/dom.js';
 import { dragToDismiss } from '../lib/gestures.js';
 import { topPriorities } from '../domain/projects.js';
+import { stalledView } from '../domain/nudges.js';
 
 const NARROW = '(max-width: 1060px)';
 const PHONE = matchMedia('(max-width: 720px)');
@@ -35,7 +37,13 @@ export class RdAssistant extends StoreElement {
     this.#setupResize();
     this.#setupRail();
     const toggle = byId('agent-toggle');
-    toggle.addEventListener('click', () => this.set(!this.#isOpen()));
+    // With stalled rows waiting, the header toggle opens straight onto the Stalled tab.
+    toggle.addEventListener('click', () => {
+      if (!this.#isOpen() && this.#stalled) (this.querySelector('rd-panel-tabs') as RdPanelTabs | null)?.select('stalled', false);
+      this.set(!this.#isOpen());
+    });
+    this.listen(document, 'rd:show-stalled', () => this.set(true, { focus: false }));
+    this.watch(['rows', 'nudges'], (_c, s) => this.#count(stalledView(s.rows, s.nudges).count));
     this.ref('close-x').addEventListener('click', () => this.set(false));
     this.ref('collapse').addEventListener('click', () => this.set(false));
     this.ref('scrim').addEventListener('click', () => this.set(false));
@@ -63,6 +71,27 @@ export class RdAssistant extends StoreElement {
     requestAnimationFrame(() => requestAnimationFrame(() => { this.#shell.style.transition = ''; }));
   }
 
+  #stalled = 0;
+
+  /** Stalled count on the rail's ✦ button and the header toggle (narrow screens). */
+  #count(n: number): void {
+    this.#stalled = n;
+    const rail = this.ref('rail-stalled');
+    for (const b of [rail.querySelector<HTMLElement>('.rb'), byId('agent-toggle').querySelector<HTMLElement>('.tbdg')]) {
+      if (!b) continue;
+      b.hidden = !n;
+      b.textContent = String(n);
+    }
+    setAttr(rail, 'aria-label', n ? `Stalled projects, ${n} need a next step` : 'Stalled projects');
+    this.#label();
+  }
+
+  #label(): void {
+    const toggle = byId('agent-toggle');
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    setAttr(toggle, 'aria-label', `${open ? 'Close' : 'Open'} your week${this.#stalled ? `, ${this.#stalled} stalled` : ''}`);
+  }
+
   #isOpen(): boolean {
     return this.#mq.matches ? this.#panel.classList.contains('open') : this.#open;
   }
@@ -71,7 +100,7 @@ export class RdAssistant extends StoreElement {
     const toggle = byId('agent-toggle');
     const bg = [this.#shell.querySelector<HTMLElement>('.rail'), this.#shell.querySelector<HTMLElement>('.center')];
     setAttr(toggle, 'aria-expanded', String(open));
-    setAttr(toggle, 'aria-label', open ? 'Close your week' : 'Open your week');
+    this.#label();
     if (!this.#mq.matches) {
       this.#open = open;
       prefs.set('agentOpen', open);
@@ -111,6 +140,7 @@ export class RdAssistant extends StoreElement {
   /** Icon rail: expand, top priorities, quick asks, chat. */
   #setupRail(): void {
     this.ref('rail-open').addEventListener('click', () => this.set(true));
+    this.ref('rail-stalled').addEventListener('click', () => emit(this, 'rd:show-stalled', {}));
     // Chat and quick asks go to the docked ask box; the panel stays collapsed.
     this.ref('rail-chat').addEventListener('click', () => { this.#seen(); this.#composer.focusInput(); });
     this.querySelectorAll<HTMLButtonElement>('.rbtn[data-rq]').forEach((b) => b.addEventListener('click', () => {
