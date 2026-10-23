@@ -8,10 +8,10 @@ updatedBy: claude
 Released: v1.7.5 <!-- x-release-please-version -->
 
 ## Left off
-Draft this week always failed with "Claude isn't available" because it asked `sample` for a `standard` tier the runtime doesn't have; it now uses `default`, and a bad request reads as a board bug instead of an outage.
+The board version now shows under the Rundown logo and at the foot of the Settings menu. On desktop, the Help divider in Settings is the label's own top border, so WebKit no longer draws it through "HELP", and Take the tour lines up with Send feedback and Report an issue. Draft this week works again (v1.7.5: it asks `sample` for the `default` tier).
 
 ## Next step
-Merge the tier fix's release PR, then republish Board B and draft this week on it.
+Merge the release PR for the version label, then republish Board B and check the Help divider on Safari and iOS.
 
 ## Blockers
 - None

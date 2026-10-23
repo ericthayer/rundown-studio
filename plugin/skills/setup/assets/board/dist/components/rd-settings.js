@@ -5,6 +5,7 @@ import { THEME, UI } from '../lib/icons.js';
 import { feedbackAddress, feedbackHref, issuesHref } from '../lib/config.js';
 import { toast } from '../lib/toast.js';
 import { startTour } from '../lib/onboarding.js';
+import { BOARD_VERSION } from '../version.js';
 import { dragToDismiss } from '../lib/gestures.js';
 import { h, icon, placeAbove, placeUnder, setAttr } from '../lib/dom.js';
 import './rd-note-locker.js';
@@ -30,7 +31,7 @@ export class RdSettings extends StoreElement {
         const current = prefs.get('theme');
         const locker = document.createElement('rd-note-locker');
         locker.className = 'nlock';
-        this.#content = h('div', { class: 'mset-content' }, h('fieldset', { class: 'fset' }, h('legend', {}, 'Color mode'), MODES.map(([value, label]) => h('label', { class: 'fopt' }, h('input', { type: 'radio', name: 'theme', value, checked: value === current, 'data-fk': `theme:${value}`, onchange: () => this.#set(value) }), icon(THEME[value]), label))), locker, this.#help());
+        this.#content = h('div', { class: 'mset-content' }, h('fieldset', { class: 'fset' }, h('legend', {}, 'Color mode'), MODES.map(([value, label]) => h('label', { class: 'fopt' }, h('input', { type: 'radio', name: 'theme', value, checked: value === current, 'data-fk': `theme:${value}`, onchange: () => this.#set(value) }), icon(THEME[value]), label))), locker, this.#help(), h('p', { class: 'mset-ver' }, `Rundown Studio v${BOARD_VERSION}`));
         this.#pop.replaceChildren(this.#content);
         this.#pop.addEventListener('beforetoggle', (e) => { if (e.newState === 'open')
             this.#pop.replaceChildren(this.#content); });

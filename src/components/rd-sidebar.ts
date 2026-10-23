@@ -7,6 +7,7 @@ import { h, icon, setAttr, setText } from '../lib/dom.js';
 import { needsYou } from '../domain/projects.js';
 import { initials } from '../lib/config.js';
 import { decisionCount, waits } from '../domain/signals.js';
+import { BOARD_VERSION } from '../version.js';
 
 type NavKey = Extract<RailFilter, keyof typeof ICON>;
 export const VIEWS: readonly [NavKey, string][] = [['all', 'Home'], ['needs', 'Needs you'], ['decisions', 'Decisions'], ['waiting', 'Waiting on'], ['blocked', 'Blocked'], ['stale', 'Stale'], ['parked', 'Parked']];
@@ -35,6 +36,7 @@ export class RdSidebar extends StoreElement {
     };
     this.ref('nav').replaceChildren(...VIEWS.map(build));
     this.ref('areas').replaceChildren(...AREAS.map(build));
+    setText(this.ref('ver'), `v${BOARD_VERSION}`);
 
     this.watch(['projects', 'filter', 'day'], (_c, s) => {
       for (const [key, { btn, badge, label }] of this.#items) {
