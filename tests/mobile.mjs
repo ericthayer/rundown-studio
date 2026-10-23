@@ -60,6 +60,7 @@ const smallText = (p) => p.evaluate(() => [...document.querySelectorAll('body *'
 
   // Assistant sheet: drag the header down to close; the close button and Escape still work.
   await p.tap('#agent-toggle'); await p.waitForTimeout(350);
+  check('phone: assistant drawer fills the screen', await p.evaluate(() => { const r = document.getElementById('agent').getBoundingClientRect(); return r.top === 0 && Math.round(r.bottom) === innerHeight && r.left === 0 && Math.round(r.right) === innerWidth; }));
   check('phone: assistant targets ≥ 44px', (await smallTargets(p, '#agent')).length === 0, (await smallTargets(p, '#agent')).join(', '));
   check('phone: no small text in assistant', (await smallText(p)).length === 0, (await smallText(p)).join(', '));
   await p.screenshot({ path: join(OUT, 'phone-assistant-light.png') });
@@ -163,6 +164,12 @@ for (const scheme of ['light', 'dark']) {
   await p.tap('.mset'); await p.waitForTimeout(150);
   await p.keyboard.press('Escape'); await p.waitForTimeout(100);
   check('tablet: Escape closes the sheet', await p.evaluate(() => !document.getElementById('msheet').open));
+  await p.tap('#agent-toggle'); await p.waitForTimeout(400);
+  check('tablet: assistant drawer is full height, 40dvw, on the right edge', await p.evaluate(() => { const r = document.getElementById('agent').getBoundingClientRect(); return r.top === 0 && Math.round(r.bottom) === innerHeight && Math.abs(r.width - innerWidth * 0.4) <= 1 && Math.round(r.right) === innerWidth; }));
+  check('tablet: assistant targets ≥ 44px', (await smallTargets(p, '#agent')).length === 0, (await smallTargets(p, '#agent')).join(', '));
+  await p.screenshot({ path: join(OUT, 'tablet-assistant.png') });
+  await p.keyboard.press('Escape'); await p.waitForTimeout(400);
+  check('tablet: Escape closes the assistant drawer', await p.evaluate(() => !document.getElementById('agent').classList.contains('open')));
   check('no console errors (tablet settings)', errors.length === 0, errors.join(' | '));
   await ctx.close();
 }

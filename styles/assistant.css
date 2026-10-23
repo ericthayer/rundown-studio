@@ -119,11 +119,13 @@ rd-composer.dock.lifted { box-shadow: var(--dock-shadow); }
   .agent-head { display: flex; }
   .scrim { display: block; position: fixed; inset: 0; z-index: 49; background: rgba(10, 10, 12, .42); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
   .scrim.on { opacity: 1; pointer-events: auto; }
-  .agent { position: fixed; z-index: 50; top: 0; right: 0; bottom: 0; width: min(420px, 100%); margin: 0; border-radius: 18px 0 0 18px; padding: 14px 14px max(14px, env(safe-area-inset-bottom, 0px)); box-shadow: -24px 0 60px -24px rgba(0, 0, 0, .4); transform: translateX(100%); visibility: hidden; transition: transform .28s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .28s; }
+  /* Tablet drawer: full height, 40dvw, on the right (same sizing as the settings side sheet). */
+  .agent { position: fixed; z-index: 50; top: 0; right: 0; bottom: 0; width: 40dvw; margin: 0; border-radius: 18px 0 0 18px; border-left: 1px solid var(--line); padding: max(14px, env(safe-area-inset-top, 0px)) 14px max(14px, env(safe-area-inset-bottom, 0px)); box-shadow: -24px 0 60px -24px rgba(0, 0, 0, .4); transform: translateX(100%); visibility: hidden; transition: transform .28s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .28s; }
   .agent.open { transform: none; visibility: visible; transition: transform .28s cubic-bezier(.2, .8, .2, 1); }
 }
 @media (max-width: 720px) {
-  .agent { top: auto; left: 0; width: 100%; height: min(88dvh, 720px); border-radius: 20px 20px 0 0; box-shadow: 0 -24px 60px -24px rgba(0, 0, 0, .4); transform: translateY(100%); }
+  /* Phone drawer: full screen, like the settings sheet; drag the header down to close. */
+  .agent { left: 0; width: 100%; height: 100dvh; border-radius: 0; border-left: 0; box-shadow: none; transform: translateY(100%); }
   .agent::before { content: ""; align-self: center; width: 36px; height: 4px; border-radius: 2px; background: var(--line); margin: -4px 0 -2px; }
 }
 @media (prefers-reduced-motion: no-preference) {
