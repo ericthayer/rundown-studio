@@ -100,8 +100,8 @@ for (const scheme of ['light', 'dark']) {
   check(`phone ${scheme}: sheet fills the screen`, await p.evaluate(() => { const r = document.getElementById('msheet').getBoundingClientRect(); return r.top === 0 && Math.round(r.bottom) === innerHeight && r.left === 0 && Math.round(r.right) === innerWidth; }));
   check(`phone ${scheme}: focus lands on the sheet, not Close`, await p.evaluate(() => document.activeElement?.id === 'msheet'));
   check(`phone ${scheme}: Help divider sits above its label`, await p.evaluate(() => {
-    const line = document.querySelector('#msheet .nlock').getBoundingClientRect().bottom;
-    return document.querySelector('#msheet .fhelp legend').getBoundingClientRect().top >= line && getComputedStyle(document.querySelector('#msheet .fhelp')).boxShadow === 'none';
+    const legend = document.querySelector('#msheet .fhelp legend'), css = getComputedStyle(legend), r = legend.getBoundingClientRect();
+    return css.borderTopStyle === 'solid' && r.top >= document.querySelector('#msheet .nlock').getBoundingClientRect().bottom && Math.round(r.width) === Math.round(legend.parentElement.clientWidth) && getComputedStyle(legend.parentElement).boxShadow === 'none';
   }));
   check(`phone ${scheme}: Help rows line up`, await p.evaluate(() => new Set([...document.querySelectorAll('#msheet .fhelp .fopt svg')].map((s) => Math.round(s.getBoundingClientRect().left))).size === 1));
   check(`phone ${scheme}: sheet body scrolls to the last Help link`, await p.evaluate(() => {

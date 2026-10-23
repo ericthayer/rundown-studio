@@ -8,10 +8,10 @@ updatedBy: claude
 Released: v1.7.4 <!-- x-release-please-version -->
 
 ## Left off
-Setup run from chat in the Claude app printed a board link but never published, because chat lacks Claude Code's multi-file Artifact tool. Setup, update and checkin now check for the tools first and send people to Claude Code; they never show a link a publish didn't return. Board B is on v1.7.3.
+The board version now shows under the Rundown logo and at the foot of the Settings menu. On desktop, the Help divider in Settings is the label's own top border, so WebKit no longer draws it through "HELP", and Take the tour lines up with Send feedback and Report an issue. Board B is on v1.7.3.
 
 ## Next step
-Re-run /rundown:setup from the Claude desktop app's Code tab on the non-enterprise test account.
+Merge the version-label PR, then republish Board B from the release and check the Help divider on Safari and iOS.
 
 ## Blockers
 - None

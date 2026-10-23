@@ -49,6 +49,18 @@ const text = (p, sel) => p.evaluate((s) => document.querySelector(s)?.textConten
   await ctx.grantPermissions(['clipboard-read', 'clipboard-write']);
   await p.click('.mset'); await p.waitForTimeout(50);
   await p.evaluate(() => { window.open = () => null; document.querySelector('[data-fk="help:feedback"]').addEventListener('click', (e) => e.preventDefault()); });
+  check('settings: Help divider is the label top border', await p.evaluate(() => {
+    const legend = document.querySelector('#me-settings .fhelp legend'), css = getComputedStyle(legend), r = legend.getBoundingClientRect();
+    return css.borderTopStyle === 'solid' && r.top >= document.querySelector('#me-settings .nlock').getBoundingClientRect().bottom && Math.round(r.width) === Math.round(legend.parentElement.clientWidth) && getComputedStyle(legend.parentElement).boxShadow === 'none';
+  }));
+  check('settings: Take the tour lines up with the Help links', await p.evaluate(() => {
+    const rows = [...document.querySelectorAll('#me-settings .fhelp .fopt')];
+    const at = (fn) => new Set(rows.map((r) => Math.round(fn(r)))).size === 1;
+    return at((r) => r.querySelector('svg').getBoundingClientRect().left) && at((r) => r.getBoundingClientRect().height) && at((r) => parseFloat(getComputedStyle(r).fontSize));
+  }));
+  const ver = await p.evaluate(async () => (await import('./dist/version.js')).BOARD_VERSION);
+  check('settings shows the board version', (await p.textContent('#me-settings .mset-ver'))?.trim() === `Rundown Studio v${ver}`);
+  check('version shows under the logo', (await p.textContent('.brand-ver'))?.trim() === `v${ver}`);
   await p.click('[data-fk="help:feedback"]'); await p.waitForTimeout(100);
   check('feedback copies the address', (await p.evaluate(() => navigator.clipboard.readText())) === 'ethayer.design@gmail.com');
   check('feedback says where it went', /ethayer\.design@gmail\.com/.test(await p.textContent('.toasts') ?? ''));

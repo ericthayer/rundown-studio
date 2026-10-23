@@ -39,8 +39,14 @@
 .answer.afail .afoot { justify-content: flex-start; }
 .aretry { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
 
-/* Help links in the settings menu. */
-.fhelp { margin-top: 7px; padding-top: 6px; box-shadow: 0 -1px 0 var(--line); }
+/* Help links in the settings menu. WebKit starts a fieldset's box at the middle of its legend (a floated legend doesn't
+   help on iOS), so a fieldset shadow or border crosses the label. The divider is the legend's own top border instead. */
+.fhelp { margin-top: 6px; }
+.fhelp legend { width: 100%; padding-top: 10px; border-top: 1px solid var(--line); }
 .fhelp a.fopt { color: inherit; text-decoration: none; }
 .fhelp a.fopt:focus-visible { outline-offset: -2px; }
-.fhelp button.fopt { width: 100%; border: 0; background: none; color: inherit; font: inherit; text-align: left; }
+/* Take the tour sits inside .me: drop the footer button's centering, height, padding and type so it matches the links. */
+.fhelp button.fopt { width: 100%; height: auto; justify-content: flex-start; padding: 7px 8px; border: 0; border-radius: 8px; background: none; color: inherit; font: inherit; font-size: max(var(--fs-floor), 0.9231rem); text-align: left; }
+.fhelp button.fopt:hover { background: var(--chip); }
+/* Build version at the foot of the settings menu. */
+.mset-ver { margin: 6px 0 0; padding: 8px 8px 2px; border-top: 1px solid var(--line); font-size: max(var(--fs-floor), 0.7692rem); color: var(--muted); }
