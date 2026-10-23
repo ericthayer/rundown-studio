@@ -12,7 +12,13 @@ Paths below are relative to this skill's own folder, the one holding this SKILL.
 - Board source: `assets/board/` (`index.html`, `styles/*.css`, `dist/**/*.js`)
 - Scheduled prompt template: `assets/rundown-prompt.md`
 
-Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
+## Before anything else: check the tools
+
+This skill needs Claude Code's `Artifact` tool, the one whose publish takes `file_path`, `files` and `capabilities` and returns a `claude.ai/artifact/...` URL, plus `ArtifactData`. Look for both in your tool list (load them with ToolSearch `select:Artifact,ArtifactData` if they are deferred). If either is missing, as in claude.ai chat, stop before asking any questions and reply:
+
+> Rundown setup needs Claude Code. Open the Claude desktop app's Code tab, or run `claude` in a terminal, and run `/rundown:setup` there. Your board will work everywhere once it exists.
+
+Never create a board any other way (an inline chat artifact, an HTML file, a code block), and never show a board URL unless an `Artifact` publish in this session returned it.
 
 ## Steps
 
@@ -39,7 +45,7 @@ Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
      - `icon`: `"list"`
      - `title`: `"Rundown"`
      - `description`: `"Private status board for every project, kept current by a scheduled rundown."`
-   - Record the returned URL as the board URL. If the publish fails, stop and report the error.
+   - Record the URL the publish result returns as the board URL. If the publish fails or returns no URL, stop and report the error; do not write config, schedule anything, or show a link.
 
 4. **Write `meta/config`.** `ArtifactData` `set` on the board URL, collection `meta`, doc id `config`:
    ```json

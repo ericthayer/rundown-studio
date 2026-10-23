@@ -8,10 +8,10 @@ updatedBy: claude
 Released: v1.7.3 <!-- x-release-please-version -->
 
 ## Left off
-Claude app installs of the plugin kept only each skill's own folder, so /rundown:setup found no board or templates. The board copies and templates now ship inside the setup, update and checkin skills, and plugin:check guards every copy and version. Board B is on v1.7.1.
+Setup run from chat in the Claude app printed a board link but never published, because chat lacks Claude Code's multi-file Artifact tool. Setup, update and checkin now check for the tools first and send people to Claude Code; they never show a link a publish didn't return. Board B is on v1.7.3.
 
 ## Next step
-Re-run /rundown:setup from the Claude app on the non-enterprise test account after the 1.7.3 release.
+Re-run /rundown:setup from the Claude desktop app's Code tab on the non-enterprise test account.
 
 ## Blockers
 - None

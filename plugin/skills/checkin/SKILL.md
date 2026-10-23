@@ -11,6 +11,8 @@ Run this from inside the project (a claude.ai Project, or a session with the pro
 
 Load `ArtifactData` with ToolSearch `select:ArtifactData` if it is deferred.
 
+If `Artifact` or `ArtifactData` is not in your tool list (claude.ai chat, for example), you can still write the check-in (steps 1-4), but you cannot read or write the board. Say so in one line: "Saving to your board needs Claude Code: run `/rundown:checkin` in the Claude desktop app's Code tab or in a terminal." Never claim a row was written.
+
 ## Find the board
 
 1. A memory line `Rundown board: <url>`.
