@@ -69,7 +69,8 @@
 }
 
 /* Settings on phones and touch tablets: the popover's content in a bottom sheet (shares .fsheet/.fsh with the filter sheet).
-   Full height on phones, 75dvh on tablets; the body is the one scroll surface. */
+   Full screen on phones; on touch tablets a full-height 40dvw side sheet on the right, like the assistant drawer.
+   The body is the one scroll surface. */
 .msheet { max-width: 100%; }
 .msheet:focus { outline: none; }
 .msheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 8px 10px calc(16px + env(safe-area-inset-bottom, 0px)); }
@@ -89,5 +90,8 @@
   .msheet .fsh { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
 }
 @media (min-width: 721px) and (max-width: 1060px) and (pointer: coarse) {
-  .fsheet.msheet { height: 75dvh; max-height: 75dvh; }
+  .fsheet.msheet { width: 40dvw; max-width: 40dvw; height: 100dvh; max-height: 100dvh; margin: 0 0 0 auto; border-radius: 18px 0 0 18px; border-left: 1px solid var(--line); }
+  .fsheet.msheet::backdrop { background: var(--scrim); }
+  /* Horizontal drags on the header belong to the close gesture; vertical ones still scroll. */
+  .msheet .fsh { padding-top: calc(14px + env(safe-area-inset-top, 0px)); touch-action: pan-y; }
 }

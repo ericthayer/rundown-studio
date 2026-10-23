@@ -145,15 +145,20 @@ for (const scheme of ['light', 'dark']) {
   await ctx.close();
 }
 
-// Touch tablets get the sheet too, at 75% of the viewport height.
+// Touch tablets get a full-height side sheet on the right, 40dvw wide; dragging its header right closes it.
 {
   const { p, ctx, errors } = await page({ viewport: { width: 820, height: 1180 }, touch: true });
   await p.tap('.mset'); await p.waitForTimeout(150);
   check('tablet: gear opens the settings sheet', await p.evaluate(() => document.getElementById('msheet').open && !document.getElementById('me-settings').matches(':popover-open')));
-  check('tablet: sheet is 75dvh on the bottom edge', await p.evaluate(() => { const r = document.getElementById('msheet').getBoundingClientRect(); return Math.abs(r.height - innerHeight * 0.75) <= 1 && Math.round(r.bottom) === innerHeight; }));
+  check('tablet: sheet is full height, 40dvw, on the right edge', await p.evaluate(() => { const r = document.getElementById('msheet').getBoundingClientRect(); return r.top === 0 && Math.round(r.bottom) === innerHeight && Math.abs(r.width - innerWidth * 0.4) <= 1 && Math.round(r.right) === innerWidth; }));
   check('tablet: sheet targets ≥ 44px', (await smallTargets(p, '#msheet')).length === 0, (await smallTargets(p, '#msheet')).join(', '));
   await p.screenshot({ path: join(OUT, 'tablet-settings.png') });
-  await p.mouse.click(410, 40); await p.waitForTimeout(100);
+  const th = await p.locator('#msheet-h').boundingBox();
+  await touchDrag(p, { x: th.x + 10, y: th.y + 5 }, { x: th.x + 300, y: th.y + 8 });
+  await p.waitForTimeout(150);
+  check('tablet: drag the header right closes the sheet', await p.evaluate(() => !document.getElementById('msheet').open));
+  await p.tap('.mset'); await p.waitForTimeout(150);
+  await p.mouse.click(200, 400); await p.waitForTimeout(100);
   check('tablet: tapping the backdrop closes the sheet', await p.evaluate(() => !document.getElementById('msheet').open));
   await p.tap('.mset'); await p.waitForTimeout(150);
   await p.keyboard.press('Escape'); await p.waitForTimeout(100);

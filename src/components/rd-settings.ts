@@ -13,11 +13,13 @@ import './rd-note-locker.js';
 const MODES: readonly [ThemeMode, string][] = [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']];
 /** Phones and touch tablets (the same range as the type floor in mobile.css) get the sheet. */
 const SHEET = matchMedia('(max-width: 720px), (pointer: coarse) and (max-width: 1060px)');
+const PHONE = matchMedia('(max-width: 720px)');
 
 /**
  * Account settings next to the viewer's name: color mode, the note locker, and Help (tour replay, feedback, issues).
- * Desktop: an anchored popover. Phones and touch tablets: the same content in a modal bottom sheet (scrolling body, focus trap,
- * Escape, close button; dragging the header down is a shortcut for the close button).
+ * Desktop: an anchored popover. Phones: the same content in a full-screen modal sheet; touch tablets: a full-height side
+ * sheet on the right, like the assistant drawer (scrolling body, focus trap, Escape, close button; dragging the header
+ * down, or right on tablets, is a shortcut for the close button).
  */
 export class RdSettings extends StoreElement {
   #btn!: HTMLButtonElement;
@@ -70,7 +72,7 @@ export class RdSettings extends StoreElement {
     this.#sheet = h('dialog', { class: 'fsheet msheet mpop', id: 'msheet', 'aria-labelledby': 'msheet-h', tabindex: -1 }, head, this.#body);
     this.#sheet.addEventListener('click', (e) => { if (e.target === this.#sheet) this.#sheet.close(); });
     this.#sheet.addEventListener('close', () => this.#btn.setAttribute('aria-expanded', 'false'));
-    dragToDismiss({ handle: head, target: this.#sheet, axis: () => (this.#sheet.open ? 'down' : null), onDismiss: () => this.#sheet.close() });
+    dragToDismiss({ handle: head, target: this.#sheet, axis: () => (this.#sheet.open ? (PHONE.matches ? 'down' : 'right') : null), onDismiss: () => this.#sheet.close() });
     this.#pop.after(this.#sheet);
   }
 
