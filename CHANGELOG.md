@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.2](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.1...rundown-studio-v1.7.2) (2026-10-23)
+
+
+### Bug fixes
+
+* **assistant:** full-screen Your week drawer on phones, 40dvw on tablets ([#34](https://github.com/ericthayer/rundown-studio/issues/34)) ([50b7425](https://github.com/ericthayer/rundown-studio/commit/50b7425f7f29ce88588c8ebfd3050879b7898d11))
+
 ## [1.7.1](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.0...rundown-studio-v1.7.1) (2026-10-23)
 
 
