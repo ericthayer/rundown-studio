@@ -42,7 +42,8 @@ export function describe(changes) {
 export function initBoardToasts() {
     let prev = null;
     let link = store.state.link;
-    store.subscribe(['projects', 'link', 'status'], (changed, s) => {
+    // Diffs the db rows, not the overlaid projects: accepting a nudge on this page is not a board update.
+    store.subscribe(['rows', 'link', 'status'], (changed, s) => {
         if (changed.has('link') && s.link !== link) {
             if (s.link === 'paused')
                 toast({ tone: 'error', key: 'feed', text: "Couldn't refresh the board. Live updates are paused.", action: { label: 'Retry', run: () => reconnect() } });
@@ -50,15 +51,15 @@ export function initBoardToasts() {
                 toast({ tone: 'ok', key: 'feed', text: 'Live updates resumed. The board is current.' });
             link = s.link;
         }
-        if (!changed.has('projects') || s.status !== 'ready')
+        if (!changed.has('rows') || s.status !== 'ready')
             return;
         // The first snapshot only sets the baseline: loading the board is not an update.
         if (prev === null) {
-            prev = s.projects;
+            prev = s.rows;
             return;
         }
-        const changes = diffProjects(prev, s.projects);
-        prev = s.projects;
+        const changes = diffProjects(prev, s.rows);
+        prev = s.rows;
         if (!changes.length)
             return;
         const [one] = changes;

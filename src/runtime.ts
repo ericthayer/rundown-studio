@@ -5,6 +5,7 @@ import { dayKey, msToMidnight } from './lib/dates.js';
 import { connectLocker } from './lib/note-locker.js';
 import { toConfig } from './lib/config.js';
 import { connectPlans } from './lib/plan-store.js';
+import { connectNudges, showRows } from './lib/nudge-store.js';
 
 /** No first snapshot by then → show the can't-reach state (a late snapshot still flips it to ready). */
 export const CONNECT_TIMEOUT = 12000;
@@ -72,6 +73,7 @@ async function connect(): Promise<void> {
   );
   connectLocker(db, (notes) => store.set({ notes }));
   connectPlans(db, (plans) => store.set({ plans }));
+  connectNudges(db);
   db.doc('meta/config').onSnapshot(
     (d) => store.set({ config: toConfig(d.data()) }),
     () => { /* config is optional */ },
@@ -85,7 +87,7 @@ function subscribeProjects(from: ArtifactDb): void {
     (snap) => {
       clearTimeout(timer);
       const { projects, skipped } = readRows(snap);
-      store.set({ projects, skipped, status: 'ready', syncedAt: Date.now(), link: navigator.onLine === false ? 'offline' : 'live' });
+      showRows(projects, { skipped, status: 'ready', syncedAt: Date.now(), link: navigator.onLine === false ? 'offline' : 'live' });
     },
     () => {
       // Terminal for this listener (revoked, dead bridge, quota). Keep the last good rows if there are any.

@@ -1,0 +1,68 @@
+/**
+ * What the viewer does with a nudge: Use this, Not now, Undo, and Restore after a check-in replaced
+ * what was set on the board. Every write is whole-doc; a refused one gets a sticky toast with Retry.
+ */
+import type { Nudge, Project } from '../types.js';
+import { store } from '../store.js';
+import { toast } from './toast.js';
+import { writeNudge } from './nudge-store.js';
+import { replaced, rowBasis } from '../domain/nudges.js';
+
+const shortDay = (iso: string | null): string => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '');
+
+/** Writes `next`; on refusal, an error toast retries the same write. Resolves true once it landed. */
+async function save(next: Nudge, failText: string): Promise<boolean> {
+  try {
+    await writeNudge(next);
+    return true;
+  } catch {
+    toast({ tone: 'error', key: `nudge:${next.projectId}`, text: failText, action: { label: 'Retry', run: async () => { await save(next, failText); } } });
+    return false;
+  }
+}
+
+/** Use this (or Park it) and Not now. Shows a 5s toast with Undo, which writes the suggestion back. */
+export async function decide(p: Project, n: Nudge, use: boolean): Promise<boolean> {
+  const next: Nudge = { ...n, status: use ? 'accepted' : 'dismissed', decidedAt: new Date().toISOString() };
+  const ok = await save(next, use ? `Couldn't set the next step for ${p.name} on the board.` : `Couldn't hide the suggestion for ${p.name}.`);
+  if (!ok) return false;
+  const text = !use ? `Suggestion hidden for ${p.name}.` : n.kind === 'park' ? `${p.name} parked on the board.` : `Next step set for ${p.name}.`;
+  toast({ tone: 'ok', key: `nudge:${p.id}`, text, action: { label: 'Undo', run: () => undo(p, n) } });
+  return true;
+}
+
+/** Puts a decided nudge back to an open suggestion. */
+export async function undo(p: Project, n: Nudge): Promise<void> {
+  const back: Nudge = { ...n, status: 'suggested', decidedAt: null };
+  if (await save(back, `Couldn't undo that for ${p.name}.`)) toast({ tone: 'info', key: `nudge:${p.id}`, text: `Suggestion for ${p.name} is back.` });
+}
+
+/** After a check-in replaced it: sets the same step (or park) on the board again, against the row as it is now. */
+async function restore(p: Project, n: Nudge): Promise<void> {
+  const again: Nudge = { ...n, status: 'accepted', basis: rowBasis(p), decidedAt: new Date().toISOString() };
+  if (await save(again, `Couldn't restore the next step for ${p.name}.`)) toast({ tone: 'ok', key: `nudge:${p.id}`, text: n.kind === 'park' ? `${p.name} parked on the board again.` : `Next step for ${p.name} restored.` });
+}
+
+/**
+ * Older check-in skills don't know about nudges, so their check-in can replace a board-set step
+ * silently. Says so once per nudge (marked `superseded` on the board, so other devices stay quiet)
+ * and offers Restore.
+ */
+export function watchReplaced(): void {
+  const told = new Set<string>();
+  store.subscribe(['rows', 'nudges', 'status'], (_c, s) => {
+    if (s.status !== 'ready' || !s.nudges?.length) return;
+    const rows = new Map(s.rows.map((p) => [p.id, p]));
+    for (const n of s.nudges) {
+      const p = rows.get(n.projectId);
+      const key = `${n.projectId}@${n.decidedAt ?? ''}`;
+      if (!p || told.has(key) || !replaced(n, p)) continue;
+      told.add(key);
+      void writeNudge({ ...n, status: 'superseded' }).catch(() => undefined);
+      const what = n.kind === 'park' ? `A check-in un-parked ${p.name}, which you parked on ${shortDay(n.decidedAt)}.` : `A check-in replaced the next step you set for ${p.name} on ${shortDay(n.decidedAt)}.`;
+      toast({ tone: 'info', key: `restore:${p.id}`, text: what, action: { label: 'Restore', run: () => restore(p, n) } });
+    }
+  });
+}
+
+export { shortDay };

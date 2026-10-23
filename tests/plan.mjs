@@ -139,6 +139,8 @@ await p.context().close();
   const { p, errors } = await page({ init: withSampler, initArg: PLAN, viewport: { width: 390, height: 844 }, touch: true });
   check('phone: ask bar visible without opening the drawer', await p.isVisible('rd-composer.dock textarea'));
   await p.tap('#agent-toggle'); await p.waitForTimeout(400);
+  check('phone: stalled rows open the drawer on Stalled', await p.isVisible('#tp-stalled') && (await p.getAttribute('#tab-stalled', 'aria-selected')) === 'true');
+  await p.tap('#tab-week');
   check('phone: drawer shows This week', await p.isVisible('#agent [data-fk="plan:draft"]'));
   await p.screenshot({ path: join(OUT, 'plan-phone.png') });
   check('phone: no sideways scroll', await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));

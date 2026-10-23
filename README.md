@@ -61,16 +61,19 @@ src/
   types.ts              domain + state types, runtime capability typings
   domain/               projects (needs-you, streak, labels) · filters (groups, sort, visible list)
                         · signals (open decisions with age, waiting on) · week-plan (ISO weeks, prompt, validation)
+                        · nudges (stalled rows, prompt, validation, overlay)
   lib/                  dom helpers (h, preserveFocus, copyCommand) · prefs · theme · dates · icons · note-locker · ask-history
-                        · sample-json / sample-errors (shared `sample` calls) · plan-store · reveal · hash
+                        · sample-json / sample-errors (shared `sample` calls) · plan-store · nudge-store · nudge-actions · reveal · hash
   components/           rd-sidebar · rd-count · rd-stat-strip · rd-streak · rd-toolbar · rd-note
                         rd-project-list · rd-decisions · rd-priorities · rd-composer · rd-assistant · rd-focus · rd-settings
                         rd-note-locker · rd-save-menu · rd-week-plan · plan-editor
+                        rd-panel-tabs · rd-stalled · nudge-card
 plugin/                 Claude Code plugin: skills/ (setup, checkin, update), templates/, board/ (generated copy)
 .claude-plugin/         marketplace manifest so the repo installs as a plugin source
 tests/smoke.mjs         focus retention, filters, contrast, rail/resize, drawer, migration, signals, focus mode, color mode, note locker
 tests/ask.mjs           Ask Rundown transcript and saving answers to the Locker / project cards
 tests/plan.mjs          This week: draft, edit, pin, failures, no-Claude path, phone
+tests/nudges.mjs        Stalled: suggest, Use this / Not now / Undo, overlay across rundown and check-in, Restore, badges
 ```
 
 ## Rules this codebase keeps
@@ -104,7 +107,11 @@ Saved Ask Rundown answers share the collection: `{ kind: 'answer', text, questio
 
 `plans/{week}` — **This week** in the right panel, keyed by ISO week (`2026-W43`): `{ week, draft, pinned }`, each a version `{ items: [{ projectId, name, why }], basis, generatedAt, pinnedAt? }` (up to 3 items). **Draft this week** asks the board's own Claude (`sample`, standard tier) for JSON, keeps only known, non-parked ids, and opens the draft in an editor; **Pin plan** writes `pinned` and clears `draft`. Without Claude, **Plan it yourself** opens the same editor empty. `basis` is a hash of the rows the draft read, so a changed board offers **Redraft**. The page writes this collection and never writes `projects`; check-ins don't read or write it. The newest 8 weeks are kept.
 
-Layout: the right panel holds **Top priorities** and **This week**. Ask Rundown is docked under the project list and stays on screen on every width; its answers fold away with **Hide answers** (remembered per browser).
+`nudges/{projectId}` — the **Stalled** tab. A row stalls when it isn't parked and is stale, blocked on you, or waiting on someone for 14+ days. **Suggest next steps** sends up to 8 stalled rows to the board's own Claude (`sample`, quick tier) and stores one suggestion per row: `{ status: 'suggested'|'accepted'|'dismissed'|'superseded', kind: 'next'|'park', text, why, basis, generatedAt, decidedAt }`. Park is only offered for stale rows and long waits. **Use this** (or **Park it**) and **Not now** write `status` and `decidedAt`, with a 5s **Undo** toast. `basis` fingerprints the row, so a suggestion only comes back after the row itself changes.
+
+The page never writes `projects`. An accepted nudge is laid over its row (next step, or `state: 'parked'`) and marked "Set on the board" until a check-in (`updatedBy: 'checkin'`) writes a newer `updatedAt`; the rundown's writes never end it. Check-ins and the rundown read `nudges` and never write it. When a check-in replaces a board-set value with a different one, the board says so once (marking the nudge `superseded`) and offers **Restore**. Board-update toasts diff the db rows, so accepting a nudge never reads as a board update.
+
+Layout: the right panel holds **Top priorities**, then two tabs, **This week** and **Stalled** (with a count badge). The same count shows on the collapsed rail's ✦ button and on the header toggle on narrow screens. Ask Rundown is docked under the project list and stays on screen on every width; its answers fold away with **Hide answers** (remembered per browser).
 
 ## Publishing
 

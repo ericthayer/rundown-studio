@@ -43,6 +43,8 @@ export abstract class StoreElement extends HTMLElement {
 /** Events crossing component boundaries (bubbling, composed). */
 export interface RundownEvents {
   'rd:reveal-project': CustomEvent<{ id: string }>;
+  /** Open the right panel on the Stalled tab, at one row's card when `id` is set. */
+  'rd:show-stalled': CustomEvent<{ id?: string }>;
 }
 
 export function emit<K extends keyof RundownEvents>(from: Element, type: K, detail: RundownEvents[K]['detail']): void {
