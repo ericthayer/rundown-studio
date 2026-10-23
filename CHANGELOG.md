@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.0...rundown-studio-v1.7.1) (2026-10-23)
+
+
+### Bug fixes
+
+* **settings:** full-screen settings drawer on phones, 40dvw side drawer on tablets ([#32](https://github.com/ericthayer/rundown-studio/issues/32)) ([45311a5](https://github.com/ericthayer/rundown-studio/commit/45311a5ba4fedec65ee45df3090aa5a79929b0b4))
+
 ## [1.7.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.6.0...rundown-studio-v1.7.0) (2026-10-23)
 
 

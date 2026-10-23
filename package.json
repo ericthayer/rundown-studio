@@ -1,6 +1,6 @@
 {
   "name": "rundown",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "private": true,
   "type": "module",
   "description": "Cross-project status board: vanilla TypeScript Web Components compiled to native ES modules, published as a multi-file Claude artifact.",
