@@ -1,30 +1,14 @@
-import { StoreElement, emit } from './base.js';
+import { StoreElement } from './base.js';
 import { store } from '../store.js';
 import { getSampler, revokeSampler } from '../runtime.js';
 import { h, icon, setAttr, setText } from '../lib/dom.js';
+import { prefs } from '../lib/prefs.js';
 import { UI } from '../lib/icons.js';
 import { loadTurns, saveTurns, recap, MAX_TURNS } from '../lib/ask-history.js';
 import { savedAnswer } from './rd-save-menu.js';
+import { STALL_MS, UNAVAILABLE, failure } from '../lib/sample-errors.js';
+import { modelRows } from '../lib/sample-json.js';
 import './rd-save-menu.js';
-/** No streamed text for this long counts as a stalled connection. */
-export const STALL_MS = 45000;
-/** Codes that mean asking can't work in this view: fall back to filtering, never re-ask. */
-const UNAVAILABLE = new Set(['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed']);
-/** Viewer copy per failure, and whether a manual Try again makes sense. Unknown codes read as upstream_error. */
-function failure(code, partial) {
-    switch (code) {
-        case 'rate_limited': return { text: 'Too many questions in a row. Try again in a minute.', retry: true };
-        case 'session_expired': return { text: 'Your claude.ai sign-in expired. Sign in again, then try again.', retry: true };
-        case 'refused': return { text: "Claude couldn't answer that one. Try asking it a different way.", retry: false };
-        case 'empty_completion': return { text: 'Claude came back empty. Try a simpler question.', retry: false };
-        case 'prompt_too_large': return { text: 'Too much project data to send at once. Filter the list down, then ask again.', retry: false };
-        case 'stalled': return { text: 'Claude stopped responding, so this answer timed out.', retry: true };
-        case 'offline': return { text: "You're offline. Ask again when you're back online.", retry: true };
-        default: return { text: partial ? 'Claude became unavailable, so this answer stopped early.' : "Claude isn't available right now. Your projects are fine; only Ask is affected.", retry: true };
-    }
-}
-/** Fields sent to the model: status data only. */
-const FIELDS = ['id', 'name', 'area', 'state', 'priority', 'lastActivity', 'due', 'leftOff', 'decided', 'openDecisions', 'waitingOn', 'blockers', 'nextStep'];
 /**
  * Ask box + transcript. With the `sample` capability it asks Claude about the projects; without it,
  * the same box filters the list (writes `query`). The transcript is kept for this tab only.
@@ -45,10 +29,12 @@ export class RdComposer extends StoreElement {
         this.#log = this.ref('log');
         this.#head = this.ref('head');
         this.ref('clear').addEventListener('click', () => this.clear());
+        this.ref('fold').addEventListener('click', () => this.#fold(Boolean(this.#log.hidden)));
         this.#menu = document.createElement('rd-save-menu');
         this.append(this.#menu);
         this.#log.replaceChildren(...this.#turns.map((t) => { const [el] = this.#turnEl(t, t.a); this.#addSave(el, t.q, t.a); return el; }));
         this.#sync();
+        this.#fold(prefs.get('askOpen'));
         this.watch(['notes'], () => this.#labelSaves());
         const form = this.ref('form');
         form.addEventListener('submit', (e) => {
@@ -88,8 +74,17 @@ export class RdComposer extends StoreElement {
         el.addEventListener('toggle', () => { turn.folded = !el.open; saveTurns(this.#turns); });
         return [el, out];
     }
+    /** Shows or hides the answer tray above the docked ask box; remembered per browser. */
+    #fold(open) {
+        prefs.set('askOpen', open);
+        this.#log.hidden = !open;
+        const btn = this.ref('fold');
+        setAttr(btn, 'aria-expanded', String(open));
+        setText(btn, open ? 'Hide answers' : 'Show answers');
+    }
     #sync() {
         this.#head.hidden = !this.#turns.length;
+        this.#scroll.hidden = !this.#turns.length;
         while (this.#log.childElementCount > MAX_TURNS)
             this.#log.firstElementChild?.remove();
         for (const el of this.#saves.keys())
@@ -128,6 +123,8 @@ export class RdComposer extends StoreElement {
         const turn = { q: question, a: '', at: new Date().toISOString() };
         const context = recap(this.#turns);
         this.#turns = [...this.#turns, turn].slice(-MAX_TURNS);
+        if (this.#log.hidden)
+            this.#fold(true);
         const [el, out] = this.#turnEl(turn, 'Thinking…');
         this.#log.append(el);
         this.#sync();
@@ -139,7 +136,7 @@ export class RdComposer extends StoreElement {
             this.#fail(el, out, question, 'offline', '');
             return;
         }
-        const data = store.state.projects.map((p) => Object.fromEntries(FIELDS.map((k) => [k, p[k]])));
+        const data = modelRows(store.state.projects);
         const prompt = `Today is ${store.state.day}. Below is a JSON list of one person's projects and their latest check-in status. Answer their question in plain text, under 120 words, no markdown headings. Use project names exactly. If the data can't answer it, say what's missing.\n\nProjects:\n${JSON.stringify(data)}\n\n${context ? `Earlier in this conversation:\n${context}\n\n` : ''}Question: ${question}`;
         // A stream that goes quiet for STALL_MS is aborted and reported as a timeout, not a supersede.
         let stalled = false;
@@ -151,7 +148,6 @@ export class RdComposer extends StoreElement {
             out.textContent = res.text;
             keep(res.text);
             this.#addSave(el, question, res.text);
-            emit(this, 'rd:answer', undefined);
         }
         catch (e) {
             const err = e;

@@ -43,7 +43,6 @@ export abstract class StoreElement extends HTMLElement {
 /** Events crossing component boundaries (bubbling, composed). */
 export interface RundownEvents {
   'rd:reveal-project': CustomEvent<{ id: string }>;
-  'rd:answer': CustomEvent<void>;
 }
 
 export function emit<K extends keyof RundownEvents>(from: Element, type: K, detail: RundownEvents[K]['detail']): void {

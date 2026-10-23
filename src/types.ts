@@ -51,6 +51,15 @@ export interface LockedNote {
   inLocker: boolean;
 }
 
+/** One pick in a weekly plan. `name` is a snapshot so the plan still reads if the row is removed. */
+export interface PlanItem { projectId: string; name: string; why: string }
+
+/** A drafted or pinned version of a plan. `basis` fingerprints the rows it was drafted from. */
+export interface PlanVersion { items: PlanItem[]; basis: string; generatedAt: string | null; pinnedAt?: string }
+
+/** `plans/{week}` (e.g. `plans/2026-W43`), written only by the board page. */
+export interface WeekPlan { week: string; draft: PlanVersion | null; pinned: PlanVersion | null }
+
 /** `meta/run` document written by the scheduled rundown and /project-checkin. */
 export interface RunMeta {
   nextRun?: string;
@@ -127,6 +136,8 @@ export interface AppState {
   day: string;
   /** Note locker entries from the board db, newest first; null until the first snapshot. */
   notes: LockedNote[] | null;
+  /** Weekly plans from the board db, newest week first; null until the first snapshot. */
+  plans: WeekPlan[] | null;
 }
 
 export type StateKey = keyof AppState;

@@ -1,6 +1,7 @@
 import { store } from '../store.js';
 import { toast } from './toast.js';
 import { reconnect } from '../runtime.js';
+import { reveal } from './reveal.js';
 const STATE_LABEL = { active: 'active', blocked: 'blocked', stale: 'stale', parked: 'parked' };
 /** Fields a check-in or rundown writes; a change to any of them counts as an update. */
 const FIELDS = ['name', 'nextStep', 'leftOff', 'lastActivity', 'due', 'priority', 'blockers', 'openDecisions', 'waitingOn', 'decided', 'sourceError'];
@@ -38,12 +39,6 @@ export function describe(changes) {
         return `${name} is now ${STATE_LABEL[one.p.state ?? 'active'] ?? one.p.state}.`;
     return `${name} was updated.`;
 }
-const reveal = (id) => {
-    store.set({ openId: id, filter: 'all', query: '' });
-    document.dispatchEvent(new CustomEvent('rd:reveal-project', { detail: { id } }));
-    // The toast (and its View button) is gone, so focus moves to the row it pointed at.
-    document.querySelector(`[data-fk="row:${CSS.escape(id)}"]`)?.focus();
-};
 export function initBoardToasts() {
     let prev = null;
     let link = store.state.link;

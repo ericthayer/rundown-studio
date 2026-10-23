@@ -51,4 +51,5 @@ export const store = new Store({
     canAsk: false,
     day: dayKey(),
     notes: null,
+    plans: null,
 });

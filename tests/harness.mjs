@@ -53,21 +53,31 @@ const stub = ({ rows, meta, config }) => {
   window.__subscribes = 0;
   window.__pushMeta = (m) => subs.meta.forEach((f) => f({ id: 'run', data: () => m }));
   window.__pushConfig = (c) => subs.config.forEach((f) => f({ id: 'config', data: () => c }));
-  // `notes` persists in localStorage under its own key so it survives reloads, like the board db.
-  const load = () => JSON.parse(localStorage.getItem('__notes') ?? '{}');
-  const notesSnap = () => ({ docs: Object.entries(load()).map(([id, x]) => ({ id, data: () => x })) });
-  const save = (all) => { localStorage.setItem('__notes', JSON.stringify(all)); subs.notes.forEach((f) => f(notesSnap())); };
-  window.__notes = load;
-  const notes = {
-    where: () => notes,
-    onSnapshot: (f) => { subs.notes.push(f); f(notesSnap()); return () => {}; },
-    doc: (id) => ({
-      set: async (d) => save({ ...load(), [id]: d }),
-      delete: async () => { const all = load(); delete all[id]; save(all); },
-    }),
+  // Page-written collections (`notes`, `plans`) persist in localStorage under their own keys so they
+  // survive reloads, like the board db.
+  const kept = (name) => {
+    const key = `__${name}`;
+    const listeners = (subs[name] ??= []);
+    const load = () => JSON.parse(localStorage.getItem(key) ?? '{}');
+    const snapOf = () => ({ docs: Object.entries(load()).map(([id, x]) => ({ id, data: () => x })) });
+    const save = (all) => { localStorage.setItem(key, JSON.stringify(all)); listeners.forEach((f) => f(snapOf())); };
+    const col = {
+      load,
+      where: () => col,
+      onSnapshot: (f) => { listeners.push(f); f(snapOf()); return () => {}; },
+      doc: (id) => ({
+        set: async (d) => save({ ...load(), [id]: JSON.parse(JSON.stringify(d)) }),
+        delete: async () => { const all = load(); delete all[id]; save(all); },
+      }),
+    };
+    return col;
   };
+  const notes = kept('notes');
+  const plans = kept('plans');
+  window.__notes = notes.load;
+  window.__plans = plans.load;
   window.claude = { use: async (n) => (n === 'db' ? {
-    collection: (name) => (name === 'notes' ? notes : { onSnapshot: (f, err) => {
+    collection: (name) => (name === 'notes' ? notes : name === 'plans' ? plans : { onSnapshot: (f, err) => {
       window.__subscribes++;
       subs.rows.push(f);
       if (err) rowErrs.push(err);

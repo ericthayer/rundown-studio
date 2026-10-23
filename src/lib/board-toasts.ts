@@ -7,6 +7,7 @@ import type { Project } from '../types.js';
 import { store } from '../store.js';
 import { toast } from './toast.js';
 import { reconnect } from '../runtime.js';
+import { reveal } from './reveal.js';
 
 type Change = { p: Project; what: 'added' | 'state' | 'updated' } | { p: Project; what: 'removed' };
 
@@ -42,13 +43,6 @@ export function describe(changes: readonly Change[]): string {
   if (one.what === 'state') return `${name} is now ${STATE_LABEL[one.p.state ?? 'active'] ?? one.p.state}.`;
   return `${name} was updated.`;
 }
-
-const reveal = (id: string): void => {
-  store.set({ openId: id, filter: 'all', query: '' });
-  document.dispatchEvent(new CustomEvent('rd:reveal-project', { detail: { id } }));
-  // The toast (and its View button) is gone, so focus moves to the row it pointed at.
-  document.querySelector<HTMLElement>(`[data-fk="row:${CSS.escape(id)}"]`)?.focus();
-};
 
 export function initBoardToasts(): void {
   let prev: Project[] | null = null;
