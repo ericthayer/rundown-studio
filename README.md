@@ -113,6 +113,8 @@ Saved Ask Rundown answers share the collection: `{ kind: 'answer', text, questio
 
 The page never writes `projects`. An accepted nudge is laid over its row (next step, or `state: 'parked'`) and marked "Set on the board" until a check-in (`updatedBy: 'checkin'`) writes a newer `updatedAt`; the rundown's writes never end it. Check-ins and the rundown read `nudges` and never write it. When a check-in replaces a board-set value with a different one, the board says so once (marking the nudge `superseded`) and offers **Restore**. Board-update toasts diff the db rows, so accepting a nudge never reads as a board update.
 
+`viewer/tour` — the first-run tour outcome: `{ tour: 'done'|'dismissed', tourVersion, savedAt }`, written when the viewer finishes or skips the tour. The tour auto-starts only when neither the board nor this browser (`rundown.prefs.tour`) has a record, so a skip survives reloads even when the artifact frame drops localStorage. A local record from before this shipped is copied up once; a refused write stays local. **Take the tour** in Settings → Help replays it any time. Check-ins and the rundown never read or write `viewer`.
+
 Layout: the right panel holds **Top priorities**, then two tabs, **This week** and **Stalled** (with a count badge). The same count shows on the collapsed rail's ✦ button and on the header toggle on narrow screens. Ask Rundown is docked under the project list and stays on screen on every width; its answers fold away with **Hide answers** (remembered per browser).
 
 ## Publishing
