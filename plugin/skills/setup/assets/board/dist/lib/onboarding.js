@@ -1,5 +1,5 @@
 import { store } from '../store.js';
-import { prefs } from './prefs.js';
+import { saveTour, tourReady, tourSeen } from './tour-store.js';
 import { checkinCommand } from './config.js';
 let guide = null;
 let running = false;
@@ -18,8 +18,7 @@ export async function startTour(returnTo) {
         const s = store.state;
         const empty = s.status === 'ready' && s.projects.length === 0;
         const end = await g.run(firstRunFlow(s.config, checkinCommand(), empty), { doneLabel: empty ? 'Start with a check-in' : 'Done' });
-        prefs.set('tour', end === 'completed' ? 'done' : 'dismissed');
-        prefs.set('tourVersion', TOUR_VERSION);
+        void saveTour(end === 'completed' ? 'done' : 'dismissed', TOUR_VERSION);
         const next = end === 'completed' && empty ? document.getElementById('empty-cta') : from;
         (next?.isConnected ? next : document.getElementById('copy-cmd-2'))?.focus();
         return end;
@@ -33,9 +32,12 @@ export async function startTour(returnTo) {
 }
 /** True while something else owns the viewer's attention (a menu, sheet or dialog). */
 const busy = () => document.querySelector('dialog[open], [popover]:popover-open:not(.toasts), .agent.open') !== null;
-/** Auto-starts the tour once per viewer, after the board first loads and nothing else is open. */
+/**
+ * Auto-starts the tour once per viewer, after the board first loads, the board's tour record has
+ * answered (it outlives this browser's storage), and nothing else is open.
+ */
 export function initOnboarding() {
-    if (prefs.get('tour') !== '')
+    if (tourSeen())
         return;
     let armed = true;
     const off = store.subscribe(['status'], (_c, s) => {
@@ -45,7 +47,7 @@ export function initOnboarding() {
         queueMicrotask(() => off());
         let tries = 0;
         const attempt = () => {
-            if (prefs.get('tour') !== '' || running)
+            if (tourSeen() || running)
                 return;
             if (busy() && ++tries < 20) {
                 window.setTimeout(attempt, 1500);
@@ -54,6 +56,6 @@ export function initOnboarding() {
             if (!busy())
                 void startTour();
         };
-        window.setTimeout(attempt, 600);
+        void tourReady().then(() => window.setTimeout(attempt, 600));
     });
 }

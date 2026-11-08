@@ -34,6 +34,14 @@ const existing = () => localStorage.setItem('rundown.prefs', JSON.stringify({ v:
   await p.waitForSelector('.estate');
   await p.waitForTimeout(1500);
   check('esc: does not auto-start again', !(await p.isVisible(OPEN)));
+  check('esc: saved on the board', (await p.evaluate(() => window.__viewer().tour?.tour)) === 'dismissed');
+  // The artifact frame may not keep localStorage: the board's record alone keeps the tour away.
+  await p.evaluate(() => localStorage.removeItem('rundown.prefs'));
+  await p.reload();
+  await p.waitForSelector('.estate');
+  await p.waitForTimeout(1500);
+  check('board: no auto-start after local storage is cleared', !(await p.isVisible(OPEN)));
+  check('board: record mirrored back into this browser', (await prefsOf(p)).tour === 'dismissed');
   check('auto: no console errors', errors.length === 0, errors.join(' | '));
   await ctx.close();
 }
@@ -73,6 +81,22 @@ const existing = () => localStorage.setItem('rundown.prefs', JSON.stringify({ v:
   check('replay: skip closes', !(await p.isVisible(OPEN)));
   check('replay: focus back on the settings gear', (await p.evaluate(() => document.activeElement?.dataset.playwell)) === 'settings');
   check('replay: recorded as dismissed', (await prefsOf(p)).tour === 'dismissed');
+  await ctx.close();
+}
+
+// Finished on another device: the board's record keeps a fresh browser from auto-starting.
+{
+  const { p, ctx } = await page({ tour: true, rows: [], meta: {}, wait: '.estate', init: () => localStorage.setItem('__viewer', JSON.stringify({ tour: { tour: 'done', tourVersion: 1, savedAt: '2026-11-01T00:00:00Z' } })) });
+  await p.waitForTimeout(2000);
+  check('device: no auto-start with a board record', !(await p.isVisible(OPEN)));
+  await ctx.close();
+}
+
+// A local record from before the board kept it is copied up once.
+{
+  const { p, ctx } = await page({ tour: true, init: () => localStorage.setItem('rundown.prefs', JSON.stringify({ v: 1, tour: 'done', tourVersion: 1 })) });
+  await p.waitForTimeout(800);
+  check('migrate: local record copied to the board', (await p.evaluate(() => window.__viewer().tour?.tour)) === 'done');
   await ctx.close();
 }
 

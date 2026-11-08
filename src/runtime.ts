@@ -6,6 +6,7 @@ import { connectLocker } from './lib/note-locker.js';
 import { toConfig } from './lib/config.js';
 import { connectPlans } from './lib/plan-store.js';
 import { connectNudges, showRows } from './lib/nudge-store.js';
+import { connectTour } from './lib/tour-store.js';
 
 /** No first snapshot by then → show the can't-reach state (a late snapshot still flips it to ready). */
 export const CONNECT_TIMEOUT = 12000;
@@ -74,6 +75,7 @@ async function connect(): Promise<void> {
   connectLocker(db, (notes) => store.set({ notes }));
   connectPlans(db, (plans) => store.set({ plans }));
   connectNudges(db);
+  connectTour(db);
   db.doc('meta/config').onSnapshot(
     (d) => store.set({ config: toConfig(d.data()) }),
     () => { /* config is optional */ },
