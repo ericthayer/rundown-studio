@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.8.0...rundown-studio-v1.8.1) (2026-11-18)
+
+
+### Bug fixes
+
+* **onboarding:** remember a skipped or finished tour on the board ([#46](https://github.com/ericthayer/rundown-studio/issues/46)) ([746bb8b](https://github.com/ericthayer/rundown-studio/commit/746bb8bd803b2e5076cb653bda7e54078c49f574))
+
 ## [1.8.0](https://github.com/ericthayer/rundown-studio/compare/rundown-studio-v1.7.6...rundown-studio-v1.8.0) (2026-10-23)
 
 
