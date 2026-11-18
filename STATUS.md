@@ -5,7 +5,7 @@ updatedBy: claude
 ---
 # Status
 
-Released: v1.8.0 <!-- x-release-please-version -->
+Released: v1.8.1 <!-- x-release-please-version -->
 
 ## Left off
 Skipping or finishing the first-run tour is now saved on the board (`viewer/tour`), so it no longer restarts on every reload. Settings → Help → Take the tour still replays it.
