@@ -53,7 +53,7 @@ const stub = ({ rows, meta, config }) => {
   window.__subscribes = 0;
   window.__pushMeta = (m) => subs.meta.forEach((f) => f({ id: 'run', data: () => m }));
   window.__pushConfig = (c) => subs.config.forEach((f) => f({ id: 'config', data: () => c }));
-  // Page-written collections (`notes`, `plans`, `nudges`) persist in localStorage under their own keys so they
+  // Page-written collections (`notes`, `plans`, `nudges`, `viewer`) persist in localStorage under their own keys so they
   // survive reloads, like the board db.
   const kept = (name) => {
     const key = `__${name}`;
@@ -75,11 +75,13 @@ const stub = ({ rows, meta, config }) => {
   const notes = kept('notes');
   const plans = kept('plans');
   const nudges = kept('nudges');
+  const viewer = kept('viewer');
   window.__notes = notes.load;
   window.__plans = plans.load;
   window.__nudges = nudges.load;
+  window.__viewer = viewer.load;
   window.claude = { use: async (n) => (n === 'db' ? {
-    collection: (name) => (name === 'notes' ? notes : name === 'plans' ? plans : name === 'nudges' ? nudges : { onSnapshot: (f, err) => {
+    collection: (name) => (name === 'notes' ? notes : name === 'plans' ? plans : name === 'nudges' ? nudges : name === 'viewer' ? viewer : { onSnapshot: (f, err) => {
       window.__subscribes++;
       subs.rows.push(f);
       if (err) rowErrs.push(err);

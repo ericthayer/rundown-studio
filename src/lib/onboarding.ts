@@ -5,7 +5,7 @@
  */
 import type { TourFlow } from './tour-flow.js';
 import { store } from '../store.js';
-import { prefs } from './prefs.js';
+import { saveTour, tourReady, tourSeen } from './tour-store.js';
 import { checkinCommand } from './config.js';
 
 export type TourEnd = 'completed' | 'dismissed';
@@ -37,8 +37,7 @@ export async function startTour(returnTo?: HTMLElement | null): Promise<TourEnd 
     const s = store.state;
     const empty = s.status === 'ready' && s.projects.length === 0;
     const end = await g.run(firstRunFlow(s.config, checkinCommand(), empty), { doneLabel: empty ? 'Start with a check-in' : 'Done' });
-    prefs.set('tour', end === 'completed' ? 'done' : 'dismissed');
-    prefs.set('tourVersion', TOUR_VERSION);
+    void saveTour(end === 'completed' ? 'done' : 'dismissed', TOUR_VERSION);
     const next = end === 'completed' && empty ? document.getElementById('empty-cta') : from;
     (next?.isConnected ? next : document.getElementById('copy-cmd-2'))?.focus();
     return end;
@@ -52,9 +51,12 @@ export async function startTour(returnTo?: HTMLElement | null): Promise<TourEnd 
 /** True while something else owns the viewer's attention (a menu, sheet or dialog). */
 const busy = (): boolean => document.querySelector('dialog[open], [popover]:popover-open:not(.toasts), .agent.open') !== null;
 
-/** Auto-starts the tour once per viewer, after the board first loads and nothing else is open. */
+/**
+ * Auto-starts the tour once per viewer, after the board first loads, the board's tour record has
+ * answered (it outlives this browser's storage), and nothing else is open.
+ */
 export function initOnboarding(): void {
-  if (prefs.get('tour') !== '') return;
+  if (tourSeen()) return;
   let armed = true;
   const off = store.subscribe(['status'], (_c, s) => {
     if (!armed || s.status !== 'ready') return;
@@ -62,10 +64,10 @@ export function initOnboarding(): void {
     queueMicrotask(() => off());
     let tries = 0;
     const attempt = (): void => {
-      if (prefs.get('tour') !== '' || running) return;
+      if (tourSeen() || running) return;
       if (busy() && ++tries < 20) { window.setTimeout(attempt, 1500); return; }
       if (!busy()) void startTour();
     };
-    window.setTimeout(attempt, 600);
+    void tourReady().then(() => window.setTimeout(attempt, 600));
   });
 }
